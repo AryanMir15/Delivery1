@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "Food Delivery",
+    "slug": "food-delivery-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#FF6B35"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.fooddelivery.mobile"
+    },
+    "android": {
+      "package": "com.fooddelivery.mobile",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ]
+    },
+    "plugins": [
+      "expo-location"
+    ]
+  }
+}
