@@ -2,7 +2,9 @@
 import io from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const SOCKET_URL = 'http://192.168.137.1:4000'; // Change to your backend IP
+// Backend URL - change to your WiFi IP for physical device testing
+// Android emulator: '10.0.2.2' | iOS simulator: 'localhost' | Physical: your WiFi IP
+const SOCKET_URL = 'http://10.0.2.2:4000';
 
 class SocketService {
   constructor() {

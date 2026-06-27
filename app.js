@@ -73,14 +73,11 @@ const server = new ApolloServer({
 
     if (token) {
       try {
-        // Verify token and get user
         const jwt = require('jsonwebtoken');
         const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
-        // Fetch full user from database
         const User = require('./models/User');
         user = await User.findById(decoded.id);
       } catch (error) {
-        // Token invalid, user remains null
         console.error('Auth error:', error.message);
       }
     }
@@ -105,7 +102,7 @@ const subscriptionServer = SubscriptionServer.create(
     schema,
     execute,
     subscribe,
-    onConnect: function(connectionParams, webSocket, context) {
+    onConnect: async function(connectionParams, webSocket, context) {
       // Handle authentication for WebSocket connections
       const token = connectionParams.authorization || connectionParams.Authorization || '';
       let user = null;
@@ -115,7 +112,7 @@ const subscriptionServer = SubscriptionServer.create(
           const jwt = require('jsonwebtoken');
           const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
           const User = require('./models/User');
-          user = User.findById(decoded.id);
+          user = await User.findById(decoded.id);
         } catch (error) {
           console.error('WebSocket Auth error:', error.message);
         }

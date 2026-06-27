@@ -28,55 +28,35 @@ function initializeSocket(server) {
   console.log('🔌 Socket.io server starting with config:');
   console.log('   - CORS: enabled for all origins');
   console.log('   - Transports: polling, websocket');
-  console.log('   - Auth: relaxed for testing');
+  console.log('   - Auth: required (JWT)');
   console.log('   - Listening on all interfaces');
 
-  // Authentication middleware - VERY PERMISSIVE FOR TESTING
   io.use(async (socket, next) => {
     console.log('🔌 Socket connection attempt from:', socket.handshake.address);
-    console.log('   Transport:', socket.conn.transport.name);
-    
+
+    const token = socket.handshake.auth.token;
+    if (!token || token === '') {
+      console.warn('⚠️ No token provided - rejecting connection');
+      return next(new Error('Authentication required'));
+    }
+
     try {
-      const token = socket.handshake.auth.token;
-      if (!token || token === '') {
-        console.warn('⚠️ No token provided - allowing connection for testing');
-        socket.userId = 'anonymous-' + Date.now();
-        socket.userRole = 'rider';
-        socket.userName = 'Anonymous Rider';
-        return next(); // Allow connection
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findById(decoded.id);
+
+      if (!user) {
+        console.warn('⚠️ User not found - rejecting connection');
+        return next(new Error('User not found'));
       }
 
-      try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await User.findById(decoded.id);
-        
-        if (!user) {
-          console.warn('⚠️ User not found - allowing anyway');
-          socket.userId = 'anonymous-' + Date.now();
-          socket.userRole = 'rider';
-          socket.userName = 'Anonymous Rider';
-          return next();
-        }
-
-        socket.userId = user._id.toString();
-        socket.userRole = user.role;
-        socket.userName = user.name;
-        console.log(`✅ Authenticated: ${user.name} (${user.role})`);
-        return next();
-      } catch (jwtError) {
-        console.warn('⚠️ JWT verification failed - allowing anyway');
-        socket.userId = 'anonymous-' + Date.now();
-        socket.userRole = 'rider';
-        socket.userName = 'Anonymous Rider';
-        return next();
-      }
-    } catch (error) {
-      console.error('❌ Socket auth error:', error.message);
-      // Still allow connection
-      socket.userId = 'anonymous-' + Date.now();
-      socket.userRole = 'rider';
-      socket.userName = 'Anonymous Rider';
-      next();
+      socket.userId = user._id.toString();
+      socket.userRole = user.role;
+      socket.userName = user.name;
+      console.log(`✅ Socket authenticated: ${user.name} (${user.role})`);
+      return next();
+    } catch (jwtError) {
+      console.warn('⚠️ JWT verification failed - rejecting connection');
+      return next(new Error('Invalid token'));
     }
   });
 

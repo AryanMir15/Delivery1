@@ -1,26 +1,24 @@
 // Rider App Configuration Constants
 
-// ⚠️ IMPORTANT: Change these to your computer's IP address
-// Find your IP: Windows (ipconfig), Mac/Linux (ifconfig)
-export const BACKEND_IP = '10.0.26.24'; // Change this!
+// Backend IP - change this to your computer's IP for physical device testing
+// Android emulator: '10.0.2.2' (maps to host localhost)
+// iOS simulator: 'localhost'
+// Physical device: your WiFi IP (e.g., '192.168.100.10')
+export const BACKEND_IP = '10.0.2.2';
 export const BACKEND_PORT = '4000';
 
-// Derived URLs - DO NOT CHANGE
+// Derived URLs
 export const HTTP_URL = `http://${BACKEND_IP}:${BACKEND_PORT}/graphql`;
 export const SOCKET_URL = `http://${BACKEND_IP}:${BACKEND_PORT}`;
 
-// Google Maps API Key
-// Get your key from: https://console.cloud.google.com/
-export const GOOGLE_MAPS_API_KEY = 'YOUR_GOOGLE_MAPS_API_KEY';
-
 // App Configuration
 export const APP_VERSION = '1.0.0';
-export const APP_NAME = 'Rider App';
+export const APP_NAME = 'shOk Rider';
 
 // Location Tracking Settings
 export const LOCATION_UPDATE_INTERVAL = 3000; // 3 seconds
 export const LOCATION_DISTANCE_FILTER = 10; // 10 meters
-export const LOCATION_ACCURACY = 'high'; // high, balanced, low
+export const LOCATION_ACCURACY = 'high';
 
 // Cache Settings
 export const CACHE_MAX_SIZE = 3145728; // 3MB
@@ -66,13 +64,13 @@ export const STATUS_ICONS = {
 };
 
 // Support Contact
-export const SUPPORT_EMAIL = 'support@deliveryapp.com';
-export const SUPPORT_PHONE = '+251911234567';
+export const SUPPORT_EMAIL = 'support@shok.app';
+export const SUPPORT_PHONE = '+923001234567';
 
-// Map Configuration
+// Map Configuration - Tando Allahyar, Sindh, Pakistan
 export const MAP_INITIAL_REGION = {
-  latitude: 9.0320, // Addis Ababa, Ethiopia
-  longitude: 38.7469,
+  latitude: 25.7721,
+  longitude: 68.7156,
   latitudeDelta: 0.05,
   longitudeDelta: 0.05,
 };
@@ -86,7 +84,6 @@ export default {
   BACKEND_PORT,
   HTTP_URL,
   SOCKET_URL,
-  GOOGLE_MAPS_API_KEY,
   APP_VERSION,
   APP_NAME,
   LOCATION_UPDATE_INTERVAL,

@@ -1,8 +1,12 @@
 const axios = require('axios');
 
-// MapTiler API Key for routing and directions
-const MAPTILER_API_KEY = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjY2OTI3YzVmNGE1ODQzNTM4NTEyZDY1YzhhMjNiY2ExIiwiaCI6Im11cm11cjY0In0=';
+// MapTiler API Key - loaded from environment variable
+const MAPTILER_API_KEY = process.env.MAPTILER_API_KEY;
 const MAPTILER_BASE_URL = 'https://api.maptiler.com';
+
+if (!MAPTILER_API_KEY) {
+  console.warn('⚠️ MAPTILER_API_KEY not set in environment variables');
+}
 
 /**
  * Validate coordinates

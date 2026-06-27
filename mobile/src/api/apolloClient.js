@@ -5,9 +5,9 @@ import { RetryLink } from '@apollo/client/link/retry';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { persistCache, AsyncStorageWrapper } from 'apollo3-cache-persist';
 
-// Use your computer's IP address for physical device
-// Change this to your computer's IP address from ipconfig
-const API_URL = 'http://10.0.26.24:4000/graphql';
+// Backend URL - change to your WiFi IP for physical device testing
+// Android emulator: '10.0.2.2' | iOS simulator: 'localhost' | Physical: your WiFi IP
+const API_URL = 'http://10.0.2.2:4000/graphql';
 
 // Create cache with offline support
 const cache = new InMemoryCache({
@@ -82,7 +82,7 @@ const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
   if (networkError) {
     console.log(`❌ [Network error]: ${networkError.message}`);
     console.log(`   Operation: ${operation.operationName}`);
-    console.log(`   API URL: http://10.0.26.24:4000/graphql`);
+    console.log(`   API URL: ${API_URL}`);
     // Store failed operation for retry when online
   }
 });
