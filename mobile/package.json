@@ -32,7 +32,6 @@
     "expo-location": "~19.0.8",
     "expo-notifications": "~0.32.17",
     "expo-status-bar": "~3.0.9",
-    "expo-task-manager": "^56.0.19",
     "expo-web-browser": "~15.0.11",
     "graphql": "^16.8.1",
     "react": "19.1.0",
