@@ -12,13 +12,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
-import { logout } from '../store/authSlice';
+import { logout } from '../../store/authSlice';
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const { shop } = useSelector((state) => state.shop);
+  const { shop } = useSelector((state) => state.vendorShop);
 
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [

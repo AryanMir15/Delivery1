@@ -13,12 +13,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useMutation } from '@apollo/client';
 import { Ionicons } from '@expo/vector-icons';
 
-import { UPDATE_RESTAURANT } from '../api/mutations';
-import { updateShop } from '../store/vendorShopSlice';
+import { UPDATE_RESTAURANT } from '../../api/mutations';
+import { updateShop } from '../../store/vendorShopSlice';
 
 export default function ShopProfileScreen({ navigation }) {
   const dispatch = useDispatch();
-  const { shop } = useSelector((state) => state.shop);
+  const { shop } = useSelector((state) => state.vendorShop);
 
   const [formData, setFormData] = useState({
     name: shop?.name || '',

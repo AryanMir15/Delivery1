@@ -12,9 +12,9 @@ import { useQuery, useMutation } from '@apollo/client';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch } from 'react-redux';
 
-import { GET_ORDERS_BY_RESTAURANT } from '../api/queries';
-import { VENDOR_UPDATE_ORDER_STATUS } from '../api/mutations';
-import { updateOrder } from '../store/orderSlice';
+import { GET_ORDERS_BY_RESTAURANT } from '../../api/queries';
+import { VENDOR_UPDATE_ORDER_STATUS } from '../../api/mutations';
+import { updateOrder } from '../../store/orderSlice';
 
 export default function OrderDetailScreen({ route, navigation }) {
   const { orderId } = route.params;

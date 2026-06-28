@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -13,25 +13,40 @@ import { useQuery, useMutation } from '@apollo/client';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
-import { GET_ORDERS_BY_RESTAURANT, GET_RESTAURANTS_BY_OWNER } from '../api/queries';
-import { UPDATE_RESTAURANT } from '../api/mutations';
-import { setOrders } from '../store/orderSlice';
-import { setShop, toggleAvailability } from '../store/vendorShopSlice';
+import { GET_ORDERS_BY_RESTAURANT, GET_RESTAURANTS_BY_OWNER } from '../../api/queries';
+import { UPDATE_RESTAURANT } from '../../api/mutations';
+import { setOrders } from '../../store/orderSlice';
+import { setShop, toggleAvailability } from '../../store/vendorShopSlice';
 
 export default function DashboardScreen() {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const { selectedRestaurant } = useSelector((state) => state.auth);
-  const { stats } = useSelector((state) => state.orders);
-  const { shop } = useSelector((state) => state.shop);
+  const [selectedRestaurant, setSelectedRestaurant] = useState(null);
+  const orders = useSelector((state) => state.order.orders);
+  const { shop } = useSelector((state) => state.vendorShop);
   const [refreshing, setRefreshing] = useState(false);
+
+  const stats = useMemo(() => {
+    const today = new Date().toDateString();
+    const todayOrders = orders.filter(
+      (o) => new Date(o.orderDate).toDateString() === today
+    );
+    return {
+      todayRevenue: todayOrders.reduce((sum, o) => sum + (o.orderAmount || 0), 0),
+      todayOrders: todayOrders.length,
+      pendingCount: orders.filter((o) => o.orderStatus === 'pending').length,
+      activeCount: orders.filter((o) => ['accepted', 'preparing', 'ready'].includes(o.orderStatus)).length,
+    };
+  }, [orders]);
 
   const { data: restaurantData, refetch: refetchRestaurant } = useQuery(
     GET_RESTAURANTS_BY_OWNER,
     {
       onCompleted: (data) => {
         if (data?.restaurantsByOwner?.[0]) {
-          dispatch(setShop(data.restaurantsByOwner[0]));
+          const restaurant = data.restaurantsByOwner[0];
+          setSelectedRestaurant(restaurant);
+          dispatch(setShop(restaurant));
         }
       },
     }

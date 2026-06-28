@@ -12,7 +12,7 @@ import { useQuery } from '@apollo/client';
 import { Ionicons } from '@expo/vector-icons';
 import { LineChart, BarChart } from 'react-native-chart-kit';
 
-import { GET_ORDERS_BY_RESTAURANT } from '../api/queries';
+import { GET_ORDERS_BY_RESTAURANT } from '../../api/queries';
 
 const screenWidth = Dimensions.get('window').width;
 

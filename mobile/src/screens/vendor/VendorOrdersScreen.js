@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -12,8 +12,8 @@ import { useQuery } from '@apollo/client';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
-import { GET_ORDERS_BY_RESTAURANT } from '../api/queries';
-import { setOrders } from '../store/orderSlice';
+import { GET_ORDERS_BY_RESTAURANT, GET_RESTAURANTS_BY_OWNER } from '../../api/queries';
+import { setOrders } from '../../store/orderSlice';
 
 const TABS = [
   { key: 'pending', label: 'Pending', icon: 'time' },
@@ -26,10 +26,29 @@ export default function OrdersScreen() {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState('pending');
-  const { selectedRestaurant } = useSelector((state) => state.auth);
-  const { pendingOrders, activeOrders, completedOrders, orders } = useSelector(
-    (state) => state.orders
+  const [selectedRestaurant, setSelectedRestaurant] = useState(null);
+  const orders = useSelector((state) => state.order.orders);
+
+  const pendingOrders = useMemo(
+    () => orders.filter((o) => o.orderStatus === 'pending'),
+    [orders]
   );
+  const activeOrders = useMemo(
+    () => orders.filter((o) => ['accepted', 'preparing', 'ready'].includes(o.orderStatus)),
+    [orders]
+  );
+  const completedOrders = useMemo(
+    () => orders.filter((o) => ['delivered', 'cancelled'].includes(o.orderStatus)),
+    [orders]
+  );
+
+  useQuery(GET_RESTAURANTS_BY_OWNER, {
+    onCompleted: (data) => {
+      if (data?.restaurantsByOwner?.[0]) {
+        setSelectedRestaurant(data.restaurantsByOwner[0]);
+      }
+    },
+  });
 
   const { refetch, loading } = useQuery(GET_ORDERS_BY_RESTAURANT, {
     variables: { restaurant: selectedRestaurant?._id },

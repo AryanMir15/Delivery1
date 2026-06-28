@@ -15,9 +15,9 @@ import { useMutation, useQuery } from '@apollo/client';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
-import { CREATE_FOOD, UPDATE_FOOD, VENDOR_UPLOAD_IMAGE } from '../api/mutations';
-import { GET_CATEGORIES } from '../api/queries';
-import { addProduct, updateProduct } from '../store/productSlice';
+import { CREATE_FOOD, UPDATE_FOOD, VENDOR_UPLOAD_IMAGE } from '../../api/mutations';
+import { GET_CATEGORIES } from '../../api/queries';
+import { addProduct, updateProduct } from '../../store/productSlice';
 
 export default function ProductFormScreen({ route, navigation }) {
   const dispatch = useDispatch();

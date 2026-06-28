@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useQuery, useSubscription } from '@apollo/client';
-import { GET_ORDER_DETAILED } from '../api/queries';
+import { GET_ORDER } from '../api/queries';
 import MapView, { Marker, AnimatedRegion } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
@@ -61,7 +61,7 @@ const OrderTrackingScreenSmooth = ({ route }) => {
   const [duration, setDuration] = useState(null);
 
   // Poll order status every 5 seconds
-  const { data, loading, refetch } = useQuery(GET_ORDER_DETAILED, {
+  const { data, loading, refetch } = useQuery(GET_ORDER, {
     variables: { id: orderId },
     pollInterval: 5000,
     fetchPolicy: 'network-only',

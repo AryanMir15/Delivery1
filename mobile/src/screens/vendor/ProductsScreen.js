@@ -15,9 +15,9 @@ import { useQuery, useMutation } from '@apollo/client';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
-import { GET_FOODS } from '../api/queries';
-import { UPDATE_FOOD } from '../api/mutations';
-import { setProducts, updateProduct } from '../store/productSlice';
+import { GET_FOODS } from '../../api/queries';
+import { UPDATE_FOOD } from '../../api/mutations';
+import { setProducts, updateProduct } from '../../store/productSlice';
 
 export default function ProductsScreen() {
   const navigation = useNavigation();

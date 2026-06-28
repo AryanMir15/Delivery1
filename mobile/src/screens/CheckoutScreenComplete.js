@@ -16,8 +16,8 @@ import {
 import * as Location from 'expo-location';
 import { useMutation, useQuery } from '@apollo/client';
 import { useSelector } from 'react-redux';
-import { PLACE_ORDER_MUTATION } from '../api/mutations';
-import { GET_RESTAURANTS_QUERY } from '../api/queries';
+import { PLACE_ORDER } from '../api/mutations';
+import { GET_RESTAURANTS } from '../api/queries';
 
 const CheckoutScreenComplete = ({ navigation, route }) => {
   const { restaurantId, cartItems } = route.params;
@@ -364,10 +364,10 @@ const CheckoutScreenComplete = ({ navigation, route }) => {
   
   // Get restaurant details
   const { data: restaurantData, loading: restaurantLoading } = useQuery(
-    GET_RESTAURANTS_QUERY
+    GET_RESTAURANTS
   );
   
-  const [placeOrder, { loading: orderLoading }] = useMutation(PLACE_ORDER_MUTATION);
+  const [placeOrder, { loading: orderLoading }] = useMutation(PLACE_ORDER);
   
   const restaurant = restaurantData?.restaurants?.find(r => r._id === restaurantId);
   

@@ -8,7 +8,7 @@ import {
   RefreshControl
 } from 'react-native';
 import { useQuery } from '@apollo/client';
-import { GET_ORDER_DETAILED } from '../api/queries';
+import { GET_ORDER } from '../api/queries';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 
 const OrderTrackingScreenComplete = ({ route }) => {
@@ -16,7 +16,7 @@ const OrderTrackingScreenComplete = ({ route }) => {
   const [refreshing, setRefreshing] = useState(false);
 
   // Poll order status every 3 seconds
-  const { data, loading, refetch } = useQuery(GET_ORDER_DETAILED, {
+  const { data, loading, refetch } = useQuery(GET_ORDER, {
     variables: { id: orderId },
     pollInterval: 3000,
     fetchPolicy: 'network-only',
