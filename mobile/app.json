@@ -3,7 +3,7 @@
     "name": "Food Delivery",
     "slug": "food-delivery-mobile",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "userInterfaceStyle": "light",
     "splash": {
       "resizeMode": "contain",
@@ -15,13 +15,17 @@
     },
     "android": {
       "package": "com.fooddelivery.mobile",
+      "newArchEnabled": true,
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION"
       ]
     },
     "plugins": [
-      "expo-location"
+      "expo-location",
+      "expo-asset",
+      "expo-font",
+      "expo-web-browser"
     ]
   }
 }

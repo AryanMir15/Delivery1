@@ -7,7 +7,7 @@ import { persistCache, AsyncStorageWrapper } from 'apollo3-cache-persist';
 
 // Backend URL - change to your WiFi IP for physical device testing
 // Android emulator: '10.0.2.2' | iOS simulator: 'localhost' | Physical: your WiFi IP
-const API_URL = 'http://10.0.2.2:4000/graphql';
+const API_URL = 'http://localhost:4000/graphql';
 
 // Create cache with offline support
 const cache = new InMemoryCache({
