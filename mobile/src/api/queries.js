@@ -729,3 +729,107 @@ export const ORDER_STATUS_UPDATED = gql`
     }
   }
 `;
+
+// ============================================
+// VENDOR QUERIES
+// ============================================
+
+export const GET_RESTAURANTS_BY_OWNER = gql`
+  query RestaurantsByOwner {
+    restaurantsByOwner {
+      _id
+      name
+      image
+      logo
+      address
+      phone
+      email
+      shopType
+      isActive
+      isAvailable
+      rating
+      reviewCount
+      minimumOrder
+      deliveryTime
+      tax
+    }
+  }
+`;
+
+export const GET_ORDERS_BY_RESTAURANT = gql`
+  query OrdersByRestaurant($restaurant: ID!) {
+    ordersByRestaurant(restaurant: $restaurant) {
+      _id
+      orderId
+      orderStatus
+      orderAmount
+      paidAmount
+      deliveryCharges
+      taxationAmount
+      tipping
+      orderDate
+      expectedTime
+      acceptedAt
+      pickedAt
+      deliveredAt
+      paymentMethod
+      paymentStatus
+      instructions
+      user {
+        _id
+        name
+        phone
+        email
+      }
+      items {
+        _id
+        title
+        description
+        image
+        quantity
+        variation {
+          title
+          price
+        }
+        addons {
+          title
+          options {
+            title
+            price
+          }
+        }
+        specialInstructions
+      }
+      deliveryAddress {
+        deliveryAddress
+        details
+        label
+      }
+      rider {
+        _id
+        name
+        phone
+        vehicleType
+      }
+    }
+  }
+`;
+
+export const GET_ADDONS = gql`
+  query Addons {
+    addons {
+      id
+      title
+      description
+      quantityMinimum
+      quantityMaximum
+      options {
+        id
+        title
+        description
+        price
+        isOutOfStock
+      }
+    }
+  }
+`;

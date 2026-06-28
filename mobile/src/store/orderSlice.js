@@ -55,6 +55,18 @@ const orderSlice = createSlice({
     clearActiveOrder: (state) => {
       state.activeOrder = null;
     },
+    updateOrder: (state, action) => {
+      const updated = action.payload;
+      const index = state.orders.findIndex(
+        (o) => o._id === updated._id || o.id === updated.id
+      );
+      if (index >= 0) {
+        state.orders[index] = { ...state.orders[index], ...updated };
+      }
+      if (state.currentOrder && (state.currentOrder._id === updated._id || state.currentOrder.id === updated.id)) {
+        state.currentOrder = { ...state.currentOrder, ...updated };
+      }
+    },
   },
 });
 
@@ -68,6 +80,7 @@ export const {
   clearOrders,
   setActiveOrder,
   clearActiveOrder,
+  updateOrder,
 } = orderSlice.actions;
 
 export default orderSlice.reducer;

@@ -8,6 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import AuthNavigator from './AuthNavigator';
 import MainNavigator from './MainNavigator';
 import RiderNavigator from './RiderNavigator';
+import VendorNavigator from './VendorNavigator';
 import SplashScreen from '../screens/SplashScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 
@@ -56,9 +57,10 @@ const RootNavigator = () => {
       case 'rider':
         return RiderNavigator;
       case 'vendor':
-      case 'admin':
       case 'owner':
-        return MainNavigator;
+        return VendorNavigator;
+      case 'admin':
+        return VendorNavigator;
       default:
         return MainNavigator;
     }
