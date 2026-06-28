@@ -14,11 +14,11 @@ import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useQuery, useMutation } from '@apollo/client';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { GET_RIDER_ORDERS } from '../api/queries';
-import { UPDATE_RIDER_AVAILABILITY, ACCEPT_ORDER_BY_RIDER } from '../api/mutations';
-import { setOrders, setActiveOrder } from '../store/orderSlice';
-import { setAvailability } from '../store/authSlice';
-import LocationService from '../services/rider/LocationService';
+import { GET_RIDER_ORDERS } from '../../api/queries';
+import { UPDATE_RIDER_AVAILABILITY, ACCEPT_ORDER_BY_RIDER } from '../../api/mutations';
+import { setOrders, setActiveOrder } from '../../store/orderSlice';
+import { setAvailability } from '../../store/authSlice';
+import LocationService from '../../services/rider/LocationService';
 
 const HomeScreen = ({ navigation }) => {
   const dispatch = useDispatch();

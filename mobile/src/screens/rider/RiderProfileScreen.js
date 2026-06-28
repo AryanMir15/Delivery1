@@ -14,10 +14,10 @@ import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useQuery } from '@apollo/client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { GET_ME, GET_RIDER_PROFILE, GET_RIDER_ORDERS } from '../api/queries';
-import { logout } from '../store/authSlice';
-import socketService from '../services/socketService';
-import LocationService from '../services/rider/LocationService';
+import { GET_ME, GET_RIDER_PROFILE, GET_RIDER_ORDERS } from '../../api/queries';
+import { logout } from '../../store/authSlice';
+import socketService from '../../services/socketService';
+import LocationService from '../../services/rider/LocationService';
 
 const ProfileScreen = () => {
   const dispatch = useDispatch();

@@ -12,7 +12,7 @@ import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useQuery } from '@apollo/client';
 import { useSelector } from 'react-redux';
 
-import { GET_RIDER_ORDERS } from '../api/queries';
+import { GET_RIDER_ORDERS } from '../../api/queries';
 
 const OrdersScreen = ({ navigation }) => {
   const { rider } = useSelector((state) => state.auth);

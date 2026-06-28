@@ -16,9 +16,9 @@ import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useSelector, useDispatch } from 'react-redux';
 import { useMutation } from '@apollo/client';
 
-import { UPDATE_RIDER_ORDER_STATUS } from '../api/mutations';
-import { updateOrderStatus, clearActiveOrder } from '../store/orderSlice';
-import LocationService from '../services/rider/LocationService';
+import { UPDATE_RIDER_ORDER_STATUS } from '../../api/mutations';
+import { updateOrderStatus, clearActiveOrder } from '../../store/orderSlice';
+import LocationService from '../../services/rider/LocationService';
 
 const { width, height } = Dimensions.get('window');
 

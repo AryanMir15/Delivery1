@@ -14,9 +14,9 @@ import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useQuery, useMutation } from '@apollo/client';
 import { useDispatch } from 'react-redux';
 
-import { GET_ORDER } from '../api/queries';
-import { UPDATE_RIDER_ORDER_STATUS } from '../api/mutations';
-import { updateOrderStatus } from '../store/orderSlice';
+import { GET_ORDER } from '../../api/queries';
+import { UPDATE_RIDER_ORDER_STATUS } from '../../api/mutations';
+import { updateOrderStatus } from '../../store/orderSlice';
 
 const OrderDetailScreen = ({ route, navigation }) => {
   const { orderId } = route.params || {};

@@ -12,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useQuery } from '@apollo/client';
 
-import { GET_RIDER_ORDERS } from '../api/queries';
+import { GET_RIDER_ORDERS } from '../../api/queries';
 
 const EarningsScreen = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('week'); // week, month, all
