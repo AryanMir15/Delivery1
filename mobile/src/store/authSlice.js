@@ -8,6 +8,7 @@ const initialState = {
   isLoading: false,
   error: null,
   deliveryAddress: null,
+  isAvailable: false,
 };
 
 // Async thunk for storing token
@@ -64,6 +65,12 @@ const authSlice = createSlice({
     setDeliveryAddress: (state, action) => {
       state.deliveryAddress = action.payload;
     },
+    setAvailability: (state, action) => {
+      state.isAvailable = action.payload;
+      if (state.user) {
+        state.user.available = action.payload;
+      }
+    },
     clearError: (state) => {
       state.error = null;
     },
@@ -88,6 +95,7 @@ export const {
   logout,
   updateUser,
   setDeliveryAddress,
+  setAvailability,
   clearError,
 } = authSlice.actions;
 

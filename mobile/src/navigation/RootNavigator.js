@@ -7,13 +7,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import AuthNavigator from './AuthNavigator';
 import MainNavigator from './MainNavigator';
+import RiderNavigator from './RiderNavigator';
 import SplashScreen from '../screens/SplashScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 
 const Stack = createStackNavigator();
 
 const RootNavigator = () => {
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
   const [isLoading, setIsLoading] = React.useState(true);
   const [showOnboarding, setShowOnboarding] = React.useState(false);
 
@@ -43,19 +44,34 @@ const RootNavigator = () => {
     return () => clearInterval(interval);
   }, [showOnboarding]);
 
-  console.log('RootNavigator render - isLoading:', isLoading, 'isAuthenticated:', isAuthenticated);
+  console.log('RootNavigator render - isLoading:', isLoading, 'isAuthenticated:', isAuthenticated, 'role:', user?.role);
 
   if (isLoading) {
     return <SplashScreen />;
   }
 
+  const getMainNavigator = () => {
+    const role = user?.role;
+    switch (role) {
+      case 'rider':
+        return RiderNavigator;
+      case 'vendor':
+      case 'admin':
+      case 'owner':
+        return MainNavigator;
+      default:
+        return MainNavigator;
+    }
+  };
+
   try {
+    const MainNav = getMainNavigator();
     return (
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {showOnboarding ? (
           <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         ) : isAuthenticated ? (
-          <Stack.Screen name="Main" component={MainNavigator} />
+          <Stack.Screen name="Main" component={MainNav} />
         ) : (
           <Stack.Screen name="Auth" component={AuthNavigator} />
         )}

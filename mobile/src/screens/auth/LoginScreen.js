@@ -35,7 +35,7 @@ const LoginScreen = ({ navigation }) => {
       setIsLoggingIn(false);
       
       if (data.login) {
-        const { token, userId, name, email, phone, picture, isActive } = data.login;
+        const { token, userId, name, email, phone, picture, isActive, userTypeId } = data.login;
         
         try {
           // Save token first
@@ -54,6 +54,7 @@ const LoginScreen = ({ navigation }) => {
                 phone,
                 profileImage: picture,
                 isActive,
+                role: userTypeId,
               },
               token,
             })

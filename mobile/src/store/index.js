@@ -16,6 +16,7 @@ import cartReducer from './cartSlice';
 import orderReducer from './orderSlice';
 import restaurantReducer from './restaurantSlice';
 import offlineReducer from './offlineSlice';
+import locationReducer from './locationSlice';
 
 const persistConfig = {
   key: 'root',
@@ -30,6 +31,7 @@ const rootReducer = combineReducers({
   order: orderReducer,
   restaurant: restaurantReducer,
   offline: offlineReducer,
+  location: locationReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

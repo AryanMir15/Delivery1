@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   orders: [],
   currentOrder: null,
+  activeOrder: null,
   isLoading: false,
   error: null,
 };
@@ -44,8 +45,15 @@ const orderSlice = createSlice({
     clearOrders: (state) => {
       state.orders = [];
       state.currentOrder = null;
+      state.activeOrder = null;
       state.isLoading = false;
       state.error = null;
+    },
+    setActiveOrder: (state, action) => {
+      state.activeOrder = action.payload;
+    },
+    clearActiveOrder: (state) => {
+      state.activeOrder = null;
     },
   },
 });
@@ -58,6 +66,8 @@ export const {
   setLoading,
   setError,
   clearOrders,
+  setActiveOrder,
+  clearActiveOrder,
 } = orderSlice.actions;
 
 export default orderSlice.reducer;
