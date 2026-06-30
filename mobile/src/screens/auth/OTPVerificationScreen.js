@@ -18,8 +18,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { VERIFY_OTP, SEND_OTP_EMAIL, SEND_OTP_PHONE, REGISTER_USER } from '../../api/mutations';
 import { loginSuccess, setAuthToken, loginStart } from '../../store/authSlice';
+import { useTheme } from '../../theme';
 
 const OTPVerificationScreen = ({ navigation, route }) => {
+  const { colors, typography } = useTheme();
   const dispatch = useDispatch();
   const { email, phone, userData, fromRegistration } = route.params || {};
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -59,9 +61,7 @@ const OTPVerificationScreen = ({ navigation, route }) => {
   const [verifyOtpMutation, { loading }] = useMutation(VERIFY_OTP, {
     onCompleted: async (data) => {
       if (data.verifyOtp.result) {
-        // OTP verified successfully
         if (fromRegistration && userData) {
-          // Complete registration after OTP verification
           dispatch(loginStart());
           registerMutation({
             variables: {
@@ -111,12 +111,10 @@ const OTPVerificationScreen = ({ navigation, route }) => {
     newOtp[index] = value;
     setOtp(newOtp);
 
-    // Auto-focus next input
     if (value && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
 
-    // Auto-verify when all digits are entered
     if (newOtp.every((digit) => digit !== '') && index === 5) {
       handleVerify(newOtp.join(''));
     }
@@ -158,39 +156,42 @@ const OTPVerificationScreen = ({ navigation, route }) => {
     Alert.alert('Success', 'OTP has been resent!');
   };
 
+  const s = styles(colors, typography);
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={s.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
+        style={s.keyboardView}
       >
         <TouchableOpacity
-          style={styles.backButton}
+          style={s.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Icon name="arrow-left" size={24} color="#1D3557" />
+          <Icon name="arrow-left" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
 
-        <View style={styles.content}>
-          <View style={styles.iconContainer}>
-            <Icon name="shield-check-outline" size={80} color="#FF6B35" />
+        <View style={s.content}>
+          <View style={s.iconContainer}>
+            <Icon name="shield-check-outline" size={80} color={colors.accent} />
           </View>
 
-          <Text style={styles.title}>Verification Code</Text>
-          <Text style={styles.subtitle}>
+          <Text style={s.title}>Verification Code</Text>
+          <Text style={s.subtitle}>
             We've sent a 6-digit code to{'\n'}
-            <Text style={styles.contact}>{email || phone}</Text>
+            <Text style={s.contact}>{email || phone}</Text>
           </Text>
 
-          <View style={styles.otpContainer}>
+          <View style={s.otpContainer}>
             {otp.map((digit, index) => (
               <TextInput
                 key={index}
                 ref={(ref) => (inputRefs.current[index] = ref)}
                 style={[
-                  styles.otpInput,
-                  digit && styles.otpInputFilled,
+                  s.otpInput,
+                  digit && s.otpInputFilled,
                 ]}
+                color={colors.textPrimary}
                 value={digit}
                 onChangeText={(value) => handleOtpChange(value, index)}
                 onKeyPress={(e) => handleKeyPress(e, index)}
@@ -202,26 +203,26 @@ const OTPVerificationScreen = ({ navigation, route }) => {
           </View>
 
           <TouchableOpacity
-            style={[styles.verifyButton, (loading || registerLoading) && styles.verifyButtonDisabled]}
+            style={[s.verifyButton, (loading || registerLoading) && s.verifyButtonDisabled]}
             onPress={() => handleVerify()}
             disabled={loading || registerLoading || otp.some((digit) => !digit)}
           >
             {(loading || registerLoading) ? (
-              <ActivityIndicator color="#FFFFFF" />
+              <ActivityIndicator color={colors.buttonPrimaryText} />
             ) : (
-              <Text style={styles.verifyButtonText}>
+              <Text style={s.verifyButtonText}>
                 {fromRegistration ? 'Verify & Create Account' : 'Verify'}
               </Text>
             )}
           </TouchableOpacity>
 
-          <View style={styles.resendContainer}>
+          <View style={s.resendContainer}>
             {canResend ? (
               <TouchableOpacity onPress={handleResend}>
-                <Text style={styles.resendText}>Resend Code</Text>
+                <Text style={s.resendText}>Resend Code</Text>
               </TouchableOpacity>
             ) : (
-              <Text style={styles.timerText}>
+              <Text style={s.timerText}>
                 Resend code in {timer}s
               </Text>
             )}
@@ -232,10 +233,10 @@ const OTPVerificationScreen = ({ navigation, route }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
   },
   keyboardView: {
     flex: 1,
@@ -244,7 +245,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 12,
@@ -260,22 +261,21 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1D3557',
+    ...typography.h1,
+    color: colors.textPrimary,
     textAlign: 'center',
     marginBottom: 12,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#6C757D',
+    ...typography.body,
+    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: 32,
   },
   contact: {
     fontWeight: '600',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   otpContainer: {
     flexDirection: 'row',
@@ -286,20 +286,20 @@ const styles = StyleSheet.create({
     width: 50,
     height: 56,
     borderRadius: 12,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.inputBackground,
     borderWidth: 2,
-    borderColor: '#E9ECEF',
+    borderColor: colors.inputBorder,
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
     textAlign: 'center',
   },
   otpInputFilled: {
-    borderColor: '#FF6B35',
-    backgroundColor: '#FFF3E0',
+    borderColor: colors.accent,
+    backgroundColor: colors.surfaceVariant,
   },
   verifyButton: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: colors.buttonPrimary,
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   verifyButtonText: {
-    color: '#FFFFFF',
+    color: colors.buttonPrimaryText,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -318,12 +318,12 @@ const styles = StyleSheet.create({
   },
   resendText: {
     fontSize: 16,
-    color: '#FF6B35',
+    color: colors.accent,
     fontWeight: '600',
   },
   timerText: {
     fontSize: 16,
-    color: '#6C757D',
+    color: colors.textSecondary,
   },
 });
 

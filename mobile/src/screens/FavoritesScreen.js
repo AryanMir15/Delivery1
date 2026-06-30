@@ -14,8 +14,12 @@ import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 import FavoritesService from '../services/FavoritesService';
 import AuthGuard from '../utils/authGuard';
+import { useTheme } from '../theme';
+import useResponsive from '../hooks/useResponsive';
 
 const FavoritesScreen = ({ navigation }) => {
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
   const user = useSelector(state => state.auth.user);
   const userId = user?._id || null;
 
@@ -23,8 +27,11 @@ const FavoritesScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const s = styles(colors, typography, scale);
+
   useEffect(() => {
-    if (!userId) {
+
+  if (!userId) {
       AuthGuard.showLoginPrompt('saveFavorite', navigation);
       return;
     }
@@ -71,30 +78,30 @@ const FavoritesScreen = ({ navigation }) => {
 
   const renderFavoriteItem = ({ item }) => (
     <TouchableOpacity
-      style={styles.favoriteCard}
+      style={s.favoriteCard}
       onPress={() => navigation.navigate('FoodDetail', { food: item })}
     >
       <Image
         source={{ uri: item.image }}
-        style={styles.favoriteImage}
+        style={s.favoriteImage}
         resizeMode="cover"
       />
-      <View style={styles.favoriteInfo}>
-        <Text style={styles.favoriteTitle} numberOfLines={2}>
+      <View style={s.favoriteInfo}>
+        <Text style={s.favoriteTitle} numberOfLines={2}>
           {item.title}
         </Text>
-        <Text style={styles.favoriteRestaurant} numberOfLines={1}>
+        <Text style={s.favoriteRestaurant} numberOfLines={1}>
           {item.restaurant?.name || 'Unknown Shop'}
         </Text>
-        <View style={styles.favoriteFooter}>
-          <Text style={styles.favoritePrice}>
-            {item.price} ETB
+        <View style={s.favoriteFooter}>
+          <Text style={s.favoritePrice}>
+            {item.price} PKR
           </Text>
           <TouchableOpacity
-            style={styles.removeButton}
+            style={s.removeButton}
             onPress={() => handleRemoveFavorite(item._id)}
           >
-            <Icon name="heart" size={24} color="#FF6B35" />
+            <Icon name="heart" size={24} color={colors.accent} />
           </TouchableOpacity>
         </View>
       </View>
@@ -103,28 +110,28 @@ const FavoritesScreen = ({ navigation }) => {
 
   if (!userId) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
+      <SafeAreaView style={s.container}>
+        <View style={s.header}>
           <TouchableOpacity
-            style={styles.backButton}
+            style={s.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Icon name="arrow-left" size={24} color="#1D3557" />
+            <Icon name="arrow-left" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Favorites</Text>
+          <Text style={s.headerTitle}>Favorites</Text>
           <View style={{ width: 40 }} />
         </View>
-        <View style={styles.emptyContainer}>
-          <Icon name="heart-outline" size={80} color="#A8DADC" />
-          <Text style={styles.emptyTitle}>Login Required</Text>
-          <Text style={styles.emptyText}>
+        <View style={s.emptyContainer}>
+          <Icon name="heart-outline" size={80} color={colors.accentLight} />
+          <Text style={s.emptyTitle}>Login Required</Text>
+          <Text style={s.emptyText}>
             Please login to save and view your favorite products
           </Text>
           <TouchableOpacity
-            style={styles.loginButton}
+            style={s.loginButton}
             onPress={() => navigation.navigate('Login')}
           >
-            <Text style={styles.loginButtonText}>Login</Text>
+            <Text style={s.loginButtonText}>Login</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -132,34 +139,34 @@ const FavoritesScreen = ({ navigation }) => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={s.container}>
+      <View style={s.header}>
         <TouchableOpacity
-          style={styles.backButton}
+          style={s.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Icon name="arrow-left" size={24} color="#1D3557" />
+          <Icon name="arrow-left" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>My Favorites</Text>
-        <Text style={styles.headerCount}>{favorites.length}</Text>
+        <Text style={s.headerTitle}>My Favorites</Text>
+        <Text style={s.headerCount}>{favorites.length}</Text>
       </View>
 
       {loading ? (
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading favorites...</Text>
+        <View style={s.loadingContainer}>
+          <Text style={s.loadingText}>Loading favorites...</Text>
         </View>
       ) : favorites.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Icon name="heart-outline" size={80} color="#A8DADC" />
-          <Text style={styles.emptyTitle}>No Favorites Yet</Text>
-          <Text style={styles.emptyText}>
+        <View style={s.emptyContainer}>
+          <Icon name="heart-outline" size={80} color={colors.accentLight} />
+          <Text style={s.emptyTitle}>No Favorites Yet</Text>
+          <Text style={s.emptyText}>
             Start adding products to your favorites by tapping the heart icon
           </Text>
           <TouchableOpacity
-            style={styles.browseButton}
+            style={s.browseButton}
             onPress={() => navigation.navigate('Home')}
           >
-            <Text style={styles.browseButtonText}>Browse Products</Text>
+            <Text style={s.browseButtonText}>Browse Products</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -167,12 +174,12 @@ const FavoritesScreen = ({ navigation }) => {
           data={favorites}
           renderItem={renderFavoriteItem}
           keyExtractor={(item) => item._id}
-          contentContainerStyle={styles.listContainer}
+          contentContainerStyle={s.listContainer}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              colors={['#FF6B35']}
+              colors={[colors.accent]}
             />
           }
         />
@@ -181,39 +188,39 @@ const FavoritesScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.surface,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    backgroundColor: '#FFFFFF',
+    paddingHorizontal: Math.round(16 * scale),
+    paddingVertical: Math.round(16 * scale),
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F8F9FA',
+    width: Math.round(40 * scale),
+    height: Math.round(40 * scale),
+    borderRadius: Math.round(20 * scale),
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: Math.round(20 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   headerCount: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#FF6B35',
-    minWidth: 40,
+    color: colors.accent,
+    minWidth: Math.round(40 * scale),
     textAlign: 'right',
   },
   loadingContainer: {
@@ -222,86 +229,86 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    fontSize: 16,
-    color: '#6C757D',
+    fontSize: Math.round(16 * scale),
+    color: colors.textSecondary,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 32,
+    paddingHorizontal: Math.round(32 * scale),
   },
   emptyTitle: {
-    fontSize: 24,
+    fontSize: Math.round(24 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginTop: 24,
-    marginBottom: 12,
+    color: colors.textPrimary,
+    marginTop: Math.round(24 * scale),
+    marginBottom: Math.round(12 * scale),
   },
   emptyText: {
-    fontSize: 16,
-    color: '#6C757D',
+    fontSize: Math.round(16 * scale),
+    color: colors.textSecondary,
     textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: Math.round(24 * scale),
   },
   loginButton: {
-    backgroundColor: '#FF6B35',
-    paddingHorizontal: 32,
-    paddingVertical: 14,
-    borderRadius: 12,
-    marginTop: 24,
+    backgroundColor: colors.accent,
+    paddingHorizontal: Math.round(32 * scale),
+    paddingVertical: Math.round(14 * scale),
+    borderRadius: Math.round(12 * scale),
+    marginTop: Math.round(24 * scale),
   },
   loginButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
+    color: colors.textInverse,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
   },
   browseButton: {
-    backgroundColor: '#FF6B35',
-    paddingHorizontal: 32,
-    paddingVertical: 14,
-    borderRadius: 12,
-    marginTop: 24,
+    backgroundColor: colors.accent,
+    paddingHorizontal: Math.round(32 * scale),
+    paddingVertical: Math.round(14 * scale),
+    borderRadius: Math.round(12 * scale),
+    marginTop: Math.round(24 * scale),
   },
   browseButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
+    color: colors.textInverse,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
   },
   listContainer: {
-    padding: 16,
+    padding: Math.round(16 * scale),
   },
   favoriteCard: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    marginBottom: 12,
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
+    marginBottom: Math.round(12 * scale),
     overflow: 'hidden',
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
   favoriteImage: {
-    width: 100,
-    height: 100,
+    width: Math.round(100 * scale),
+    height: Math.round(100 * scale),
   },
   favoriteInfo: {
     flex: 1,
-    padding: 12,
+    padding: Math.round(12 * scale),
     justifyContent: 'space-between',
   },
   favoriteTitle: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#1D3557',
-    marginBottom: 4,
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   favoriteRestaurant: {
-    fontSize: 14,
-    color: '#6C757D',
-    marginBottom: 8,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginBottom: Math.round(8 * scale),
   },
   favoriteFooter: {
     flexDirection: 'row',
@@ -309,15 +316,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   favoritePrice: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#FF6B35',
+    color: colors.accent,
   },
   removeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#FFF5F3',
+    width: Math.round(40 * scale),
+    height: Math.round(40 * scale),
+    borderRadius: Math.round(20 * scale),
+    backgroundColor: colors.dangerSurface,
     justifyContent: 'center',
     alignItems: 'center',
   },

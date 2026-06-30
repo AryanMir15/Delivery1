@@ -18,8 +18,12 @@ import { addToCart } from '../store/cartSlice';
 import FavoritesService from '../services/FavoritesService';
 import SessionService from '../services/SessionService';
 import useProductTracking from '../hooks/useProductTracking';
+import { useTheme } from '../theme';
+import useResponsive from '../hooks/useResponsive';
 
 const FoodDetailScreenSimple = ({ navigation, route }) => {
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
   const dispatch = useDispatch();
   const user = useSelector(state => state.auth.user);
   const userId = user?._id || null;
@@ -136,78 +140,80 @@ const FoodDetailScreenSimple = ({ navigation, route }) => {
     return (selectedVariation.discounted || selectedVariation.price) * quantity;
   };
 
+  const s = styles(colors, typography, scale);
+
   if (!food) {
     return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.errorText}>Food not found</Text>
+      <SafeAreaView style={s.container}>
+        <Text style={s.errorText}>Food not found</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={s.container}>
       <ScrollView>
         {/* Header */}
-        <View style={styles.header}>
+        <View style={s.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Icon name="arrow-left" size={24} color="#000" />
+            <Icon name="arrow-left" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Product Details</Text>
+          <Text style={s.headerTitle}>Product Details</Text>
           <TouchableOpacity onPress={handleToggleFavorite}>
             <Icon 
               name={isFavorite ? "heart" : "heart-outline"} 
               size={24} 
-              color={isFavorite ? "#E63946" : "#000"} 
+              color={isFavorite ? colors.error : colors.textPrimary} 
             />
           </TouchableOpacity>
         </View>
 
         {/* Image */}
-        <Image source={{ uri: food.image || '' }} style={styles.foodImage} />
+        <Image source={{ uri: food.image || '' }} style={s.foodImage} />
 
         {/* Info */}
-        <View style={styles.infoSection}>
-          <Text style={styles.foodName}>{String(food.title || '')}</Text>
-          <Text style={styles.foodDescription}>{String(food.description || '')}</Text>
+        <View style={s.infoSection}>
+          <Text style={s.foodName}>{String(food.title || '')}</Text>
+          <Text style={s.foodDescription}>{String(food.description || '')}</Text>
           
           {/* Restaurant */}
-          <View style={styles.restaurantInfo}>
-            <Icon name="store" size={20} color="#FF6B35" />
-            <Text style={styles.restaurantName}>{String(food.restaurant?.name || 'Restaurant')}</Text>
+          <View style={s.restaurantInfo}>
+            <Icon name="store" size={20} color={colors.accent} />
+            <Text style={s.restaurantName}>{String(food.restaurant?.name || 'Restaurant')}</Text>
           </View>
 
           {/* Variations */}
-          <Text style={styles.sectionTitle}>Select Size</Text>
+          <Text style={s.sectionTitle}>Select Size</Text>
           {food.variations?.map((v) => (
             <TouchableOpacity
               key={String(v._id || v.id)}
               style={[
-                styles.variationItem,
-                selectedVariation?.id === v.id && styles.variationSelected,
+                s.variationItem,
+                selectedVariation?.id === v.id && s.variationSelected,
               ]}
               onPress={() => setSelectedVariation(v)}
             >
-              <Text style={styles.variationTitle}>{String(v.title || '')}</Text>
-              <Text style={styles.variationPrice}>{`${v.price || 0} ETB`}</Text>
+              <Text style={s.variationTitle}>{String(v.title || '')}</Text>
+              <Text style={s.variationPrice}>{`${v.price || 0} PKR`}</Text>
             </TouchableOpacity>
           ))}
 
           {/* Quantity */}
-          <View style={styles.quantitySection}>
-            <Text style={styles.sectionTitle}>Quantity</Text>
-            <View style={styles.quantityControls}>
+          <View style={s.quantitySection}>
+            <Text style={s.sectionTitle}>Quantity</Text>
+            <View style={s.quantityControls}>
               <TouchableOpacity
-                style={styles.quantityButton}
+                style={s.quantityButton}
                 onPress={() => setQuantity(Math.max(1, quantity - 1))}
               >
-                <Icon name="minus" size={20} color="#000" />
+                <Icon name="minus" size={20} color={colors.textPrimary} />
               </TouchableOpacity>
-              <Text style={styles.quantityText}>{String(quantity)}</Text>
+              <Text style={s.quantityText}>{String(quantity)}</Text>
               <TouchableOpacity
-                style={styles.quantityButton}
+                style={s.quantityButton}
                 onPress={() => setQuantity(quantity + 1)}
               >
-                <Icon name="plus" size={20} color="#000" />
+                <Icon name="plus" size={20} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
           </View>
@@ -215,44 +221,44 @@ const FoodDetailScreenSimple = ({ navigation, route }) => {
       </ScrollView>
 
       {/* Footer */}
-      <View style={styles.footer}>
+      <View style={s.footer}>
         <View>
-          <Text style={styles.totalLabel}>Total</Text>
-          <Text style={styles.totalValue}>{`${calculateTotal().toFixed(2)} ETB`}</Text>
+          <Text style={s.totalLabel}>Total</Text>
+          <Text style={s.totalValue}>{`${calculateTotal().toFixed(2)} PKR`}</Text>
         </View>
-        <TouchableOpacity style={styles.addButton} onPress={handleAddToCart}>
-          <Text style={styles.addButtonText}>Add to Cart</Text>
+        <TouchableOpacity style={s.addButton} onPress={handleAddToCart}>
+          <Text style={s.addButtonText}>Add to Cart</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16 },
-  headerTitle: { fontSize: 18, fontWeight: 'bold' },
-  foodImage: { width: '100%', height: 250 },
-  infoSection: { padding: 16 },
-  foodName: { fontSize: 24, fontWeight: 'bold', marginBottom: 8 },
-  foodDescription: { fontSize: 14, color: '#666', marginBottom: 16 },
-  restaurantInfo: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
-  restaurantName: { fontSize: 16, marginLeft: 8 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginTop: 16, marginBottom: 8 },
-  variationItem: { flexDirection: 'row', justifyContent: 'space-between', padding: 12, borderWidth: 1, borderColor: '#ddd', borderRadius: 8, marginBottom: 8 },
-  variationSelected: { borderColor: '#FF6B35', backgroundColor: '#FFF3E0' },
-  variationTitle: { fontSize: 16 },
-  variationPrice: { fontSize: 16, fontWeight: 'bold', color: '#FF6B35' },
-  quantitySection: { marginTop: 16 },
-  quantityControls: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 8 },
-  quantityButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#f0f0f0', justifyContent: 'center', alignItems: 'center' },
-  quantityText: { fontSize: 20, fontWeight: 'bold', marginHorizontal: 20 },
-  footer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderTopWidth: 1, borderColor: '#ddd' },
-  totalLabel: { fontSize: 14, color: '#666' },
-  totalValue: { fontSize: 20, fontWeight: 'bold', color: '#FF6B35' },
-  addButton: { backgroundColor: '#FF6B35', paddingHorizontal: 32, paddingVertical: 12, borderRadius: 8 },
-  addButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-  errorText: { fontSize: 16, textAlign: 'center', marginTop: 50 },
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.surface },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: Math.round(16 * scale) },
+  headerTitle: { fontSize: Math.round(18 * scale), fontWeight: 'bold' },
+  foodImage: { width: '100%', height: Math.round(250 * scale) },
+  infoSection: { padding: Math.round(16 * scale) },
+  foodName: { fontSize: Math.round(24 * scale), fontWeight: 'bold', marginBottom: Math.round(8 * scale) },
+  foodDescription: { fontSize: Math.round(14 * scale), color: colors.textSecondary, marginBottom: Math.round(16 * scale) },
+  restaurantInfo: { flexDirection: 'row', alignItems: 'center', marginBottom: Math.round(16 * scale) },
+  restaurantName: { fontSize: Math.round(16 * scale), marginLeft: Math.round(8 * scale) },
+  sectionTitle: { fontSize: Math.round(18 * scale), fontWeight: 'bold', marginTop: Math.round(16 * scale), marginBottom: Math.round(8 * scale) },
+  variationItem: { flexDirection: 'row', justifyContent: 'space-between', padding: Math.round(12 * scale), borderWidth: 1, borderColor: colors.border, borderRadius: Math.round(8 * scale), marginBottom: Math.round(8 * scale) },
+  variationSelected: { borderColor: colors.accent, backgroundColor: colors.accentSurface },
+  variationTitle: { fontSize: Math.round(16 * scale) },
+  variationPrice: { fontSize: Math.round(16 * scale), fontWeight: 'bold', color: colors.accent },
+  quantitySection: { marginTop: Math.round(16 * scale) },
+  quantityControls: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: Math.round(8 * scale) },
+  quantityButton: { width: Math.round(40 * scale), height: Math.round(40 * scale), borderRadius: Math.round(20 * scale), backgroundColor: colors.surface, justifyContent: 'center', alignItems: 'center' },
+  quantityText: { fontSize: Math.round(20 * scale), fontWeight: 'bold', marginHorizontal: Math.round(20 * scale) },
+  footer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: Math.round(16 * scale), borderTopWidth: 1, borderColor: colors.border },
+  totalLabel: { fontSize: Math.round(14 * scale), color: colors.textSecondary },
+  totalValue: { fontSize: Math.round(20 * scale), fontWeight: 'bold', color: colors.accent },
+  addButton: { backgroundColor: colors.accent, paddingHorizontal: Math.round(32 * scale), paddingVertical: Math.round(12 * scale), borderRadius: Math.round(8 * scale) },
+  addButtonText: { color: colors.textInverse, fontSize: Math.round(16 * scale), fontWeight: 'bold' },
+  errorText: { fontSize: Math.round(16 * scale), textAlign: 'center', marginTop: Math.round(50 * scale) },
 });
 
 export default FoodDetailScreenSimple;

@@ -14,8 +14,12 @@ import { useQuery } from '@apollo/client';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 
 import { GET_RESTAURANTS, GET_FOODS } from '../api/queries';
+import { useTheme } from '../theme';
+import useResponsive from '../hooks/useResponsive';
 
 const SearchScreen = ({ navigation, route }) => {
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
   const { category } = route.params || {};
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('restaurants'); // shops, products
@@ -65,20 +69,20 @@ const SearchScreen = ({ navigation, route }) => {
   }, [searchQuery, activeTab, restaurants.length, foods.length]);
 
   const renderSearchBar = () => (
-    <View style={styles.searchContainer}>
+    <View style={s.searchContainer}>
       <TouchableOpacity
-        style={styles.backButton}
+        style={s.backButton}
         onPress={() => navigation.goBack()}
       >
-        <Icon name="arrow-left" size={24} color="#1D3557" />
+        <Icon name="arrow-left" size={24} color={colors.textPrimary} />
       </TouchableOpacity>
 
-      <View style={styles.searchInputContainer}>
-        <Icon name="magnify" size={22} color="#FF6B35" />
+      <View style={s.searchInputContainer}>
+        <Icon name="magnify" size={22} color={colors.accent} />
         <TextInput
-          style={styles.searchInput}
+          style={s.searchInput}
           placeholder={activeTab === 'restaurants' ? 'Search shops...' : 'Search products...'}
-          placeholderTextColor="#A8DADC"
+          placeholderTextColor={colors.inputPlaceholder}
           value={searchQuery}
           onChangeText={setSearchQuery}
           autoFocus={true}
@@ -86,7 +90,7 @@ const SearchScreen = ({ navigation, route }) => {
         />
         {searchQuery ? (
           <TouchableOpacity onPress={() => setSearchQuery('')}>
-            <Icon name="close-circle" size={20} color="#6C757D" />
+            <Icon name="close-circle" size={20} color={colors.textSecondary} />
           </TouchableOpacity>
         ) : null}
       </View>
@@ -94,15 +98,15 @@ const SearchScreen = ({ navigation, route }) => {
   );
 
   const renderTabs = () => (
-    <View style={styles.tabContainer}>
+    <View style={s.tabContainer}>
       <TouchableOpacity
-        style={[styles.tab, activeTab === 'restaurants' && styles.activeTab]}
+        style={[s.tab, activeTab === 'restaurants' && s.activeTab]}
         onPress={() => setActiveTab('restaurants')}
       >
         <Text
           style={[
-            styles.tabText,
-            activeTab === 'restaurants' && styles.activeTabText,
+            s.tabText,
+            activeTab === 'restaurants' && s.activeTabText,
           ]}
         >
           Shops
@@ -110,11 +114,11 @@ const SearchScreen = ({ navigation, route }) => {
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={[styles.tab, activeTab === 'foods' && styles.activeTab]}
+        style={[s.tab, activeTab === 'foods' && s.activeTab]}
         onPress={() => setActiveTab('foods')}
       >
         <Text
-          style={[styles.tabText, activeTab === 'foods' && styles.activeTabText]}
+          style={[s.tabText, activeTab === 'foods' && s.activeTabText]}
         >
           Products
         </Text>
@@ -124,26 +128,26 @@ const SearchScreen = ({ navigation, route }) => {
 
   const renderRestaurantItem = ({ item }) => (
     <TouchableOpacity
-      style={styles.restaurantItem}
+      style={s.restaurantItem}
       onPress={() => navigation.navigate('Restaurant', { restaurant: item })}
     >
-      <Image source={{ uri: item.image }} style={styles.restaurantImage} />
-      <View style={styles.restaurantInfo}>
-        <Text style={styles.restaurantName} numberOfLines={2}>
+      <Image source={{ uri: item.image }} style={s.restaurantImage} />
+      <View style={s.restaurantInfo}>
+        <Text style={s.restaurantName} numberOfLines={2}>
           {item.name}
         </Text>
-        <Text style={styles.restaurantCuisine} numberOfLines={1}>
+        <Text style={s.restaurantCuisine} numberOfLines={1}>
           {item.shopType}
         </Text>
-        <View style={styles.restaurantMeta}>
-          <View style={styles.ratingContainer}>
+        <View style={s.restaurantMeta}>
+          <View style={s.ratingContainer}>
             <Icon name="star" size={14} color="#FFD700" />
-            <Text style={styles.ratingText}>{String(item.rating || '4.2')}</Text>
+            <Text style={s.ratingText}>{String(item.rating || '4.2')}</Text>
           </View>
-          <Text style={styles.deliveryTime}>
+          <Text style={s.deliveryTime}>
             {`${item.deliveryTime || '25-35'} min`}
           </Text>
-          <Text style={styles.minOrder}>{`Min ETB ${item.minimumOrder || '15'}`}</Text>
+          <Text style={s.minOrder}>{`Min PKR ${item.minimumOrder || '15'}`}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -151,34 +155,34 @@ const SearchScreen = ({ navigation, route }) => {
 
   const renderFoodItem = ({ item }) => (
     <TouchableOpacity
-      style={styles.foodItem}
+      style={s.foodItem}
       onPress={() => navigation.navigate('FoodDetail', { food: item })}
     >
-      <Image source={{ uri: item.image }} style={styles.foodImage} />
-      <View style={styles.foodInfo}>
-        <Text style={styles.foodName} numberOfLines={2}>
+      <Image source={{ uri: item.image }} style={s.foodImage} />
+      <View style={s.foodInfo}>
+        <Text style={s.foodName} numberOfLines={2}>
           {item.title}
         </Text>
-        <Text style={styles.foodRestaurant} numberOfLines={1}>
+        <Text style={s.foodRestaurant} numberOfLines={1}>
           {item.restaurant?.name}
         </Text>
-        <Text style={styles.foodDescription} numberOfLines={2}>
+        <Text style={s.foodDescription} numberOfLines={2}>
           {item.description}
         </Text>
-        <Text style={styles.foodPrice}>
-          {`ETB ${item.variations?.[0]?.price || '12.99'}`}
+        <Text style={s.foodPrice}>
+          {`PKR ${item.variations?.[0]?.price || '12.99'}`}
         </Text>
       </View>
     </TouchableOpacity>
   );
 
   const renderEmptyState = () => (
-    <View style={styles.emptyContainer}>
-      <Icon name="magnify" size={80} color="#A8DADC" />
-      <Text style={styles.emptyTitle}>
+    <View style={s.emptyContainer}>
+      <Icon name="magnify" size={80} color={colors.accentLight} />
+      <Text style={s.emptyTitle}>
         {searchQuery ? 'No results found' : 'Start searching'}
       </Text>
-      <Text style={styles.emptySubtitle}>
+      <Text style={s.emptySubtitle}>
         {searchQuery
           ? `Try searching for something else`
           : `Search for shops or products`}
@@ -187,15 +191,17 @@ const SearchScreen = ({ navigation, route }) => {
   );
 
   const isLoading = restaurantsLoading || foodsLoading;
+  const s = styles(colors, typography, scale);
+
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={s.container}>
       {renderSearchBar()}
       {renderTabs()}
 
       {isLoading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#FF6B35" />
+        <View style={s.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.accent} />
         </View>
       ) : (
         <FlatList
@@ -206,47 +212,47 @@ const SearchScreen = ({ navigation, route }) => {
           }
           ListEmptyComponent={renderEmptyState()}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.listContainer}
+          contentContainerStyle={s.listContainer}
         />
       )}
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
+    paddingHorizontal: Math.round(16 * scale),
+    paddingVertical: Math.round(12 * scale),
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F8F9FA',
+    width: Math.round(40 * scale),
+    height: Math.round(40 * scale),
+    borderRadius: Math.round(20 * scale),
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: Math.round(12 * scale),
   },
   searchInputContainer: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    height: 50,
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(16 * scale),
+    paddingHorizontal: Math.round(16 * scale),
+    height: Math.round(50 * scale),
     borderWidth: 2,
-    borderColor: '#FF6B35',
-    shadowColor: '#FF6B35',
+    borderColor: colors.accent,
+    shadowColor: colors.accent,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -254,81 +260,81 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
-    color: '#1D3557',
-    marginLeft: 12,
+    fontSize: Math.round(16 * scale),
+    color: colors.textPrimary,
+    marginLeft: Math.round(12 * scale),
     fontWeight: '500',
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: '#F8F9FA',
-    marginHorizontal: 16,
-    marginVertical: 16,
-    borderRadius: 16,
-    padding: 6,
+    backgroundColor: colors.surface,
+    marginHorizontal: Math.round(16 * scale),
+    marginVertical: Math.round(16 * scale),
+    borderRadius: Math.round(16 * scale),
+    padding: Math.round(6 * scale),
     borderWidth: 1,
-    borderColor: '#E9ECEF',
+    borderColor: colors.border,
   },
   tab: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 12,
+    paddingVertical: Math.round(12 * scale),
+    borderRadius: Math.round(12 * scale),
     alignItems: 'center',
     justifyContent: 'center',
   },
   activeTab: {
-    backgroundColor: '#FF6B35',
-    shadowColor: '#FF6B35',
+    backgroundColor: colors.accent,
+    shadowColor: colors.accent,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 4,
   },
   tabText: {
-    fontSize: 15,
-    color: '#6C757D',
+    fontSize: Math.round(15 * scale),
+    color: colors.textSecondary,
     fontWeight: '600',
   },
   activeTabText: {
-    color: '#FFFFFF',
+    color: colors.textInverse,
     fontWeight: '700',
   },
   listContainer: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingHorizontal: Math.round(16 * scale),
+    paddingBottom: Math.round(16 * scale),
   },
   restaurantItem: {
     flexDirection: 'row',
-    backgroundColor: '#F8F9FA',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
-    shadowColor: '#000',
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
+    padding: Math.round(12 * scale),
+    marginBottom: Math.round(12 * scale),
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
   restaurantImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 8,
-    marginRight: 12,
+    width: Math.round(100 * scale),
+    height: Math.round(100 * scale),
+    borderRadius: Math.round(8 * scale),
+    marginRight: Math.round(12 * scale),
   },
   restaurantInfo: {
     flex: 1,
     justifyContent: 'space-between',
   },
   restaurantName: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginBottom: 4,
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   restaurantCuisine: {
-    fontSize: 14,
-    color: '#6C757D',
-    marginBottom: 8,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginBottom: Math.round(8 * scale),
   },
   restaurantMeta: {
     flexDirection: 'row',
@@ -340,73 +346,73 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   ratingText: {
-    fontSize: 12,
-    color: '#6C757D',
-    marginLeft: 4,
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
+    marginLeft: Math.round(4 * scale),
   },
   deliveryTime: {
-    fontSize: 12,
-    color: '#6C757D',
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
   },
   minOrder: {
-    fontSize: 12,
-    color: '#6C757D',
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
   },
   foodItem: {
     flexDirection: 'row',
-    backgroundColor: '#F8F9FA',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
+    padding: Math.round(12 * scale),
+    marginBottom: Math.round(12 * scale),
   },
   foodImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    marginRight: 12,
+    width: Math.round(80 * scale),
+    height: Math.round(80 * scale),
+    borderRadius: Math.round(8 * scale),
+    marginRight: Math.round(12 * scale),
   },
   foodInfo: {
     flex: 1,
     justifyContent: 'space-between',
   },
   foodName: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#1D3557',
-    marginBottom: 4,
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   foodRestaurant: {
-    fontSize: 12,
-    color: '#FF6B35',
-    marginBottom: 4,
+    fontSize: Math.round(12 * scale),
+    color: colors.accent,
+    marginBottom: Math.round(4 * scale),
   },
   foodDescription: {
-    fontSize: 12,
-    color: '#6C757D',
-    marginBottom: 8,
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
+    marginBottom: Math.round(8 * scale),
   },
   foodPrice: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 32,
-    paddingTop: 100,
+    paddingHorizontal: Math.round(32 * scale),
+    paddingTop: Math.round(100 * scale),
   },
   emptyTitle: {
-    fontSize: 20,
+    fontSize: Math.round(20 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginTop: 16,
-    marginBottom: 8,
+    color: colors.textPrimary,
+    marginTop: Math.round(16 * scale),
+    marginBottom: Math.round(8 * scale),
   },
   emptySubtitle: {
-    fontSize: 16,
-    color: '#6C757D',
+    fontSize: Math.round(16 * scale),
+    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 22,
   },

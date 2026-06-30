@@ -16,6 +16,8 @@ import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useSelector, useDispatch } from 'react-redux';
 import { useMutation } from '@apollo/client';
 
+import { useTheme, getStatusColor } from '../../theme';
+import useResponsive from '../../hooks/useResponsive';
 import { UPDATE_RIDER_ORDER_STATUS } from '../../api/mutations';
 import { updateOrderStatus, clearActiveOrder } from '../../store/orderSlice';
 import LocationService from '../../services/rider/LocationService';
@@ -26,8 +28,10 @@ const DeliveryScreen = ({ navigation, route }) => {
   const { order } = route.params;
   const dispatch = useDispatch();
   const mapRef = useRef(null);
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
   
-  const { rider } = useSelector((state) => state.auth);
+  const { user: rider } = useSelector((state) => state.auth);
   const currentLocation = useSelector((state) => state.location.currentLocation);
   const [isTracking, setIsTracking] = useState(false);
   const [distance, setDistance] = useState(null);
@@ -282,7 +286,7 @@ const DeliveryScreen = ({ navigation, route }) => {
               
               Alert.alert(
                 '🎉 Delivery Complete!',
-                `Order ${order.orderId} delivered successfully!\n\nEarnings: ETB ${(order.deliveryCharges + order.tipping).toFixed(2)}`,
+                `Order ${order.orderId} delivered successfully!\n\nEarnings: PKR ${(order.deliveryCharges + order.tipping).toFixed(2)}`,
                 [
                   {
                     text: 'OK',
@@ -339,6 +343,8 @@ const DeliveryScreen = ({ navigation, route }) => {
     }
   };
 
+  const s = styles(colors, typography, scale);
+
   const destination = currentStep === 'pickup' ? restaurantLocation : deliveryLocation;
   const destinationName = currentStep === 'pickup' ? order.restaurant.name : 'Customer';
   const destinationAddress = currentStep === 'pickup' 
@@ -349,11 +355,11 @@ const DeliveryScreen = ({ navigation, route }) => {
     : order.user.phone;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.mapContainer}>
+    <SafeAreaView style={s.container}>
+      <View style={s.mapContainer}>
         <MapView
           ref={mapRef}
-          style={styles.map}
+          style={s.map}
           initialRegion={{
             latitude: currentLocation?.latitude || destination.latitude,
             longitude: currentLocation?.longitude || destination.longitude,
@@ -370,8 +376,8 @@ const DeliveryScreen = ({ navigation, route }) => {
             title={order.restaurant.name}
             description={order.restaurant.address}
           >
-            <View style={styles.restaurantMarker}>
-              <Icon name="store" size={24} color="#FFFFFF" />
+            <View style={s.restaurantMarker}>
+              <Icon name="store" size={24} color={colors.surface} />
             </View>
           </Marker>
 
@@ -381,8 +387,8 @@ const DeliveryScreen = ({ navigation, route }) => {
             title="Customer"
             description={order.deliveryAddress.deliveryAddress}
           >
-            <View style={styles.customerMarker}>
-              <Icon name="home" size={24} color="#FFFFFF" />
+            <View style={s.customerMarker}>
+              <Icon name="home" size={24} color={colors.surface} />
             </View>
           </Marker>
 
@@ -397,8 +403,8 @@ const DeliveryScreen = ({ navigation, route }) => {
               description="Your current location"
               anchor={{ x: 0.5, y: 0.5 }}
             >
-              <View style={styles.riderMarker}>
-                <Icon name="bike-fast" size={24} color="#FFFFFF" />
+              <View style={s.riderMarker}>
+                <Icon name="bike-fast" size={24} color={colors.surface} />
               </View>
             </Marker>
           )}
@@ -408,7 +414,7 @@ const DeliveryScreen = ({ navigation, route }) => {
             <Polyline
               coordinates={routeCoordinates}
               strokeWidth={4}
-              strokeColor={currentStep === 'pickup' ? '#FF6B35' : '#2EC4B6'}
+              strokeColor={currentStep === 'pickup' ? colors.warning : colors.accent}
               lineDashPattern={[1]}
             />
           )}
@@ -417,148 +423,148 @@ const DeliveryScreen = ({ navigation, route }) => {
           <Polyline
             coordinates={[restaurantLocation, deliveryLocation]}
             strokeWidth={2}
-            strokeColor="#E9ECEF"
+            strokeColor={colors.border}
             lineDashPattern={[10, 10]}
           />
         </MapView>
 
         {/* Back Button */}
         <TouchableOpacity
-          style={styles.backButton}
+          style={s.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Icon name="arrow-left" size={24} color="#1D3557" />
+          <Icon name="arrow-left" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
 
         {/* Step Indicator */}
-        <View style={styles.stepIndicator}>
-          <View style={styles.stepContainer}>
-            <View style={[styles.step, currentStep === 'pickup' && styles.activeStep]}>
-              <Icon name="store" size={20} color="#FFFFFF" />
+        <View style={s.stepIndicator}>
+          <View style={s.stepContainer}>
+            <View style={[s.step, currentStep === 'pickup' && s.activeStep]}>
+              <Icon name="store" size={20} color={colors.surface} />
             </View>
-            <View style={[styles.stepLine, currentStep === 'delivery' && styles.activeStepLine]} />
-            <View style={[styles.step, currentStep === 'delivery' && styles.activeStep]}>
-              <Icon name="home" size={20} color="#FFFFFF" />
+            <View style={[s.stepLine, currentStep === 'delivery' && s.activeStepLine]} />
+            <View style={[s.step, currentStep === 'delivery' && s.activeStep]}>
+              <Icon name="home" size={20} color={colors.surface} />
             </View>
           </View>
-          <Text style={styles.stepText}>
+          <Text style={s.stepText}>
             {currentStep === 'pickup' ? 'Pickup from Restaurant' : 'Deliver to Customer'}
           </Text>
         </View>
       </View>
 
       {/* Bottom Sheet */}
-      <View style={styles.bottomSheet}>
+      <View style={s.bottomSheet}>
         {/* Distance & Time */}
         {distance && duration && (
-          <View style={styles.routeInfo}>
-            <View style={styles.routeItem}>
-              <Icon name="map-marker-distance" size={20} color="#2EC4B6" />
-              <Text style={styles.routeText}>{distance.toFixed(1)} km</Text>
+          <View style={s.routeInfo}>
+            <View style={s.routeItem}>
+              <Icon name="map-marker-distance" size={20} color={colors.accent} />
+              <Text style={s.routeText}>{distance.toFixed(1)} km</Text>
             </View>
-            <View style={styles.routeItem}>
-              <Icon name="clock-outline" size={20} color="#2EC4B6" />
-              <Text style={styles.routeText}>{Math.ceil(duration)} min</Text>
+            <View style={s.routeItem}>
+              <Icon name="clock-outline" size={20} color={colors.accent} />
+              <Text style={s.routeText}>{Math.ceil(duration)} min</Text>
             </View>
           </View>
         )}
 
         {/* Destination Info */}
-        <View style={styles.destinationInfo}>
-          <View style={styles.destinationHeader}>
+        <View style={s.destinationInfo}>
+          <View style={s.destinationHeader}>
             <Icon 
               name={currentStep === 'pickup' ? 'store' : 'home'} 
               size={24} 
-              color="#2EC4B6" 
+              color={colors.accent} 
             />
-            <View style={styles.destinationDetails}>
-              <Text style={styles.destinationName}>{destinationName}</Text>
-              <Text style={styles.destinationAddress}>{destinationAddress}</Text>
+            <View style={s.destinationDetails}>
+              <Text style={s.destinationName}>{destinationName}</Text>
+              <Text style={s.destinationAddress}>{destinationAddress}</Text>
             </View>
           </View>
 
           {/* Action Buttons */}
-          <View style={styles.actionButtons}>
+          <View style={s.actionButtons}>
             <TouchableOpacity
-              style={styles.actionButton}
+              style={s.actionButton}
               onPress={() => handleCall(destinationPhone)}
             >
-              <Icon name="phone" size={20} color="#2EC4B6" />
-              <Text style={styles.actionButtonText}>Call</Text>
+              <Icon name="phone" size={20} color={colors.accent} />
+              <Text style={s.actionButtonText}>Call</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.actionButton}
+              style={s.actionButton}
               onPress={() => handleNavigate(destination)}
             >
-              <Icon name="navigation" size={20} color="#2EC4B6" />
-              <Text style={styles.actionButtonText}>Navigate</Text>
+              <Icon name="navigation" size={20} color={colors.accent} />
+              <Text style={s.actionButtonText}>Navigate</Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Order Items */}
-        <View style={styles.orderItems}>
-          <Text style={styles.orderItemsTitle}>Order Items ({order.items.length})</Text>
+        <View style={s.orderItems}>
+          <Text style={s.orderItemsTitle}>Order Items ({order.items.length})</Text>
           {order.items.slice(0, 2).map((item, index) => (
-            <Text key={index} style={styles.orderItem}>
+            <Text key={index} style={s.orderItem}>
               {item.quantity}x {item.food.title}
             </Text>
           ))}
           {order.items.length > 2 && (
-            <Text style={styles.orderItem}>+{order.items.length - 2} more items</Text>
+            <Text style={s.orderItem}>+{order.items.length - 2} more items</Text>
           )}
         </View>
 
         {/* Action Buttons Based on Step */}
         {currentStep === 'pickup' ? (
-          <View style={styles.actionButtonsContainer}>
+          <View style={s.actionButtonsContainer}>
             <TouchableOpacity
-              style={[styles.secondaryButton, updating && styles.mainButtonDisabled]}
+              style={[s.secondaryButton, updating && s.mainButtonDisabled]}
               onPress={handleArrivedAtRestaurant}
               disabled={updating}
             >
-              <Icon name="map-marker-check" size={20} color="#2EC4B6" />
-              <Text style={styles.secondaryButtonText}>Arrived at Restaurant</Text>
+              <Icon name="map-marker-check" size={20} color={colors.accent} />
+              <Text style={s.secondaryButtonText}>Arrived at Restaurant</Text>
             </TouchableOpacity>
             
             <TouchableOpacity
-              style={[styles.mainButton, updating && styles.mainButtonDisabled]}
+              style={[s.mainButton, updating && s.mainButtonDisabled]}
               onPress={handlePickedUp}
               disabled={updating}
             >
               {updating ? (
-                <ActivityIndicator color="#FFFFFF" />
+                <ActivityIndicator color={colors.surface} />
               ) : (
                 <>
-                  <Icon name="check-circle" size={24} color="#FFFFFF" />
-                  <Text style={styles.mainButtonText}>Picked Up Order</Text>
+                  <Icon name="check-circle" size={24} color={colors.surface} />
+                  <Text style={s.mainButtonText}>Picked Up Order</Text>
                 </>
               )}
             </TouchableOpacity>
           </View>
         ) : (
-          <View style={styles.actionButtonsContainer}>
+          <View style={s.actionButtonsContainer}>
             <TouchableOpacity
-              style={[styles.secondaryButton, updating && styles.mainButtonDisabled]}
+              style={[s.secondaryButton, updating && s.mainButtonDisabled]}
               onPress={handleArrivedAtCustomer}
               disabled={updating}
             >
-              <Icon name="map-marker-check" size={20} color="#2EC4B6" />
-              <Text style={styles.secondaryButtonText}>Arrived at Customer</Text>
+              <Icon name="map-marker-check" size={20} color={colors.accent} />
+              <Text style={s.secondaryButtonText}>Arrived at Customer</Text>
             </TouchableOpacity>
             
             <TouchableOpacity
-              style={[styles.mainButton, updating && styles.mainButtonDisabled]}
+              style={[s.mainButton, updating && s.mainButtonDisabled]}
               onPress={handleDelivered}
               disabled={updating}
             >
               {updating ? (
-                <ActivityIndicator color="#FFFFFF" />
+                <ActivityIndicator color={colors.surface} />
               ) : (
                 <>
-                  <Icon name="check-all" size={24} color="#FFFFFF" />
-                  <Text style={styles.mainButtonText}>Mark as Delivered</Text>
+                  <Icon name="check-all" size={24} color={colors.surface} />
+                  <Text style={s.mainButtonText}>Mark as Delivered</Text>
                 </>
               )}
             </TouchableOpacity>
@@ -569,10 +575,10 @@ const DeliveryScreen = ({ navigation, route }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   mapContainer: {
     flex: 1,
@@ -583,158 +589,158 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: 'absolute',
-    top: 50,
-    left: 16,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#FFFFFF',
+    top: Math.round(50 * scale),
+    left: Math.round(16 * scale),
+    width: Math.round(44 * scale),
+    height: Math.round(44 * scale),
+    borderRadius: Math.round(22 * scale),
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: Math.round(2 * scale) },
     shadowOpacity: 0.2,
-    shadowRadius: 4,
+    shadowRadius: Math.round(4 * scale),
     elevation: 4,
   },
   riderMarker: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#2EC4B6',
+    width: Math.round(44 * scale),
+    height: Math.round(44 * scale),
+    borderRadius: Math.round(22 * scale),
+    backgroundColor: colors.accent,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
-    borderColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    borderColor: colors.surface,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: Math.round(2 * scale) },
     shadowOpacity: 0.3,
-    shadowRadius: 4,
+    shadowRadius: Math.round(4 * scale),
     elevation: 5,
   },
   restaurantMarker: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#FF6B35',
+    width: Math.round(44 * scale),
+    height: Math.round(44 * scale),
+    borderRadius: Math.round(22 * scale),
+    backgroundColor: colors.warning,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
-    borderColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    borderColor: colors.surface,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: Math.round(2 * scale) },
     shadowOpacity: 0.3,
-    shadowRadius: 4,
+    shadowRadius: Math.round(4 * scale),
     elevation: 5,
   },
   customerMarker: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#457B9D',
+    width: Math.round(44 * scale),
+    height: Math.round(44 * scale),
+    borderRadius: Math.round(22 * scale),
+    backgroundColor: colors.info,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
-    borderColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    borderColor: colors.surface,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: Math.round(2 * scale) },
     shadowOpacity: 0.3,
-    shadowRadius: 4,
+    shadowRadius: Math.round(4 * scale),
     elevation: 5,
   },
   stepIndicator: {
     position: 'absolute',
-    top: 50,
-    right: 16,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    top: Math.round(50 * scale),
+    right: Math.round(16 * scale),
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
+    padding: Math.round(12 * scale),
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: Math.round(2 * scale) },
     shadowOpacity: 0.2,
-    shadowRadius: 4,
+    shadowRadius: Math.round(4 * scale),
     elevation: 4,
   },
   stepContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: Math.round(8 * scale),
   },
   step: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#E9ECEF',
+    width: Math.round(36 * scale),
+    height: Math.round(36 * scale),
+    borderRadius: Math.round(18 * scale),
+    backgroundColor: colors.border,
     justifyContent: 'center',
     alignItems: 'center',
   },
   activeStep: {
-    backgroundColor: '#2EC4B6',
+    backgroundColor: colors.accent,
   },
   stepLine: {
-    width: 40,
-    height: 2,
-    backgroundColor: '#E9ECEF',
-    marginHorizontal: 4,
+    width: Math.round(40 * scale),
+    height: Math.round(2 * scale),
+    backgroundColor: colors.border,
+    marginHorizontal: Math.round(4 * scale),
   },
   activeStepLine: {
-    backgroundColor: '#2EC4B6',
+    backgroundColor: colors.accent,
   },
   stepText: {
-    fontSize: 12,
-    color: '#1D3557',
+    fontSize: Math.round(12 * scale),
+    color: colors.textPrimary,
     fontWeight: '500',
   },
   bottomSheet: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: Math.round(24 * scale),
+    borderTopRightRadius: Math.round(24 * scale),
+    padding: Math.round(20 * scale),
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: Math.round(-4 * scale) },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowRadius: Math.round(8 * scale),
     elevation: 8,
   },
   routeInfo: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: 20,
-    paddingBottom: 20,
+    marginBottom: Math.round(20 * scale),
+    paddingBottom: Math.round(20 * scale),
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   routeItem: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   routeText: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#1D3557',
-    marginLeft: 8,
+    color: colors.textPrimary,
+    marginLeft: Math.round(8 * scale),
   },
   destinationInfo: {
-    marginBottom: 20,
+    marginBottom: Math.round(20 * scale),
   },
   destinationHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: Math.round(16 * scale),
   },
   destinationDetails: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: Math.round(12 * scale),
   },
   destinationName: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginBottom: 4,
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   destinationAddress: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   actionButtons: {
     flexDirection: 'row',
@@ -743,69 +749,69 @@ const styles = StyleSheet.create({
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    backgroundColor: '#E0F7F5',
-    borderRadius: 12,
+    paddingVertical: Math.round(12 * scale),
+    paddingHorizontal: Math.round(24 * scale),
+    backgroundColor: colors.surfaceVariant,
+    borderRadius: Math.round(12 * scale),
   },
   actionButtonText: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#2EC4B6',
-    marginLeft: 8,
+    color: colors.accent,
+    marginLeft: Math.round(8 * scale),
   },
   orderItems: {
-    marginBottom: 20,
-    paddingTop: 20,
+    marginBottom: Math.round(20 * scale),
+    paddingTop: Math.round(20 * scale),
     borderTopWidth: 1,
-    borderTopColor: '#E9ECEF',
+    borderTopColor: colors.border,
   },
   orderItemsTitle: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#1D3557',
-    marginBottom: 8,
+    color: colors.textPrimary,
+    marginBottom: Math.round(8 * scale),
   },
   orderItem: {
-    fontSize: 14,
-    color: '#6C757D',
-    marginBottom: 4,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginBottom: Math.round(4 * scale),
   },
   actionButtonsContainer: {
-    gap: 12,
+    gap: Math.round(12 * scale),
   },
   mainButton: {
     flexDirection: 'row',
-    backgroundColor: '#2EC4B6',
-    paddingVertical: 16,
-    borderRadius: 12,
+    backgroundColor: colors.accent,
+    paddingVertical: Math.round(16 * scale),
+    borderRadius: Math.round(12 * scale),
     justifyContent: 'center',
     alignItems: 'center',
   },
   secondaryButton: {
     flexDirection: 'row',
-    backgroundColor: '#E0F7F5',
-    paddingVertical: 14,
-    borderRadius: 12,
+    backgroundColor: colors.surfaceVariant,
+    paddingVertical: Math.round(14 * scale),
+    borderRadius: Math.round(12 * scale),
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#2EC4B6',
+    borderColor: colors.accent,
   },
   mainButtonDisabled: {
     opacity: 0.7,
   },
   mainButtonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
+    color: colors.surface,
+    fontSize: Math.round(18 * scale),
     fontWeight: '600',
-    marginLeft: 8,
+    marginLeft: Math.round(8 * scale),
   },
   secondaryButtonText: {
-    color: '#2EC4B6',
-    fontSize: 16,
+    color: colors.accent,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    marginLeft: 8,
+    marginLeft: Math.round(8 * scale),
   },
 });
 

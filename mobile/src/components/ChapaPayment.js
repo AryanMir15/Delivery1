@@ -3,8 +3,10 @@ import { View, StyleSheet, Alert, Linking } from 'react-native';
 import { Button, ActivityIndicator, Text } from 'react-native-paper';
 import { useMutation } from '@apollo/client';
 import { INITIALIZE_PAYMENT, VERIFY_PAYMENT } from '../api/mutations';
+import { useTheme } from '../theme';
 
 const ChapaPayment = ({ orderId, amount, onSuccess, onError }) => {
+  const { colors, typography } = useTheme();
   const [loading, setLoading] = useState(false);
   const [txRef, setTxRef] = useState(null);
 
@@ -92,45 +94,47 @@ const ChapaPayment = ({ orderId, amount, onSuccess, onError }) => {
     }
   };
 
+  const styles = (colors, typography) => StyleSheet.create({
+    container: {
+      marginVertical: 10,
+    },
+    button: {
+      borderRadius: 8,
+    },
+    buttonContent: {
+      paddingVertical: 8,
+    },
+    loadingText: {
+      textAlign: 'center',
+      marginTop: 10,
+      color: colors.textTertiary,
+    },
+  });
+
+  const s = styles(colors, typography);
+
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <Button
         mode="contained"
         onPress={handlePayment}
         disabled={loading}
-        style={styles.button}
-        contentStyle={styles.buttonContent}
+        style={s.button}
+        contentStyle={s.buttonContent}
       >
         {loading ? (
-          <ActivityIndicator color="#fff" />
+          <ActivityIndicator color={colors.textInverse} />
         ) : (
-          `Pay ETB ${amount.toFixed(2)} with Chapa`
+          `Pay PKR ${amount.toFixed(2)} with Chapa`
         )}
       </Button>
       {loading && (
-        <Text style={styles.loadingText}>
+        <Text style={s.loadingText}>
           Processing payment...
         </Text>
       )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: 10,
-  },
-  button: {
-    borderRadius: 8,
-  },
-  buttonContent: {
-    paddingVertical: 8,
-  },
-  loadingText: {
-    textAlign: 'center',
-    marginTop: 10,
-    color: '#666',
-  },
-});
 
 export default ChapaPayment;

@@ -12,10 +12,15 @@ import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useQuery } from '@apollo/client';
 import { useSelector } from 'react-redux';
 
+import { useTheme } from '../../theme';
+import useResponsive from '../../hooks/useResponsive';
+import StatusBadge from '../../components/StatusBadge';
 import { GET_RIDER_ORDERS } from '../../api/queries';
 
 const OrdersScreen = ({ navigation }) => {
-  const { rider } = useSelector((state) => state.auth);
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
+  const { user: rider } = useSelector((state) => state.auth);
   const [selectedFilter, setSelectedFilter] = useState('all'); // all, active, completed
   const [refreshing, setRefreshing] = useState(false);
 
@@ -50,25 +55,6 @@ const OrdersScreen = ({ navigation }) => {
   };
 
   const filteredOrders = getFilteredOrders();
-
-  const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'pending':
-        return '#FFC107';
-      case 'accepted':
-      case 'preparing':
-        return '#2EC4B6';
-      case 'ready':
-      case 'picked':
-        return '#17A2B8';
-      case 'delivered':
-        return '#28A745';
-      case 'cancelled':
-        return '#E63946';
-      default:
-        return '#6C757D';
-    }
-  };
 
   const getStatusIcon = (status) => {
     switch (status?.toLowerCase()) {
@@ -123,18 +109,18 @@ const OrdersScreen = ({ navigation }) => {
 
   const renderFilterButton = (filter, label, icon) => (
     <TouchableOpacity
-      style={[styles.filterButton, selectedFilter === filter && styles.filterButtonActive]}
+      style={[s.filterButton, selectedFilter === filter && s.filterButtonActive]}
       onPress={() => setSelectedFilter(filter)}
     >
       <Icon
         name={icon}
         size={18}
-        color={selectedFilter === filter ? '#FFFFFF' : '#6C757D'}
+        color={selectedFilter === filter ? colors.surface : colors.textSecondary}
       />
       <Text
         style={[
-          styles.filterButtonText,
-          selectedFilter === filter && styles.filterButtonTextActive,
+          s.filterButtonText,
+          selectedFilter === filter && s.filterButtonTextActive,
         ]}
       >
         {label}
@@ -144,61 +130,57 @@ const OrdersScreen = ({ navigation }) => {
 
   const renderOrderItem = ({ item }) => {
     const earnings = calculateEarnings(item);
-    const statusColor = getStatusColor(item.orderStatus);
     const statusIcon = getStatusIcon(item.orderStatus);
 
     return (
       <TouchableOpacity
-        style={styles.orderCard}
+        style={s.orderCard}
         onPress={() => navigation.navigate('OrderDetail', { orderId: item.id || item._id })}
       >
-        <View style={styles.orderHeader}>
-          <View style={styles.orderIdContainer}>
-            <Text style={styles.orderId}>#{item.orderId}</Text>
-            <View style={[styles.statusBadge, { backgroundColor: statusColor }]}>
-              <Icon name={statusIcon} size={14} color="#FFFFFF" />
-              <Text style={styles.statusText}>{item.orderStatus}</Text>
-            </View>
+        <View style={s.orderHeader}>
+          <View style={s.orderIdContainer}>
+            <Text style={s.orderId}>#{item.orderId}</Text>
+            <StatusBadge status={item.orderStatus} size="small" />
           </View>
-          <Text style={styles.orderDate}>{formatDate(item.orderDate)}</Text>
+          <Text style={s.orderDate}>{formatDate(item.orderDate)}</Text>
         </View>
 
-        <View style={styles.orderBody}>
-          <View style={styles.locationRow}>
-            <Icon name="store" size={18} color="#FF6B35" />
-            <View style={styles.locationInfo}>
-              <Text style={styles.locationName}>{item.restaurant?.name}</Text>
-              <Text style={styles.locationAddress} numberOfLines={1}>
+        <View style={s.orderBody}>
+          <View style={s.locationRow}>
+            <Icon name="store" size={18} color={colors.warning} />
+            <View style={s.locationInfo}>
+              <Text style={s.locationName}>{item.restaurant?.name}</Text>
+              <Text style={s.locationAddress} numberOfLines={1}>
                 {item.restaurant?.address}
               </Text>
             </View>
           </View>
 
-          <View style={styles.divider} />
+          <View style={s.divider} />
 
-          <View style={styles.locationRow}>
-            <Icon name="map-marker" size={18} color="#2EC4B6" />
-            <View style={styles.locationInfo}>
-              <Text style={styles.locationName}>{item.user?.name || 'Customer'}</Text>
-              <Text style={styles.locationAddress} numberOfLines={1}>
+          <View style={s.locationRow}>
+            <Icon name="map-marker" size={18} color={colors.accent} />
+            <View style={s.locationInfo}>
+              <Text style={s.locationName}>{item.user?.name || 'Customer'}</Text>
+              <Text style={s.locationAddress} numberOfLines={1}>
                 {item.deliveryAddress?.deliveryAddress}
               </Text>
             </View>
           </View>
         </View>
 
-        <View style={styles.orderFooter}>
-          <View style={styles.orderMeta}>
-            <Icon name="package-variant" size={16} color="#6C757D" />
-            <Text style={styles.metaText}>{item.items?.length || 0} items</Text>
+        <View style={s.orderFooter}>
+          <View style={s.orderMeta}>
+            <Icon name="package-variant" size={16} color={colors.textSecondary} />
+            <Text style={s.metaText}>{item.items?.length || 0} items</Text>
           </View>
-          <View style={styles.orderMeta}>
-            <Icon name="cash" size={16} color="#6C757D" />
-            <Text style={styles.metaText}>ETB {item.orderAmount?.toFixed(2)}</Text>
+          <View style={s.orderMeta}>
+            <Icon name="cash" size={16} color={colors.textSecondary} />
+            <Text style={s.metaText}>PKR {item.orderAmount?.toFixed(2)}</Text>
           </View>
-          <View style={styles.earningsContainer}>
-            <Text style={styles.earningsLabel}>Earned:</Text>
-            <Text style={styles.earningsAmount}>ETB {earnings.toFixed(2)}</Text>
+          <View style={s.earningsContainer}>
+            <Text style={s.earningsLabel}>Earned:</Text>
+            <Text style={s.earningsAmount}>PKR {earnings.toFixed(2)}</Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -206,16 +188,16 @@ const OrdersScreen = ({ navigation }) => {
   };
 
   const renderEmptyState = () => (
-    <View style={styles.emptyContainer}>
-      <Icon name="clipboard-list-outline" size={80} color="#A8DADC" />
-      <Text style={styles.emptyTitle}>
+    <View style={s.emptyContainer}>
+      <Icon name="clipboard-list-outline" size={80} color={colors.accentLight} />
+      <Text style={s.emptyTitle}>
         {selectedFilter === 'active'
           ? 'No active orders'
           : selectedFilter === 'completed'
           ? 'No completed orders'
           : 'No orders yet'}
       </Text>
-      <Text style={styles.emptySubtext}>
+      <Text style={s.emptySubtext}>
         {selectedFilter === 'active'
           ? 'Accept orders from the home screen'
           : selectedFilter === 'completed'
@@ -224,6 +206,8 @@ const OrdersScreen = ({ navigation }) => {
       </Text>
     </View>
   );
+
+  const s = styles(colors, typography, scale);
 
   const renderStats = () => {
     const activeCount = orders.filter(
@@ -241,35 +225,35 @@ const OrdersScreen = ({ navigation }) => {
       .reduce((sum, order) => sum + calculateEarnings(order), 0);
 
     return (
-      <View style={styles.statsContainer}>
-        <View style={styles.statItem}>
-          <Text style={styles.statValue}>{activeCount}</Text>
-          <Text style={styles.statLabel}>Active</Text>
+      <View style={s.statsContainer}>
+        <View style={s.statItem}>
+          <Text style={s.statValue}>{activeCount}</Text>
+          <Text style={s.statLabel}>Active</Text>
         </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <Text style={styles.statValue}>{completedCount}</Text>
-          <Text style={styles.statLabel}>Completed</Text>
+        <View style={s.statDivider} />
+        <View style={s.statItem}>
+          <Text style={s.statValue}>{completedCount}</Text>
+          <Text style={s.statLabel}>Completed</Text>
         </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <Text style={styles.statValue}>ETB {totalEarnings.toFixed(0)}</Text>
-          <Text style={styles.statLabel}>Total Earned</Text>
+        <View style={s.statDivider} />
+        <View style={s.statItem}>
+          <Text style={s.statValue}>PKR {totalEarnings.toFixed(0)}</Text>
+          <Text style={s.statLabel}>Total Earned</Text>
         </View>
       </View>
     );
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>My Orders</Text>
-        <Text style={styles.subtitle}>{orders.length} total orders</Text>
+    <SafeAreaView style={s.container}>
+      <View style={s.header}>
+        <Text style={s.title}>My Orders</Text>
+        <Text style={s.subtitle}>{orders.length} total orders</Text>
       </View>
 
       {renderStats()}
 
-      <View style={styles.filterContainer}>
+      <View style={s.filterContainer}>
         {renderFilterButton('all', 'All', 'format-list-bulleted')}
         {renderFilterButton('active', 'Active', 'bike-fast')}
         {renderFilterButton('completed', 'Completed', 'check-all')}
@@ -281,214 +265,200 @@ const OrdersScreen = ({ navigation }) => {
         renderItem={renderOrderItem}
         ListEmptyComponent={renderEmptyState()}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#2EC4B6']} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.accent]} />
         }
-        contentContainerStyle={styles.listContainer}
+        contentContainerStyle={s.listContainer}
         showsVerticalScrollIndicator={false}
       />
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.background,
   },
   header: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 12,
+    backgroundColor: colors.surface,
+    paddingHorizontal: Math.round(16 * scale),
+    paddingTop: Math.round(16 * scale),
+    paddingBottom: Math.round(12 * scale),
   },
   title: {
-    fontSize: 28,
+    fontSize: Math.round(28 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   subtitle: {
-    fontSize: 14,
-    color: '#6C757D',
-    marginTop: 4,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginTop: Math.round(4 * scale),
   },
   statsContainer: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    backgroundColor: colors.surface,
+    paddingVertical: Math.round(16 * scale),
+    paddingHorizontal: Math.round(16 * scale),
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   statItem: {
     flex: 1,
     alignItems: 'center',
   },
   statValue: {
-    fontSize: 20,
+    fontSize: Math.round(20 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   statLabel: {
-    fontSize: 12,
-    color: '#6C757D',
-    marginTop: 4,
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
+    marginTop: Math.round(4 * scale),
   },
   statDivider: {
     width: 1,
-    backgroundColor: '#E9ECEF',
+    backgroundColor: colors.border,
   },
   filterContainer: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 8,
+    backgroundColor: colors.surface,
+    paddingHorizontal: Math.round(16 * scale),
+    paddingVertical: Math.round(12 * scale),
+    gap: Math.round(8 * scale),
   },
   filterButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    backgroundColor: '#F8F9FA',
+    paddingVertical: Math.round(10 * scale),
+    paddingHorizontal: Math.round(12 * scale),
+    borderRadius: Math.round(8 * scale),
+    backgroundColor: colors.background,
     borderWidth: 1,
-    borderColor: '#E9ECEF',
+    borderColor: colors.border,
   },
   filterButtonActive: {
-    backgroundColor: '#2EC4B6',
-    borderColor: '#2EC4B6',
+    backgroundColor: colors.accent,
+    borderColor: colors.accent,
   },
   filterButtonText: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#6C757D',
-    marginLeft: 6,
+    color: colors.textSecondary,
+    marginLeft: Math.round(6 * scale),
   },
   filterButtonTextActive: {
-    color: '#FFFFFF',
+    color: colors.surface,
   },
   listContainer: {
-    padding: 16,
+    padding: Math.round(16 * scale),
   },
   orderCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
+    padding: Math.round(16 * scale),
+    marginBottom: Math.round(12 * scale),
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: Math.round(2 * scale) },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: Math.round(4 * scale),
     elevation: 3,
   },
   orderHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 12,
+    marginBottom: Math.round(12 * scale),
   },
   orderIdContainer: {
     flex: 1,
   },
   orderId: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginBottom: 6,
+    color: colors.textPrimary,
+    marginBottom: Math.round(6 * scale),
   },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  statusText: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '600',
-    marginLeft: 4,
-    textTransform: 'capitalize',
-  },
+
   orderDate: {
-    fontSize: 12,
-    color: '#6C757D',
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
   },
   orderBody: {
-    marginBottom: 12,
+    marginBottom: Math.round(12 * scale),
   },
   locationRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 8,
+    marginBottom: Math.round(8 * scale),
   },
   locationInfo: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: Math.round(12 * scale),
   },
   locationName: {
-    fontSize: 15,
+    fontSize: Math.round(15 * scale),
     fontWeight: '600',
-    color: '#1D3557',
-    marginBottom: 2,
+    color: colors.textPrimary,
+    marginBottom: Math.round(2 * scale),
   },
   locationAddress: {
-    fontSize: 13,
-    color: '#6C757D',
+    fontSize: Math.round(13 * scale),
+    color: colors.textSecondary,
   },
   divider: {
     height: 1,
-    backgroundColor: '#E9ECEF',
-    marginVertical: 8,
+    backgroundColor: colors.border,
+    marginVertical: Math.round(8 * scale),
   },
   orderFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 12,
+    paddingTop: Math.round(12 * scale),
     borderTopWidth: 1,
-    borderTopColor: '#E9ECEF',
+    borderTopColor: colors.border,
   },
   orderMeta: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   metaText: {
-    fontSize: 13,
-    color: '#6C757D',
-    marginLeft: 4,
+    fontSize: Math.round(13 * scale),
+    color: colors.textSecondary,
+    marginLeft: Math.round(4 * scale),
   },
   earningsContainer: {
     alignItems: 'flex-end',
   },
   earningsLabel: {
-    fontSize: 11,
-    color: '#6C757D',
-    marginBottom: 2,
+    fontSize: Math.round(11 * scale),
+    color: colors.textSecondary,
+    marginBottom: Math.round(2 * scale),
   },
   earningsAmount: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
-    color: '#2EC4B6',
+    color: colors.accent,
   },
   emptyContainer: {
     alignItems: 'center',
-    paddingVertical: 60,
-    paddingHorizontal: 32,
+    paddingVertical: Math.round(60 * scale),
+    paddingHorizontal: Math.round(32 * scale),
   },
   emptyTitle: {
-    fontSize: 20,
+    fontSize: Math.round(20 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginTop: 16,
-    marginBottom: 8,
+    color: colors.textPrimary,
+    marginTop: Math.round(16 * scale),
+    marginBottom: Math.round(8 * scale),
   },
   emptySubtext: {
-    fontSize: 16,
-    color: '#6C757D',
+    fontSize: Math.round(16 * scale),
+    color: colors.textSecondary,
     textAlign: 'center',
   },
 });

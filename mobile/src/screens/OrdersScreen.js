@@ -14,6 +14,9 @@ import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useQuery } from '@apollo/client';
 import { GET_ORDERS_BY_USER } from '../api/queries';
 import { formatDate } from '../utils/dateFormatter';
+import { useTheme, getStatusColor } from '../theme';
+import useResponsive from '../hooks/useResponsive';
+import StatusBadge from '../components/StatusBadge';
 
 const ORDER_FILTERS = [
   { key: 'all', label: 'All' },
@@ -25,6 +28,8 @@ const ORDER_FILTERS = [
 ];
 
 const OrdersScreen = ({ navigation }) => {
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
   const [selectedFilter, setSelectedFilter] = useState('all');
 
   const { data, loading, refetch, error } = useQuery(GET_ORDERS_BY_USER, {
@@ -37,25 +42,6 @@ const OrdersScreen = ({ navigation }) => {
     if (selectedFilter === 'all') return true;
     return order.orderStatus === selectedFilter;
   });
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'pending':
-        return '#FFC107';
-      case 'accepted':
-        return '#2196F3';
-      case 'assigned':
-        return '#9C27B0';
-      case 'picked':
-        return '#FF9800';
-      case 'delivered':
-        return '#4CAF50';
-      case 'cancelled':
-        return '#E63946';
-      default:
-        return '#6C757D';
-    }
-  };
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -77,39 +63,38 @@ const OrdersScreen = ({ navigation }) => {
   };
 
   const renderOrderCard = ({ item }) => {
-    const statusColor = getStatusColor(item.orderStatus);
+    const statusColor = getStatusColor(colors, item.orderStatus);
     const statusIcon = getStatusIcon(item.orderStatus);
+
 
     return (
       <TouchableOpacity
-        style={styles.orderCard}
+        style={s.orderCard}
         onPress={() =>
           navigation.navigate('OrderTracking', { orderId: item._id })
         }
       >
         {/* Restaurant Info */}
-        <View style={styles.orderHeader}>
+        <View style={s.orderHeader}>
           <Image
             source={{
               uri: item.restaurant?.image || 'https://via.placeholder.com/50',
             }}
-            style={styles.restaurantImage}
+            style={s.restaurantImage}
           />
-          <View style={styles.orderHeaderInfo}>
-            <Text style={styles.restaurantName}>{item.restaurant?.name}</Text>
-            <Text style={styles.orderDate}>
+          <View style={s.orderHeaderInfo}>
+            <Text style={s.restaurantName}>{item.restaurant?.name}</Text>
+            <Text style={s.orderDate}>
               {formatDate(item.orderDate || item.createdAt)}
             </Text>
           </View>
-          <View style={[styles.statusBadge, { backgroundColor: statusColor }]}>
-            <Icon name={statusIcon} size={16} color="#FFFFFF" />
-          </View>
+          <StatusBadge status={item.orderStatus} />
         </View>
 
         {/* Order Items */}
         {item.items && item.items.length > 0 && (
-          <View style={styles.orderItems}>
-            <Text style={styles.itemsText}>
+          <View style={s.orderItems}>
+            <Text style={s.itemsText}>
               {item.items
                 .map((orderItem) => orderItem?.title || orderItem?.food?.title || 'Item')
                 .join(', ')}
@@ -118,43 +103,43 @@ const OrdersScreen = ({ navigation }) => {
         )}
 
         {/* Order Footer */}
-        <View style={styles.orderFooter}>
-          <View style={styles.orderFooterLeft}>
-            <Text style={styles.orderIdLabel}>Order #{item.orderId}</Text>
-            <Text style={styles.orderAmount}>{'ETB ' + String(item.orderAmount.toFixed(2))}</Text>
+        <View style={s.orderFooter}>
+          <View style={s.orderFooterLeft}>
+            <Text style={s.orderIdLabel}>Order #{item.orderId}</Text>
+            <Text style={s.orderAmount}>{'PKR ' + String(item.orderAmount.toFixed(2))}</Text>
           </View>
-          <View style={styles.orderFooterRight}>
-            <Text style={[styles.statusText, { color: statusColor }]}>
+          <View style={s.orderFooterRight}>
+            <Text style={[s.statusText, { color: statusColor }]}>
               {item.orderStatus.charAt(0).toUpperCase() + item.orderStatus.slice(1)}
             </Text>
-            <Icon name="chevron-right" size={20} color="#6C757D" />
+            <Icon name="chevron-right" size={20} color={colors.textSecondary} />
           </View>
         </View>
 
         {/* Action Buttons */}
         {item.orderStatus === 'delivered' && (
-          <View style={styles.actionButtons}>
+          <View style={s.actionButtons}>
             <TouchableOpacity
-              style={styles.actionButton}
+              style={s.actionButton}
               onPress={() =>
                 navigation.navigate('RateOrder', { orderId: item._id })
               }
             >
-              <Icon name="star-outline" size={18} color="#FF6B35" />
-              <Text style={styles.actionButtonText}>Rate</Text>
+              <Icon name="star-outline" size={18} color={colors.accent} />
+              <Text style={s.actionButtonText}>Rate</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.actionButton}
+              style={s.actionButton}
               onPress={() => {
                 // Reorder functionality
               }}
             >
-              <Icon name="refresh" size={18} color="#FF6B35" />
-              <Text style={styles.actionButtonText}>Reorder</Text>
+              <Icon name="refresh" size={18} color={colors.accent} />
+              <Text style={s.actionButtonText}>Reorder</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton}>
-              <Icon name="receipt" size={18} color="#FF6B35" />
-              <Text style={styles.actionButtonText}>Receipt</Text>
+            <TouchableOpacity style={s.actionButton}>
+              <Icon name="receipt" size={18} color={colors.accent} />
+              <Text style={s.actionButtonText}>Receipt</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -162,47 +147,49 @@ const OrdersScreen = ({ navigation }) => {
     );
   };
 
+  const s = styles(colors, typography, scale);
+
   if (loading && !data) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#FF6B35" />
+      <View style={s.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={s.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>My Orders</Text>
+      <View style={s.header}>
+        <Text style={s.headerTitle}>My Orders</Text>
         <TouchableOpacity
-          style={styles.searchButton}
+          style={s.searchButton}
           onPress={() => navigation.navigate('SearchOrders')}
         >
-          <Icon name="magnify" size={24} color="#1D3557" />
+          <Icon name="magnify" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
       </View>
 
       {/* Filter Tabs */}
-      <View style={styles.filterContainer}>
+      <View style={s.filterContainer}>
         <FlatList
           horizontal
           data={ORDER_FILTERS}
           keyExtractor={(item) => item.key}
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filterContent}
+          contentContainerStyle={s.filterContent}
           renderItem={({ item }) => (
             <TouchableOpacity
               style={[
-                styles.filterTab,
-                selectedFilter === item.key && styles.filterTabActive,
+                s.filterTab,
+                selectedFilter === item.key && s.filterTabActive,
               ]}
               onPress={() => setSelectedFilter(item.key)}
             >
               <Text
                 style={[
-                  styles.filterTabText,
-                  selectedFilter === item.key && styles.filterTabTextActive,
+                  s.filterTabText,
+                  selectedFilter === item.key && s.filterTabTextActive,
                 ]}
               >
                 {item.label}
@@ -214,19 +201,19 @@ const OrdersScreen = ({ navigation }) => {
 
       {/* Orders List */}
       {filteredOrders.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Icon name="receipt" size={80} color="#E9ECEF" />
-          <Text style={styles.emptyTitle}>No orders found</Text>
-          <Text style={styles.emptySubtitle}>
+        <View style={s.emptyContainer}>
+          <Icon name="receipt" size={80} color={colors.border} />
+          <Text style={s.emptyTitle}>No orders found</Text>
+          <Text style={s.emptySubtitle}>
             {selectedFilter === 'all'
               ? 'Start ordering to see your orders here'
               : `No ${selectedFilter} orders`}
           </Text>
           <TouchableOpacity
-            style={styles.browseButton}
+            style={s.browseButton}
             onPress={() => navigation.navigate('Home')}
           >
-            <Text style={styles.browseButtonText}>Browse Products</Text>
+            <Text style={s.browseButtonText}>Browse Products</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -234,14 +221,14 @@ const OrdersScreen = ({ navigation }) => {
           data={filteredOrders}
           renderItem={renderOrderCard}
           keyExtractor={(item) => item._id}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={s.listContent}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
               refreshing={loading}
               onRefresh={refetch}
-              colors={['#FF6B35']}
-              tintColor="#FF6B35"
+              colors={[colors.accent]}
+              tintColor={colors.accent}
             />
           }
         />
@@ -250,10 +237,10 @@ const OrdersScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.surface,
   },
   loadingContainer: {
     flex: 1,
@@ -264,61 +251,61 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#FFFFFF',
+    paddingHorizontal: Math.round(20 * scale),
+    paddingVertical: Math.round(16 * scale),
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: Math.round(24 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   searchButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F8F9FA',
+    width: Math.round(40 * scale),
+    height: Math.round(40 * scale),
+    borderRadius: Math.round(20 * scale),
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
   },
   filterContainer: {
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 12,
+    backgroundColor: colors.surface,
+    paddingVertical: Math.round(12 * scale),
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   filterContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: Math.round(20 * scale),
   },
   filterTab: {
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#F8F9FA',
-    marginRight: 12,
+    paddingHorizontal: Math.round(20 * scale),
+    paddingVertical: Math.round(8 * scale),
+    borderRadius: Math.round(20 * scale),
+    backgroundColor: colors.surface,
+    marginRight: Math.round(12 * scale),
   },
   filterTabActive: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: colors.accent,
   },
   filterTabText: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '500',
-    color: '#6C757D',
+    color: colors.textSecondary,
   },
   filterTabTextActive: {
-    color: '#FFFFFF',
+    color: colors.textInverse,
   },
   listContent: {
-    padding: 20,
+    padding: Math.round(20 * scale),
   },
   orderCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
+    padding: Math.round(16 * scale),
+    marginBottom: Math.round(16 * scale),
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -327,126 +314,120 @@ const styles = StyleSheet.create({
   orderHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: Math.round(12 * scale),
   },
   restaurantImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 8,
-    backgroundColor: '#E9ECEF',
+    width: Math.round(50 * scale),
+    height: Math.round(50 * scale),
+    borderRadius: Math.round(8 * scale),
+    backgroundColor: colors.border,
   },
   orderHeaderInfo: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: Math.round(12 * scale),
   },
   restaurantName: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#1D3557',
-    marginBottom: 4,
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   orderDate: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
-  statusBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+
   orderItems: {
-    paddingVertical: 12,
+    paddingVertical: Math.round(12 * scale),
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: '#E9ECEF',
+    borderColor: colors.border,
   },
   itemsText: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
     lineHeight: 20,
   },
   orderFooter: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 12,
+    marginTop: Math.round(12 * scale),
   },
   orderFooterLeft: {
     flex: 1,
   },
   orderIdLabel: {
-    fontSize: 12,
-    color: '#6C757D',
-    marginBottom: 4,
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
+    marginBottom: Math.round(4 * scale),
   },
   orderAmount: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   orderFooterRight: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   statusText: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    marginRight: 4,
+    marginRight: Math.round(4 * scale),
   },
   actionButtons: {
     flexDirection: 'row',
-    marginTop: 12,
-    paddingTop: 12,
+    marginTop: Math.round(12 * scale),
+    paddingTop: Math.round(12 * scale),
     borderTopWidth: 1,
-    borderTopColor: '#E9ECEF',
+    borderTopColor: colors.border,
   },
   actionButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 8,
-    borderRadius: 8,
-    backgroundColor: '#FFF3E0',
-    marginHorizontal: 4,
+    paddingVertical: Math.round(8 * scale),
+    borderRadius: Math.round(8 * scale),
+    backgroundColor: colors.accentSurface,
+    marginHorizontal: Math.round(4 * scale),
   },
   actionButtonText: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#FF6B35',
-    marginLeft: 6,
+    color: colors.accent,
+    marginLeft: Math.round(6 * scale),
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 40,
+    paddingHorizontal: Math.round(40 * scale),
   },
   emptyTitle: {
-    fontSize: 20,
+    fontSize: Math.round(20 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginTop: 24,
+    color: colors.textPrimary,
+    marginTop: Math.round(24 * scale),
   },
   emptySubtitle: {
-    fontSize: 16,
-    color: '#6C757D',
-    marginTop: 8,
-    marginBottom: 32,
+    fontSize: Math.round(16 * scale),
+    color: colors.textSecondary,
+    marginTop: Math.round(8 * scale),
+    marginBottom: Math.round(32 * scale),
     textAlign: 'center',
   },
   browseButton: {
-    backgroundColor: '#FF6B35',
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 12,
+    backgroundColor: colors.accent,
+    paddingHorizontal: Math.round(32 * scale),
+    paddingVertical: Math.round(16 * scale),
+    borderRadius: Math.round(12 * scale),
   },
   browseButtonText: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.textInverse,
   },
 });
 

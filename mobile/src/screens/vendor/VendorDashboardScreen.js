@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -12,8 +12,15 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useQuery, useMutation } from '@apollo/client';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '../../theme';
+import useResponsive from '../../hooks/useResponsive';
+import StatusBadge from '../../components/StatusBadge';
+import OrdersIcon from '../../components/OrdersIcon';
+import DoorOpenIcon from '../../components/DoorOpenIcon';
+import DoorClosedIcon from '../../components/DoorClosedIcon';
 
-import { GET_ORDERS_BY_RESTAURANT, GET_RESTAURANTS_BY_OWNER } from '../../api/queries';
+import { GET_ORDERS_BY_RESTAURANT, GET_RESTAURANTS_BY_OWNER, GET_FOODS } from '../../api/queries';
 import { UPDATE_RESTAURANT } from '../../api/mutations';
 import { setOrders } from '../../store/orderSlice';
 import { setShop, toggleAvailability } from '../../store/vendorShopSlice';
@@ -21,6 +28,9 @@ import { setShop, toggleAvailability } from '../../store/vendorShopSlice';
 export default function DashboardScreen() {
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const { colors, typography } = useTheme();
+  const { scale, isTablet } = useResponsive();
+
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const orders = useSelector((state) => state.order.orders);
   const { shop } = useSelector((state) => state.vendorShop);
@@ -28,14 +38,30 @@ export default function DashboardScreen() {
 
   const stats = useMemo(() => {
     const today = new Date().toDateString();
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+
     const todayOrders = orders.filter(
       (o) => new Date(o.orderDate).toDateString() === today
     );
+    const yesterdayOrders = orders.filter(
+      (o) => new Date(o.orderDate).toDateString() === yesterday
+    );
+
+    const todayRevenue = todayOrders.reduce((sum, o) => sum + (o.orderAmount || 0), 0);
+    const yesterdayRevenue = yesterdayOrders.reduce((sum, o) => sum + (o.orderAmount || 0), 0);
+
+    let revenueChange = null;
+    if (yesterdayRevenue > 0) {
+      revenueChange = ((todayRevenue - yesterdayRevenue) / yesterdayRevenue * 100).toFixed(0);
+      revenueChange = Number(revenueChange);
+    }
+
     return {
-      todayRevenue: todayOrders.reduce((sum, o) => sum + (o.orderAmount || 0), 0),
+      todayRevenue,
       todayOrders: todayOrders.length,
       pendingCount: orders.filter((o) => o.orderStatus === 'pending').length,
       activeCount: orders.filter((o) => ['accepted', 'preparing', 'ready'].includes(o.orderStatus)).length,
+      revenueChange,
     };
   }, [orders]);
 
@@ -62,11 +88,37 @@ export default function DashboardScreen() {
           dispatch(setOrders(data.ordersByRestaurant));
         }
       },
-      pollInterval: 10000, // Poll every 10 seconds
+      pollInterval: 10000,
     }
   );
 
   const [updateRestaurant] = useMutation(UPDATE_RESTAURANT);
+
+  const { data: foodsData } = useQuery(GET_FOODS, {
+    variables: { restaurant: selectedRestaurant?._id },
+    skip: !selectedRestaurant,
+  });
+
+  const outOfStockCount = useMemo(() => {
+    if (!foodsData?.foods) return 0;
+    return foodsData.foods.filter((f) => f.isOutOfStock).length;
+  }, [foodsData]);
+
+  const topSellers = useMemo(() => {
+    if (orders.length === 0) return [];
+    const itemCounts = {};
+    orders.forEach((order) => {
+      if (order.items) {
+        order.items.forEach((item) => {
+          const name = item.title || item.food?.title || 'Item';
+          itemCounts[name] = (itemCounts[name] || 0) + (item.quantity || 1);
+        });
+      }
+    });
+    return Object.entries(itemCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3);
+  }, [orders]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -95,350 +147,412 @@ export default function DashboardScreen() {
     }
   };
 
+  const s = styles(colors, typography, scale, isTablet);
+
+  const renderComparison = () => {
+    if (stats.revenueChange === null) return null;
+    const isUp = stats.revenueChange > 0;
+    const isDown = stats.revenueChange < 0;
+    return (
+      <View style={[s.comparisonBadge, isUp && s.comparisonUp, isDown && s.comparisonDown]}>
+        <Ionicons
+          name={isUp ? 'arrow-up' : isDown ? 'arrow-down' : 'remove'}
+          size={10}
+          color={isUp ? colors.statusDelivered : isDown ? colors.statusCancelled : colors.textTertiary}
+        />
+        <Text style={[s.comparisonText, isUp && s.comparisonTextUp, isDown && s.comparisonTextDown]}>
+          {Math.abs(stats.revenueChange)}% vs yesterday
+        </Text>
+      </View>
+    );
+  };
+
   return (
-    <ScrollView
-      style={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-      }
-    >
-      {/* Header */}
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>Welcome back!</Text>
-          <Text style={styles.shopName}>{shop?.name || 'Your Shop'}</Text>
-        </View>
-        <TouchableOpacity
-          style={[
-            styles.statusButton,
-            shop?.isAvailable ? styles.statusOpen : styles.statusClosed,
-          ]}
-          onPress={handleToggleAvailability}
-        >
-          <Ionicons
-            name={shop?.isAvailable ? 'checkmark-circle' : 'close-circle'}
-            size={20}
-            color="#fff"
-          />
-          <Text style={styles.statusText}>
-            {shop?.isAvailable ? 'Open' : 'Closed'}
-          </Text>
-        </TouchableOpacity>
-      </View>
+    <SafeAreaView style={s.container} edges={['top']}>
+      <ScrollView
+        style={s.scrollContent}
+        contentContainerStyle={s.scrollInner}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
+      >
+        {/* Hero Header */}
+        <View style={s.hero}>
+          <Text style={s.shopName}>{shop?.name || 'Your Shop'}</Text>
 
-      {/* Stats Cards */}
-      <View style={styles.statsContainer}>
-        <View style={[styles.statCard, styles.statCardPrimary]}>
-          <Ionicons name="cash-outline" size={32} color="#4CAF50" />
-          <Text style={styles.statValue}>
-            ETB {stats.todayRevenue.toFixed(2)}
-          </Text>
-          <Text style={styles.statLabel}>Today's Revenue</Text>
-        </View>
-
-        <View style={styles.statCard}>
-          <Ionicons name="receipt-outline" size={32} color="#2196F3" />
-          <Text style={styles.statValue}>{stats.todayOrders}</Text>
-          <Text style={styles.statLabel}>Today's Orders</Text>
-        </View>
-      </View>
-
-      <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
-          <Ionicons name="time-outline" size={32} color="#FF9800" />
-          <Text style={styles.statValue}>{stats.pendingCount}</Text>
-          <Text style={styles.statLabel}>Pending Orders</Text>
-        </View>
-
-        <View style={styles.statCard}>
-          <Ionicons name="checkmark-done-outline" size={32} color="#9C27B0" />
-          <Text style={styles.statValue}>{stats.activeCount}</Text>
-          <Text style={styles.statLabel}>Active Orders</Text>
-        </View>
-      </View>
-
-      {/* Quick Actions */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
-        <View style={styles.actionsContainer}>
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => navigation.navigate('Orders')}
-          >
-            <Ionicons name="receipt" size={24} color="#4CAF50" />
-            <Text style={styles.actionText}>View Orders</Text>
-          </TouchableOpacity>
+          <View style={s.revenueRow}>
+            <Text style={s.revenueValue}>PKR {stats.todayRevenue.toLocaleString()}</Text>
+            {renderComparison()}
+          </View>
+          <Text style={s.revenueLabel}>today's earnings</Text>
 
           <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => navigation.navigate('Products', { screen: 'ProductForm' })}
+            style={s.statusToggle}
+            onPress={handleToggleAvailability}
           >
-            <Ionicons name="add-circle" size={24} color="#4CAF50" />
-            <Text style={styles.actionText}>Add Product</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => navigation.navigate('Products')}
-          >
-            <Ionicons name="fast-food" size={24} color="#4CAF50" />
-            <Text style={styles.actionText}>Products</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => navigation.navigate('Analytics')}
-          >
-            <Ionicons name="stats-chart" size={24} color="#4CAF50" />
-            <Text style={styles.actionText}>Analytics</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Recent Orders */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Recent Orders</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Orders')}>
-            <Text style={styles.seeAllText}>See All</Text>
+            {shop?.isAvailable ? (
+              <DoorOpenIcon size={Math.round(20 * scale)} color={colors.statusDelivered} />
+            ) : (
+              <DoorClosedIcon size={Math.round(20 * scale)} color={colors.statusCancelled} />
+            )}
+            <Text style={[s.statusText, { color: shop?.isAvailable ? colors.statusDelivered : colors.statusCancelled }]}>
+              {shop?.isAvailable ? 'Open' : 'Closed'}
+            </Text>
           </TouchableOpacity>
         </View>
 
-        {ordersData?.ordersByRestaurant?.slice(0, 5).map((order) => (
-          <TouchableOpacity
-            key={order._id}
-            style={styles.orderCard}
-            onPress={() =>
-              navigation.navigate('Orders', {
-                screen: 'OrderDetail',
-                params: { orderId: order._id },
-              })
-            }
-          >
-            <View style={styles.orderHeader}>
-              <Text style={styles.orderId}>#{order.orderId}</Text>
+        {/* Stats Row */}
+        <View style={s.statsRow}>
+          <View style={s.statItem}>
+            <Text style={s.statValue}>{stats.todayOrders}</Text>
+            <Text style={s.statLabel}>Orders</Text>
+          </View>
+          <View style={s.statDivider} />
+          <View style={s.statItem}>
+            <Text style={s.statValue}>{stats.pendingCount}</Text>
+            <Text style={s.statLabel}>Pending</Text>
+          </View>
+          <View style={s.statDivider} />
+          <View style={s.statItem}>
+            <Text style={s.statValue}>{stats.activeCount}</Text>
+            <Text style={s.statLabel}>Active</Text>
+          </View>
+        </View>
+
+        {/* Top Products */}
+        {topSellers.length > 0 && (
+          <View style={s.section}>
+            <View style={s.sectionHeader}>
+              <Text style={s.sectionTitle}>Top Products</Text>
+              <Ionicons name="trophy" size={Math.round(16 * scale)} color={colors.accent} />
+            </View>
+            {topSellers.map(([name, count], index) => (
               <View
-                style={[
-                  styles.statusBadge,
-                  { backgroundColor: getStatusColor(order.orderStatus) },
-                ]}
+                key={name}
+                style={[s.productRow, index < topSellers.length - 1 && s.productRowBorder]}
               >
-                <Text style={styles.statusBadgeText}>
-                  {order.orderStatus.toUpperCase()}
-                </Text>
+                <View style={[s.rankBadge, index === 0 && s.rankBadgeGold]}>
+                  <Text style={[s.rankText, index === 0 && s.rankTextGold]}>{index + 1}</Text>
+                </View>
+                <Text style={s.productName} numberOfLines={1}>{name}</Text>
+                <Text style={s.productCount}>{count}x</Text>
               </View>
-            </View>
-            <Text style={styles.orderCustomer}>{order.user.name}</Text>
-            <View style={styles.orderFooter}>
-              <Text style={styles.orderAmount}>ETB {order.orderAmount}</Text>
-              <Text style={styles.orderTime}>
-                {new Date(order.orderDate).toLocaleTimeString()}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        ))}
-
-        {(!ordersData?.ordersByRestaurant ||
-          ordersData.ordersByRestaurant.length === 0) && (
-          <View style={styles.emptyState}>
-            <Ionicons name="receipt-outline" size={48} color="#ccc" />
-            <Text style={styles.emptyText}>No orders yet</Text>
+            ))}
           </View>
         )}
-      </View>
-    </ScrollView>
+
+        {/* Out of Stock Warning */}
+        {outOfStockCount > 0 && (
+          <View style={s.section}>
+            <View style={s.outOfStockBanner}>
+              <Ionicons name="alert-circle" size={Math.round(18 * scale)} color={colors.statusCancelled} />
+              <Text style={s.outOfStockText}>
+                {outOfStockCount} item{outOfStockCount !== 1 ? 's' : ''} out of stock
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {/* Recent Orders */}
+        <View style={s.section}>
+          <View style={s.sectionHeader}>
+            <Text style={s.sectionTitle}>Recent Orders</Text>
+            <TouchableOpacity style={s.seeAllBtn} onPress={() => navigation.navigate('Orders')}>
+              <Text style={s.seeAllText}>See All</Text>
+              <Ionicons name="arrow-forward" size={14} color={colors.accent} />
+            </TouchableOpacity>
+          </View>
+
+          {ordersData?.ordersByRestaurant?.slice(0, 5).map((order, index) => (
+            <TouchableOpacity
+              key={order._id}
+              style={[s.orderCard, index === 0 && s.orderCardTop]}
+              onPress={() =>
+                navigation.navigate('Orders', {
+                  screen: 'OrderDetail',
+                  params: { orderId: order._id },
+                })
+              }
+            >
+              <View style={s.orderLeft}>
+                <View style={s.orderIdRow}>
+                  {index === 0 && (
+                    <Ionicons name="trophy" size={Math.round(14 * scale)} color={colors.accent} style={{ marginRight: 4 }} />
+                  )}
+                  <Text style={s.orderId}>#{order.orderId}</Text>
+                </View>
+                <Text style={s.orderCustomer}>{order.user.name}</Text>
+              </View>
+              <View style={s.orderRight}>
+                <StatusBadge status={order.orderStatus} />
+                <Text style={s.orderAmount}>PKR {order.orderAmount}</Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+
+          {(!ordersData?.ordersByRestaurant ||
+            ordersData.ordersByRestaurant.length === 0) && (
+            <View style={s.emptyState}>
+              <OrdersIcon size={48} color={colors.textTertiary} />
+              <Text style={s.emptyText}>No orders yet</Text>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
-function getStatusColor(status) {
-  const colors = {
-    pending: '#FF9800',
-    accepted: '#2196F3',
-    preparing: '#9C27B0',
-    ready: '#00BCD4',
-    picked: '#3F51B5',
-    delivered: '#4CAF50',
-    cancelled: '#F44336',
-  };
-  return colors[status] || '#757575';
-}
-
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale, isTablet) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  scrollContent: {
+    flex: 1,
+  },
+  scrollInner: {
+    paddingBottom: 40 * scale,
+    maxWidth: isTablet ? 720 : undefined,
+    alignSelf: isTablet ? 'center' : undefined,
+    width: isTablet ? '100%' : undefined,
+  },
+  // Hero Header
+  hero: {
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  greeting: {
-    fontSize: 14,
-    color: '#666',
+    paddingVertical: 32 * scale,
+    paddingHorizontal: 20 * scale,
+    backgroundColor: colors.surface,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    borderBottomWidth: 2,
+    borderBottomColor: colors.accent,
+    position: 'relative',
+    elevation: 6,
+    shadowColor: colors.accent,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
   },
   shopName: {
-    fontSize: 20,
+    fontSize: Math.round(26 * scale),
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
+    textAlign: 'center',
+    marginBottom: 14 * scale,
+  },
+  revenueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  revenueValue: {
+    fontSize: Math.round(36 * scale),
+    fontWeight: 'bold',
+    color: colors.accent,
+  },
+  revenueLabel: {
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
     marginTop: 4,
   },
-  statusButton: {
+  comparisonBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    gap: 3,
   },
-  statusOpen: {
-    backgroundColor: '#4CAF50',
+  comparisonUp: {
+    backgroundColor: `${colors.statusDelivered}18`,
   },
-  statusClosed: {
-    backgroundColor: '#F44336',
+  comparisonDown: {
+    backgroundColor: `${colors.statusCancelled}18`,
+  },
+  comparisonText: {
+    fontSize: Math.round(12 * scale),
+    fontWeight: '600',
+    color: colors.textTertiary,
+  },
+  comparisonTextUp: {
+    color: colors.statusDelivered,
+  },
+  comparisonTextDown: {
+    color: colors.statusCancelled,
+  },
+  statusToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    position: 'absolute',
+    bottom: 18,
+    right: 20,
   },
   statusText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    marginLeft: 5,
+    fontSize: Math.round(14 * scale),
+    fontWeight: '600',
   },
-  statsContainer: {
+  // Stats Row
+  statsRow: {
     flexDirection: 'row',
-    padding: 10,
+    marginHorizontal: 16 * scale,
+    marginTop: 16 * scale,
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    paddingVertical: 22 * scale,
+    paddingHorizontal: 10,
   },
-  statCard: {
+  statItem: {
     flex: 1,
-    backgroundColor: '#fff',
-    padding: 20,
-    margin: 5,
-    borderRadius: 10,
     alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  statCardPrimary: {
-    borderWidth: 2,
-    borderColor: '#4CAF50',
   },
   statValue: {
-    fontSize: 24,
+    fontSize: Math.round(24 * scale),
     fontWeight: 'bold',
-    color: '#333',
-    marginTop: 10,
+    color: colors.textPrimary,
   },
   statLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 5,
-    textAlign: 'center',
+    fontSize: Math.round(13 * scale),
+    color: colors.textSecondary,
+    marginTop: 4,
   },
+  statDivider: {
+    width: 1,
+    backgroundColor: colors.border,
+    marginVertical: 2,
+  },
+  // Top Products
+  productRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12 * scale,
+    paddingHorizontal: 4,
+    gap: 12,
+  },
+  productRowBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  rankBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: colors.surfaceVariant,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  rankBadgeGold: {
+    backgroundColor: `${colors.accent}20`,
+  },
+  rankText: {
+    fontSize: Math.round(13 * scale),
+    fontWeight: 'bold',
+    color: colors.textSecondary,
+  },
+  rankTextGold: {
+    color: colors.accent,
+  },
+  productName: {
+    flex: 1,
+    fontSize: Math.round(15 * scale),
+    fontWeight: '500',
+    color: colors.textPrimary,
+  },
+  productCount: {
+    fontSize: Math.round(15 * scale),
+    fontWeight: '600',
+    color: colors.accent,
+  },
+  // Out of Stock
+  outOfStockBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: `${colors.statusCancelled}12`,
+    padding: 14 * scale,
+    borderRadius: 12,
+    gap: 10,
+  },
+  outOfStockText: {
+    fontSize: Math.round(14 * scale),
+    fontWeight: '600',
+    color: colors.statusCancelled,
+  },
+  // Section
   section: {
-    padding: 15,
+    paddingHorizontal: 16 * scale,
+    paddingTop: 24 * scale,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 14,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: Math.round(18 * scale),
+    fontWeight: '600',
+    color: colors.textPrimary,
   },
   seeAllText: {
-    color: '#4CAF50',
-    fontSize: 14,
+    color: colors.accent,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
   },
-  actionsContainer: {
+  seeAllBtn: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  actionButton: {
-    width: '48%',
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
     alignItems: 'center',
-    marginBottom: 10,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    gap: 4,
   },
-  actionText: {
-    marginTop: 8,
-    fontSize: 14,
-    color: '#333',
-    fontWeight: '600',
-  },
+  // Order cards
   orderCard: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  orderHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    backgroundColor: colors.surface,
+    padding: 18 * scale,
+    borderRadius: 12,
+    marginBottom: 10 * scale,
+  },
+  orderCardTop: {
+    borderWidth: 1,
+    borderColor: `${colors.accent}30`,
+  },
+  orderLeft: {
+    flex: 1,
+    marginRight: 12,
+  },
+  orderIdRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   orderId: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  statusBadgeText: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: 'bold',
+    fontSize: Math.round(16 * scale),
+    fontWeight: '600',
+    color: colors.textPrimary,
   },
   orderCustomer: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginTop: 3,
   },
-  orderFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  orderRight: {
+    alignItems: 'flex-end',
+    gap: 6,
   },
   orderAmount: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#4CAF50',
+    fontSize: Math.round(15 * scale),
+    fontWeight: '600',
+    color: colors.accent,
   },
-  orderTime: {
-    fontSize: 12,
-    color: '#999',
-  },
+  // Empty
   emptyState: {
     alignItems: 'center',
-    padding: 40,
+    padding: 48 * scale,
   },
   emptyText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#999',
+    marginTop: 12,
+    fontSize: Math.round(16 * scale),
+    color: colors.textTertiary,
   },
 });

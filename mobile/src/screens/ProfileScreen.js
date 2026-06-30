@@ -13,8 +13,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 
 import { logout } from '../store/authSlice';
+import { useTheme } from '../theme';
+import useResponsive from '../hooks/useResponsive';
 
 const ProfileScreen = ({ navigation }) => {
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
   const dispatch = useDispatch();
   const { user, deliveryAddress } = useSelector((state) => state.auth);
   const { orders } = useSelector((state) => state.order);
@@ -66,92 +70,94 @@ const ProfileScreen = ({ navigation }) => {
   ];
 
   const renderHeader = () => (
-    <View style={styles.header}>
-      <View style={styles.profileInfo}>
+    <View style={s.header}>
+      <View style={s.profileInfo}>
         <Image
           source={{ uri: user?.profileImage || 'https://via.placeholder.com/80' }}
-          style={styles.profileImage}
+          style={s.profileImage}
         />
-        <View style={styles.userInfo}>
-          <Text style={styles.userName}>{user?.name || 'User'}</Text>
-          <Text style={styles.userEmail}>{user?.email || 'user@example.com'}</Text>
-          <Text style={styles.userPhone}>{user?.phone || '+1 234 567 8900'}</Text>
+        <View style={s.userInfo}>
+          <Text style={s.userName}>{user?.name || 'User'}</Text>
+          <Text style={s.userEmail}>{user?.email || 'user@example.com'}</Text>
+          <Text style={s.userPhone}>{user?.phone || '+1 234 567 8900'}</Text>
         </View>
         <TouchableOpacity
-          style={styles.editButton}
+          style={s.editButton}
           onPress={() => navigation.navigate('EditProfile')}
         >
-          <Icon name="pencil" size={18} color="#FF6B35" />
+          <Icon name="pencil" size={18} color={colors.accent} />
         </TouchableOpacity>
       </View>
     </View>
   );
 
   const renderStats = () => (
-    <View style={styles.statsContainer}>
-      <View style={styles.statItem}>
-        <Text style={styles.statNumber}>{String(orders.length)}</Text>
-        <Text style={styles.statLabel}>Orders</Text>
+    <View style={s.statsContainer}>
+      <View style={s.statItem}>
+        <Text style={s.statNumber}>{String(orders.length)}</Text>
+        <Text style={s.statLabel}>Orders</Text>
       </View>
-      <View style={styles.statDivider} />
-      <View style={styles.statItem}>
-        <Text style={styles.statNumber}>0</Text>
-        <Text style={styles.statLabel}>Favorites</Text>
+      <View style={s.statDivider} />
+      <View style={s.statItem}>
+        <Text style={s.statNumber}>0</Text>
+        <Text style={s.statLabel}>Favorites</Text>
       </View>
-      <View style={styles.statDivider} />
-      <View style={styles.statItem}>
-        <Text style={styles.statNumber}>0</Text>
-        <Text style={styles.statLabel}>Reviews</Text>
+      <View style={s.statDivider} />
+      <View style={s.statItem}>
+        <Text style={s.statNumber}>0</Text>
+        <Text style={s.statLabel}>Reviews</Text>
       </View>
     </View>
   );
 
   const renderMenuSection = ({ section, items }) => (
-    <View style={styles.menuSection}>
-      <Text style={styles.menuSectionTitle}>{section}</Text>
+    <View style={s.menuSection}>
+      <Text style={s.menuSectionTitle}>{section}</Text>
       {items.map((item, index) => (
         <TouchableOpacity
           key={index}
-          style={styles.menuItem}
+          style={s.menuItem}
           onPress={item.onPress}
         >
-          <View style={styles.menuItemIcon}>
-            <Icon name={item.icon} size={24} color="#FF6B35" />
+          <View style={s.menuItemIcon}>
+            <Icon name={item.icon} size={24} color={colors.accent} />
           </View>
-          <View style={styles.menuItemContent}>
-            <Text style={styles.menuItemTitle}>{item.title}</Text>
-            <Text style={styles.menuItemSubtitle}>{item.subtitle}</Text>
+          <View style={s.menuItemContent}>
+            <Text style={s.menuItemTitle}>{item.title}</Text>
+            <Text style={s.menuItemSubtitle}>{item.subtitle}</Text>
           </View>
-          <Icon name="chevron-right" size={24} color="#6C757D" />
+          <Icon name="chevron-right" size={24} color={colors.textSecondary} />
         </TouchableOpacity>
       ))}
     </View>
   );
 
   const renderSignOut = () => (
-    <TouchableOpacity style={styles.signOutButton} onPress={handleLogout}>
-      <Icon name="logout" size={24} color="#E63946" />
-      <Text style={styles.signOutText}>Sign Out</Text>
+    <TouchableOpacity style={s.signOutButton} onPress={handleLogout}>
+      <Icon name="logout" size={24} color={colors.error} />
+      <Text style={s.signOutText}>Sign Out</Text>
     </TouchableOpacity>
   );
+  const s = styles(colors, typography, scale);
+
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Profile</Text>
+    <SafeAreaView style={s.container}>
+      <View style={s.header}>
+        <Text style={s.headerTitle}>Profile</Text>
         <TouchableOpacity>
-          <Icon name="cog-outline" size={24} color="#FF6B35" />
+          <Icon name="cog-outline" size={24} color={colors.accent} />
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={s.content} showsVerticalScrollIndicator={false}>
         {renderHeader()}
         {renderStats()}
         
         {menuItems.map((section, index) => (
           <View key={index}>
             {renderMenuSection(section)}
-            {index < menuItems.length - 1 && <View style={styles.sectionDivider} />}
+            {index < menuItems.length - 1 && <View style={s.sectionDivider} />}
           </View>
         ))}
         
@@ -161,33 +167,28 @@ const ProfileScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
+    paddingHorizontal: Math.round(16 * scale),
+    paddingVertical: Math.round(12 * scale),
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: Math.round(20 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   content: {
     flex: 1,
-  },
-  header: {
-    paddingHorizontal: 16,
-    paddingVertical: 24,
-    backgroundColor: '#F8F9FA',
   },
   profileInfo: {
     flexDirection: 'row',
@@ -195,37 +196,37 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   profileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginRight: 16,
+    width: Math.round(80 * scale),
+    height: Math.round(80 * scale),
+    borderRadius: Math.round(40 * scale),
+    marginRight: Math.round(16 * scale),
   },
   userInfo: {
     flex: 1,
   },
   userName: {
-    fontSize: 20,
+    fontSize: Math.round(20 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginBottom: 4,
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   userEmail: {
-    fontSize: 14,
-    color: '#6C757D',
-    marginBottom: 2,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginBottom: Math.round(2 * scale),
   },
   userPhone: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   editButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#FFFFFF',
+    width: Math.round(36 * scale),
+    height: Math.round(36 * scale),
+    borderRadius: Math.round(18 * scale),
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -233,12 +234,12 @@ const styles = StyleSheet.create({
   },
   statsContainer: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    marginHorizontal: 16,
-    marginVertical: 16,
-    borderRadius: 12,
-    paddingVertical: 20,
-    shadowColor: '#000',
+    backgroundColor: colors.surface,
+    marginHorizontal: Math.round(16 * scale),
+    marginVertical: Math.round(16 * scale),
+    borderRadius: Math.round(12 * scale),
+    paddingVertical: Math.round(20 * scale),
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -249,81 +250,81 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statNumber: {
-    fontSize: 24,
+    fontSize: Math.round(24 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginBottom: 4,
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   statLabel: {
-    fontSize: 12,
-    color: '#6C757D',
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
   },
   statDivider: {
     width: 1,
-    backgroundColor: '#E9ECEF',
+    backgroundColor: colors.border,
   },
   menuSection: {
-    marginTop: 24,
+    marginTop: Math.round(24 * scale),
   },
   menuSectionTitle: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginBottom: 12,
-    paddingHorizontal: 16,
+    color: colors.textPrimary,
+    marginBottom: Math.round(12 * scale),
+    paddingHorizontal: Math.round(16 * scale),
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    paddingVertical: Math.round(16 * scale),
+    paddingHorizontal: Math.round(16 * scale),
     borderBottomWidth: 1,
-    borderBottomColor: '#F8F9FA',
+    borderBottomColor: colors.surface,
   },
   menuItemIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#FFF3E0',
+    width: Math.round(40 * scale),
+    height: Math.round(40 * scale),
+    borderRadius: Math.round(20 * scale),
+    backgroundColor: colors.accentSurface,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: Math.round(16 * scale),
   },
   menuItemContent: {
     flex: 1,
   },
   menuItemTitle: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#1D3557',
-    marginBottom: 2,
+    color: colors.textPrimary,
+    marginBottom: Math.round(2 * scale),
   },
   menuItemSubtitle: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   sectionDivider: {
     height: 1,
-    backgroundColor: '#E9ECEF',
-    marginHorizontal: 16,
+    backgroundColor: colors.border,
+    marginHorizontal: Math.round(16 * scale),
   },
   signOutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    marginHorizontal: 16,
-    marginVertical: 24,
-    backgroundColor: '#FFF5F5',
-    borderRadius: 12,
+    paddingVertical: Math.round(16 * scale),
+    marginHorizontal: Math.round(16 * scale),
+    marginVertical: Math.round(24 * scale),
+    backgroundColor: colors.dangerSurface,
+    borderRadius: Math.round(12 * scale),
     borderWidth: 1,
-    borderColor: '#FED7D7',
+    borderColor: colors.dangerBorder,
   },
   signOutText: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#E63946',
-    marginLeft: 8,
+    color: colors.error,
+    marginLeft: Math.round(8 * scale),
   },
 });
 

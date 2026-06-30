@@ -8,17 +8,22 @@ import {
   Image,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useTheme, getStatusColor } from '../../theme';
+import useResponsive from '../../hooks/useResponsive';
 
 import { logout } from '../../store/authSlice';
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const { colors, typography } = useTheme();
   const { user } = useSelector((state) => state.auth);
   const { shop } = useSelector((state) => state.vendorShop);
+  const { scale } = useResponsive();
 
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
@@ -37,82 +42,85 @@ export default function ProfileScreen() {
       title: 'Shop Settings',
       subtitle: 'Manage your shop details',
       onPress: () => navigation.navigate('ShopProfile'),
-      color: '#4CAF50',
+      color: colors.accent,
     },
     {
       icon: 'notifications',
       title: 'Notifications',
       subtitle: 'Manage notification preferences',
       onPress: () => Alert.alert('Coming Soon', 'Notification settings'),
-      color: '#FF9800',
+      color: colors.warning,
     },
     {
       icon: 'help-circle',
       title: 'Help & Support',
       subtitle: 'Get help or contact support',
       onPress: () => Alert.alert('Support', 'Contact: support@vendorapp.com'),
-      color: '#2196F3',
+      color: colors.info,
     },
     {
       icon: 'document-text',
       title: 'Terms & Conditions',
       subtitle: 'Read our terms and policies',
       onPress: () => Alert.alert('Terms', 'Terms and conditions'),
-      color: '#9C27B0',
+      color: colors.accent,
     },
     {
       icon: 'information-circle',
       title: 'About',
       subtitle: 'App version and information',
       onPress: () => Alert.alert('About', 'Vendor App v1.0.0'),
-      color: '#607D8B',
+      color: colors.textSecondary,
     },
   ];
 
+  const s = styles(colors, typography, scale);
+
   return (
-    <ScrollView style={styles.container}>
+    <SafeAreaView style={s.container} edges={['top']}>
+    <ScrollView style={s.container} contentContainerStyle={s.scrollInner}>
       {/* Profile Header */}
-      <View style={styles.header}>
-        <View style={styles.avatarContainer}>
+      <View style={s.header}>
+        <View style={s.avatarContainer}>
           {user?.image ? (
-            <Image source={{ uri: user.image }} style={styles.avatar} />
+            <Image source={{ uri: user.image }} style={s.avatar} />
           ) : (
-            <View style={styles.avatarPlaceholder}>
-              <Ionicons name="person" size={40} color="#fff" />
+            <View style={s.avatarPlaceholder}>
+              <Ionicons name="person" size={40} color={colors.textInverse} />
             </View>
           )}
         </View>
-        <Text style={styles.name}>{user?.name || 'Vendor'}</Text>
-        <Text style={styles.email}>{user?.email}</Text>
+        <Text style={s.name}>{user?.name || 'Vendor'}</Text>
+        <Text style={s.email}>{user?.email}</Text>
       </View>
 
       {/* Shop Info Card */}
       {shop && (
-        <View style={styles.shopCard}>
-          <View style={styles.shopHeader}>
-            <Ionicons name="storefront" size={24} color="#4CAF50" />
-            <Text style={styles.shopName}>{shop.name}</Text>
+        <View style={s.shopCard}>
+          <View style={s.shopHeader}>
+            <Ionicons name="storefront" size={24} color={colors.accent} />
+            <Text style={s.shopName}>{shop.name}</Text>
           </View>
-          <View style={styles.shopStats}>
-            <View style={styles.shopStat}>
-              <Ionicons name="star" size={16} color="#FF9800" />
-              <Text style={styles.shopStatText}>
+          <View style={s.shopStats}>
+            <View style={s.shopStat}>
+              <Ionicons name="star" size={16} color={colors.warning} />
+              <Text style={s.shopStatText}>
                 {shop.rating?.toFixed(1) || '0.0'}
               </Text>
             </View>
-            <View style={styles.shopStat}>
-              <Ionicons name="chatbubbles" size={16} color="#2196F3" />
-              <Text style={styles.shopStatText}>
+            <View style={s.shopStat}>
+              <Ionicons name="chatbubbles" size={16} color={colors.info} />
+              <Text style={s.shopStatText}>
                 {shop.reviewCount || 0} reviews
               </Text>
             </View>
             <View
               style={[
-                styles.shopStatus,
-                shop.isAvailable ? styles.shopOpen : styles.shopClosed,
+                s.shopStatus,
+                shop.isAvailable ? s.shopOpen : s.shopClosed,
               ]}
             >
-              <Text style={styles.shopStatusText}>
+              <Text style={s.shopStatusText}>
                 {shop.isAvailable ? 'Open' : 'Closed'}
               </Text>
             </View>
@@ -121,84 +129,88 @@ export default function ProfileScreen() {
       )}
 
       {/* Menu Items */}
-      <View style={styles.menuSection}>
+      <View style={s.menuSection}>
         {menuItems.map((item, index) => (
           <TouchableOpacity
             key={index}
-            style={styles.menuItem}
+            style={s.menuItem}
             onPress={item.onPress}
           >
-            <View style={[styles.menuIcon, { backgroundColor: `${item.color}20` }]}>
+            <View style={[s.menuIcon, { backgroundColor: `${item.color}20` }]}>
               <Ionicons name={item.icon} size={24} color={item.color} />
             </View>
-            <View style={styles.menuContent}>
-              <Text style={styles.menuTitle}>{item.title}</Text>
-              <Text style={styles.menuSubtitle}>{item.subtitle}</Text>
+            <View style={s.menuContent}>
+              <Text style={s.menuTitle}>{item.title}</Text>
+              <Text style={s.menuSubtitle}>{item.subtitle}</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#ccc" />
+            <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
           </TouchableOpacity>
         ))}
       </View>
 
       {/* Logout Button */}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Ionicons name="log-out" size={20} color="#F44336" />
-        <Text style={styles.logoutText}>Logout</Text>
+      <TouchableOpacity style={s.logoutButton} onPress={handleLogout}>
+        <Ionicons name="log-out" size={20} color={colors.error} />
+        <Text style={s.logoutText}>Logout</Text>
       </TouchableOpacity>
 
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>Vendor App v1.0.0</Text>
-        <Text style={styles.footerText}>© 2024 All rights reserved</Text>
+      <View style={s.footer}>
+        <Text style={s.footerText}>Vendor App v1.0.0</Text>
+        <Text style={s.footerText}>&copy; 2024 All rights reserved</Text>
       </View>
     </ScrollView>
+    </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background,
+  },
+  scrollInner: {
+    paddingBottom: Math.round(40 * scale),
   },
   header: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     alignItems: 'center',
-    padding: 30,
+    padding: Math.round(30 * scale),
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: colors.border,
   },
   avatarContainer: {
-    marginBottom: 15,
+    marginBottom: Math.round(15 * scale),
   },
   avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: Math.round(100 * scale),
+    height: Math.round(100 * scale),
+    borderRadius: Math.round(50 * scale),
   },
   avatarPlaceholder: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#4CAF50',
+    width: Math.round(100 * scale),
+    height: Math.round(100 * scale),
+    borderRadius: Math.round(50 * scale),
+    backgroundColor: colors.accent,
     justifyContent: 'center',
     alignItems: 'center',
   },
   name: {
-    fontSize: 24,
+    fontSize: Math.round(24 * scale),
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 5,
+    color: colors.textPrimary,
+    marginBottom: Math.round(5 * scale),
   },
   email: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   shopCard: {
-    backgroundColor: '#fff',
-    margin: 15,
-    padding: 20,
-    borderRadius: 10,
+    backgroundColor: colors.surface,
+    margin: Math.round(15 * scale),
+    padding: Math.round(20 * scale),
+    borderRadius: Math.round(10 * scale),
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -206,51 +218,51 @@ const styles = StyleSheet.create({
   shopHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 15,
-    gap: 10,
+    marginBottom: Math.round(15 * scale),
+    gap: Math.round(10 * scale),
   },
   shopName: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
   },
   shopStats: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 15,
+    gap: Math.round(15 * scale),
   },
   shopStat: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: Math.round(5 * scale),
   },
   shopStatText: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   shopStatus: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: Math.round(12 * scale),
+    paddingVertical: Math.round(4 * scale),
+    borderRadius: Math.round(12 * scale),
     marginLeft: 'auto',
   },
   shopOpen: {
-    backgroundColor: '#E8F5E9',
+    backgroundColor: `${colors.success}20`,
   },
   shopClosed: {
-    backgroundColor: '#FFEBEE',
+    backgroundColor: `${colors.error}20`,
   },
   shopStatusText: {
-    fontSize: 12,
+    fontSize: Math.round(12 * scale),
     fontWeight: 'bold',
   },
   menuSection: {
-    backgroundColor: '#fff',
-    marginHorizontal: 15,
-    borderRadius: 10,
+    backgroundColor: colors.surface,
+    marginHorizontal: Math.round(15 * scale),
+    borderRadius: Math.round(10 * scale),
     overflow: 'hidden',
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -258,58 +270,58 @@ const styles = StyleSheet.create({
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 15,
+    padding: Math.round(15 * scale),
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: colors.border,
   },
   menuIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: Math.round(48 * scale),
+    height: Math.round(48 * scale),
+    borderRadius: Math.round(24 * scale),
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 15,
+    marginRight: Math.round(15 * scale),
   },
   menuContent: {
     flex: 1,
   },
   menuTitle: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 2,
+    color: colors.textPrimary,
+    marginBottom: Math.round(2 * scale),
   },
   menuSubtitle: {
-    fontSize: 12,
-    color: '#999',
+    fontSize: Math.round(12 * scale),
+    color: colors.textTertiary,
   },
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
-    margin: 15,
-    padding: 15,
-    borderRadius: 10,
-    gap: 10,
+    backgroundColor: colors.surface,
+    margin: Math.round(15 * scale),
+    padding: Math.round(15 * scale),
+    borderRadius: Math.round(10 * scale),
+    gap: Math.round(10 * scale),
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   logoutText: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
-    color: '#F44336',
+    color: colors.error,
   },
   footer: {
     alignItems: 'center',
-    padding: 20,
+    padding: Math.round(20 * scale),
   },
   footerText: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 2,
+    fontSize: Math.round(12 * scale),
+    color: colors.textTertiary,
+    marginTop: Math.round(2 * scale),
   },
 });

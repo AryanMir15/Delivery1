@@ -10,21 +10,28 @@ import {
   RefreshControl,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector, useDispatch } from 'react-redux';
 import { useQuery, useMutation } from '@apollo/client';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useTheme, getStatusColor } from '../../theme';
+import useResponsive from '../../hooks/useResponsive';
 
-import { GET_FOODS } from '../../api/queries';
+import { GET_FOODS, GET_RESTAURANTS_BY_OWNER } from '../../api/queries';
 import { UPDATE_FOOD } from '../../api/mutations';
 import { setProducts, updateProduct } from '../../store/productSlice';
 
 export default function ProductsScreen() {
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
   const [searchQuery, setSearchQuery] = useState('');
-  const { selectedRestaurant } = useSelector((state) => state.auth);
   const { products } = useSelector((state) => state.products);
+
+  const { data: restaurantData } = useQuery(GET_RESTAURANTS_BY_OWNER);
+  const selectedRestaurant = restaurantData?.restaurantsByOwner?.[0];
 
   const { refetch, loading } = useQuery(GET_FOODS, {
     variables: { restaurant: selectedRestaurant?._id },
@@ -86,49 +93,51 @@ export default function ProductsScreen() {
     );
   };
 
+  const s = styles(colors, typography, scale);
+
   const renderProduct = ({ item: product }) => (
     <TouchableOpacity
-      style={styles.productCard}
+      style={s.productCard}
       onPress={() => handleProductPress(product)}
       onLongPress={() => navigation.navigate('ProductDetail', { product })}
     >
-      <View style={styles.imageWrapper}>
+      <View style={s.imageWrapper}>
         <Image
           source={{
             uri: product.image || 'https://via.placeholder.com/100',
           }}
-          style={styles.productImage}
+          style={s.productImage}
         />
         {product.images && product.images.length > 0 && (
-          <View style={styles.imageCountBadge}>
-            <Ionicons name="images" size={12} color="#fff" />
-            <Text style={styles.imageCountText}>+{product.images.length}</Text>
+          <View style={s.imageCountBadge}>
+            <Ionicons name="images" size={12} color={colors.textInverse} />
+            <Text style={s.imageCountText}>+{product.images.length}</Text>
           </View>
         )}
       </View>
-      <View style={styles.productInfo}>
-        <Text style={styles.productTitle} numberOfLines={2}>
+      <View style={s.productInfo}>
+        <Text style={s.productTitle} numberOfLines={2}>
           {product.title}
         </Text>
-        <Text style={styles.productCategory}>{product.category?.title}</Text>
-        <View style={styles.productFooter}>
-          <Text style={styles.productPrice}>
-            ETB {product.variations?.[0]?.price || 0}
+        <Text style={s.productCategory}>{product.category?.title}</Text>
+        <View style={s.productFooter}>
+          <Text style={s.productPrice}>
+            PKR {product.variations?.[0]?.price || 0}
           </Text>
           <View
             style={[
-              styles.stockBadge,
-              product.isOutOfStock ? styles.outOfStock : styles.inStock,
+              s.stockBadge,
+              product.isOutOfStock ? s.outOfStock : s.inStock,
             ]}
           >
-            <Text style={styles.stockText}>
+            <Text style={s.stockText}>
               {product.isOutOfStock ? 'Out of Stock' : 'In Stock'}
             </Text>
           </View>
         </View>
       </View>
       <TouchableOpacity
-        style={styles.stockToggle}
+        style={s.stockToggle}
         onPress={(e) => {
           e.stopPropagation();
           handleToggleStock(product);
@@ -137,26 +146,27 @@ export default function ProductsScreen() {
         <Ionicons
           name={product.isOutOfStock ? 'eye-off' : 'eye'}
           size={24}
-          color={product.isOutOfStock ? '#F44336' : '#4CAF50'}
+          color={product.isOutOfStock ? colors.error : colors.success}
         />
       </TouchableOpacity>
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={s.container} edges={['top']}>
+    <View style={s.container}>
       {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
+      <View style={s.searchContainer}>
+        <Ionicons name="search" size={20} color={colors.textTertiary} style={s.searchIcon} />
         <TextInput
-          style={styles.searchInput}
+          style={s.searchInput}
           placeholder="Search products..."
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
         {searchQuery.length > 0 && (
           <TouchableOpacity onPress={() => setSearchQuery('')}>
-            <Ionicons name="close-circle" size={20} color="#999" />
+            <Ionicons name="close-circle" size={20} color={colors.textTertiary} />
           </TouchableOpacity>
         )}
       </View>
@@ -166,19 +176,19 @@ export default function ProductsScreen() {
         data={filteredProducts}
         renderItem={renderProduct}
         keyExtractor={(item) => item._id}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={s.listContent}
         refreshControl={
           <RefreshControl refreshing={loading} onRefetch={refetch} />
         }
         ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Ionicons name="fast-food-outline" size={64} color="#ccc" />
-            <Text style={styles.emptyText}>No products found</Text>
+          <View style={s.emptyState}>
+            <Ionicons name="fast-food-outline" size={64} color={colors.textTertiary} />
+            <Text style={s.emptyText}>No products found</Text>
             <TouchableOpacity
-              style={styles.addButton}
+              style={s.addButton}
               onPress={() => navigation.navigate('ProductForm')}
             >
-              <Text style={styles.addButtonText}>Add Your First Product</Text>
+              <Text style={s.addButtonText}>Add Your First Product</Text>
             </TouchableOpacity>
           </View>
         }
@@ -187,165 +197,167 @@ export default function ProductsScreen() {
       {/* Floating Add Button */}
       {products.length > 0 && (
         <TouchableOpacity
-          style={styles.fab}
+          style={s.fab}
           onPress={() => navigation.navigate('ProductForm')}
         >
-          <Ionicons name="add" size={32} color="#fff" />
+          <Ionicons name="add" size={32} color={colors.textInverse} />
         </TouchableOpacity>
       )}
     </View>
+    </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    margin: 15,
-    paddingHorizontal: 15,
-    borderRadius: 10,
+    backgroundColor: colors.surface,
+    margin: Math.round(15 * scale),
+    paddingHorizontal: Math.round(15 * scale),
+    borderRadius: Math.round(10 * scale),
     elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: Math.round(2 * scale) },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: Math.round(4 * scale),
   },
   searchIcon: {
-    marginRight: 10,
+    marginRight: Math.round(10 * scale),
   },
   searchInput: {
     flex: 1,
-    height: 45,
-    fontSize: 16,
+    height: Math.round(45 * scale),
+    fontSize: Math.round(16 * scale),
+    color: colors.textPrimary,
   },
   listContent: {
-    padding: 15,
+    padding: Math.round(15 * scale),
   },
   productCard: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 15,
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(10 * scale),
+    padding: Math.round(12 * scale),
+    marginBottom: Math.round(15 * scale),
     elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: Math.round(2 * scale) },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: Math.round(4 * scale),
   },
   imageWrapper: {
     position: 'relative',
   },
   productImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    backgroundColor: '#f0f0f0',
+    width: Math.round(80 * scale),
+    height: Math.round(80 * scale),
+    borderRadius: Math.round(8 * scale),
+    backgroundColor: colors.surfaceVariant,
   },
   imageCountBadge: {
     position: 'absolute',
-    bottom: 5,
-    right: 5,
-    backgroundColor: 'rgba(0,0,0,0.7)',
+    bottom: Math.round(5 * scale),
+    right: Math.round(5 * scale),
+    backgroundColor: colors.overlay,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 10,
-    gap: 2,
+    paddingHorizontal: Math.round(6 * scale),
+    paddingVertical: Math.round(2 * scale),
+    borderRadius: Math.round(10 * scale),
+    gap: Math.round(2 * scale),
   },
   imageCountText: {
-    color: '#fff',
-    fontSize: 10,
+    color: colors.textInverse,
+    fontSize: Math.round(10 * scale),
     fontWeight: 'bold',
   },
   productInfo: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: Math.round(12 * scale),
     justifyContent: 'space-between',
   },
   productTitle: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
   },
   productCategory: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 4,
+    fontSize: Math.round(12 * scale),
+    color: colors.textTertiary,
+    marginTop: Math.round(4 * scale),
   },
   productFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: Math.round(8 * scale),
   },
   productPrice: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: colors.accent,
   },
   stockBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: Math.round(10 * scale),
+    paddingVertical: Math.round(4 * scale),
+    borderRadius: Math.round(12 * scale),
   },
   inStock: {
-    backgroundColor: '#E8F5E9',
+    backgroundColor: `${colors.success}20`,
   },
   outOfStock: {
-    backgroundColor: '#FFEBEE',
+    backgroundColor: `${colors.error}20`,
   },
   stockText: {
-    fontSize: 11,
+    fontSize: Math.round(11 * scale),
     fontWeight: 'bold',
   },
   stockToggle: {
     justifyContent: 'center',
-    paddingLeft: 10,
+    paddingLeft: Math.round(10 * scale),
   },
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 60,
+    paddingVertical: Math.round(60 * scale),
   },
   emptyText: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#999',
-    marginTop: 15,
-    marginBottom: 20,
+    color: colors.textTertiary,
+    marginTop: Math.round(15 * scale),
+    marginBottom: Math.round(20 * scale),
   },
   addButton: {
-    backgroundColor: '#4CAF50',
-    paddingHorizontal: 30,
-    paddingVertical: 15,
-    borderRadius: 25,
+    backgroundColor: colors.accent,
+    paddingHorizontal: Math.round(30 * scale),
+    paddingVertical: Math.round(15 * scale),
+    borderRadius: Math.round(25 * scale),
   },
   addButtonText: {
-    color: '#fff',
-    fontSize: 16,
+    color: colors.textInverse,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
   },
   fab: {
     position: 'absolute',
-    right: 20,
-    bottom: 20,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#4CAF50',
+    right: Math.round(20 * scale),
+    bottom: Math.round(20 * scale),
+    width: Math.round(60 * scale),
+    height: Math.round(60 * scale),
+    borderRadius: Math.round(30 * scale),
+    backgroundColor: colors.accent,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: Math.round(2 * scale) },
     shadowOpacity: 0.3,
-    shadowRadius: 4,
+    shadowRadius: Math.round(4 * scale),
   },
 });

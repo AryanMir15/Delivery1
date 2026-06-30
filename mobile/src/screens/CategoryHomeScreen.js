@@ -19,11 +19,15 @@ import { useSelector } from 'react-redux';
 import { GET_FOODS, GET_RESTAURANTS } from '../api/queries';
 import SessionService from '../services/SessionService';
 import RecommendationEngine from '../services/RecommendationEngine';
+import { useTheme } from '../theme';
+import useResponsive from '../hooks/useResponsive';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 48) / 2;
 
 const CategoryHomeScreen = ({ navigation, route }) => {
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
   const { category } = route.params || {};
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -184,19 +188,21 @@ const CategoryHomeScreen = ({ navigation, route }) => {
     }
   };
 
+  const s = styles(colors, typography, scale);
+
   const renderSearchBar = () => (
-    <View style={styles.searchContainer}>
-      <Icon name="magnify" size={22} color="#6C757D" />
+    <View style={s.searchContainer}>
+      <Icon name="magnify" size={22} color={colors.textSecondary} />
       <TextInput
-        style={styles.searchInput}
+        style={s.searchInput}
         placeholder="Search products..."
-        placeholderTextColor="#A8DADC"
+        placeholderTextColor={colors.accentLight}
         value={searchQuery}
         onChangeText={handleSearch}
       />
       {searchQuery ? (
         <TouchableOpacity onPress={() => setSearchQuery('')}>
-          <Icon name="close-circle" size={20} color="#6C757D" />
+          <Icon name="close-circle" size={20} color={colors.textSecondary} />
         </TouchableOpacity>
       ) : null}
     </View>
@@ -207,24 +213,24 @@ const CategoryHomeScreen = ({ navigation, route }) => {
 
     return (
       <TouchableOpacity
-        style={styles.categoryCircle}
+        style={s.categoryCircle}
         onPress={() => navigation.navigate('CategoryHome', { category: item })}
       >
         <View style={[
-          styles.circleContainer,
-          { backgroundColor: item.color || '#FF6B35' },
-          isSelected && styles.circleSelected
+          s.circleContainer,
+          { backgroundColor: item.color || colors.accent },
+          isSelected && s.circleSelected
         ]}>
-          <Icon name={item.icon || 'store'} size={32} color="#FFFFFF" />
+          <Icon name={item.icon || 'store'} size={32} color={colors.textInverse} />
           {item.requiresPrescription && (
-            <View style={styles.circleBadge}>
-              <Icon name="file-document" size={10} color="#FFFFFF" />
+            <View style={s.circleBadge}>
+              <Icon name="file-document" size={10} color={colors.textInverse} />
             </View>
           )}
         </View>
         <Text style={[
-          styles.circleCategoryTitle,
-          isSelected && styles.circleCategoryTitleSelected
+          s.circleCategoryTitle,
+          isSelected && s.circleCategoryTitleSelected
         ]} numberOfLines={2}>
           {item.title.split(' ')[0]}
         </Text>
@@ -243,27 +249,27 @@ const CategoryHomeScreen = ({ navigation, route }) => {
 
     return (
       <TouchableOpacity
-        style={styles.featuredCard}
+        style={s.featuredCard}
         onPress={handleProductPress}
       >
         <Image
           source={{ uri: item.image }}
-          style={styles.featuredImage}
+          style={s.featuredImage}
           resizeMode="cover"
         />
-        <View style={styles.featuredInfo}>
-          <Text style={styles.featuredTitle} numberOfLines={2}>
+        <View style={s.featuredInfo}>
+          <Text style={s.featuredTitle} numberOfLines={2}>
             {item.title}
           </Text>
-          <Text style={styles.featuredRestaurant} numberOfLines={1}>
+          <Text style={s.featuredRestaurant} numberOfLines={1}>
             {item.restaurant?.name}
           </Text>
-          <View style={styles.featuredFooter}>
-            <Text style={styles.featuredPrice}>
-              {`${item.variations?.[0]?.price || 0} ETB`}
+          <View style={s.featuredFooter}>
+            <Text style={s.featuredPrice}>
+              {`${item.variations?.[0]?.price || 0} PKR`}
             </Text>
-            <TouchableOpacity style={styles.addButton}>
-              <Icon name="plus" size={16} color="#FFFFFF" />
+            <TouchableOpacity style={s.addButton}>
+              <Icon name="plus" size={16} color={colors.textInverse} />
             </TouchableOpacity>
           </View>
         </View>
@@ -273,29 +279,29 @@ const CategoryHomeScreen = ({ navigation, route }) => {
 
   const renderVendorCard = ({ item }) => (
     <TouchableOpacity
-      style={styles.vendorCard}
+      style={s.vendorCard}
       onPress={() => navigation.navigate('Restaurant', { restaurant: item })}
     >
       <Image
         source={{ uri: item.image }}
-        style={styles.vendorImage}
+        style={s.vendorImage}
         resizeMode="cover"
       />
-      <View style={styles.vendorInfo}>
-        <Text style={styles.vendorName} numberOfLines={2}>
+      <View style={s.vendorInfo}>
+        <Text style={s.vendorName} numberOfLines={2}>
           {item.name}
         </Text>
-        <Text style={styles.vendorType} numberOfLines={1}>
+        <Text style={s.vendorType} numberOfLines={1}>
           {item.shopType}
         </Text>
-        <View style={styles.vendorMeta}>
-          <View style={styles.vendorRating}>
+        <View style={s.vendorMeta}>
+          <View style={s.vendorRating}>
             <Icon name="star" size={14} color="#FFD700" />
-            <Text style={styles.vendorRatingText}>{String(item.rating || '4.5')}</Text>
+            <Text style={s.vendorRatingText}>{String(item.rating || '4.5')}</Text>
           </View>
-          <View style={styles.vendorDelivery}>
-            <Icon name="clock-outline" size={14} color="#6C757D" />
-            <Text style={styles.vendorDeliveryText}>{`${item.deliveryTime || '25-35'} min`}</Text>
+          <View style={s.vendorDelivery}>
+            <Icon name="clock-outline" size={14} color={colors.textSecondary} />
+            <Text style={s.vendorDeliveryText}>{`${item.deliveryTime || '25-35'} min`}</Text>
           </View>
         </View>
       </View>
@@ -303,19 +309,19 @@ const CategoryHomeScreen = ({ navigation, route }) => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={s.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={s.header}>
         <TouchableOpacity
-          style={styles.backButton}
+          style={s.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Icon name="arrow-left" size={24} color="#1D3557" />
+          <Icon name="arrow-left" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
 
-        <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>{category?.title || 'All Categories'}</Text>
-          <Text style={styles.headerSubtitle}>
+        <View style={s.headerContent}>
+          <Text style={s.headerTitle}>{category?.title || 'All Categories'}</Text>
+          <Text style={s.headerSubtitle}>
             {`${filteredProducts.length} products • ${filteredVendors.length} vendors`}
           </Text>
         </View>
@@ -324,37 +330,37 @@ const CategoryHomeScreen = ({ navigation, route }) => {
       {renderSearchBar()}
 
       <ScrollView
-        style={styles.mainScroll}
+        style={s.mainScroll}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#FF6B35']} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.accent]} />
         }
       >
         {/* All Products Section - Grid Layout */}
-        <View style={styles.productsSection}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>
+        <View style={s.productsSection}>
+          <View style={s.sectionHeader}>
+            <Text style={s.sectionTitle}>
               {category ? `${category.title} Products` : 'All Products'}
             </Text>
-            <Text style={styles.productCount}>{`${filteredProducts.length} items`}</Text>
+            <Text style={s.productCount}>{`${filteredProducts.length} items`}</Text>
           </View>
 
           {productsLoading ? (
-            <View style={styles.loadingContainer}>
-              <Text style={styles.loadingText}>Loading products...</Text>
+            <View style={s.loadingContainer}>
+              <Text style={s.loadingText}>Loading products...</Text>
             </View>
           ) : filteredProducts.length > 0 ? (
-            <View style={styles.productsGrid}>
+            <View style={s.productsGrid}>
               {filteredProducts.map((item) => (
-                <View key={item._id || item.id} style={styles.productGridItem}>
+                <View key={item._id || item.id} style={s.productGridItem}>
                   {renderFeaturedProduct({ item })}
                 </View>
               ))}
             </View>
           ) : (
-            <View style={styles.emptyFeatured}>
-              <Icon name="food-off" size={48} color="#A8DADC" />
-              <Text style={styles.emptyFeaturedText}>
+            <View style={s.emptyFeatured}>
+              <Icon name="food-off" size={48} color={colors.accentLight} />
+              <Text style={s.emptyFeaturedText}>
                 {category ? `No ${category.title} products available` : 'No products available'}
               </Text>
             </View>
@@ -362,20 +368,20 @@ const CategoryHomeScreen = ({ navigation, route }) => {
         </View>
 
         {/* Vendors Section */}
-        <View style={styles.vendorsSection}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>
+        <View style={s.vendorsSection}>
+          <View style={s.sectionHeader}>
+            <Text style={s.sectionTitle}>
               {category ? `${category.title} Vendors` : 'All Vendors'}
             </Text>
-            <Text style={styles.vendorCount}>{`${filteredVendors.length} vendors`}</Text>
+            <Text style={s.vendorCount}>{`${filteredVendors.length} vendors`}</Text>
           </View>
 
           {restaurantsLoading ? (
-            <View style={styles.loadingContainer}>
-              <Text style={styles.loadingText}>Loading vendors...</Text>
+            <View style={s.loadingContainer}>
+              <Text style={s.loadingText}>Loading vendors...</Text>
             </View>
           ) : filteredVendors.length > 0 ? (
-            <View style={styles.vendorsList}>
+            <View style={s.vendorsList}>
               {filteredVendors.map((vendor) => (
                 <View key={vendor._id || vendor.id}>
                   {renderVendorCard({ item: vendor })}
@@ -383,9 +389,9 @@ const CategoryHomeScreen = ({ navigation, route }) => {
               ))}
             </View>
           ) : (
-            <View style={styles.emptyVendors}>
-              <Icon name="store-off" size={48} color="#A8DADC" />
-              <Text style={styles.emptyVendorsText}>
+            <View style={s.emptyVendors}>
+              <Icon name="store-off" size={48} color={colors.accentLight} />
+              <Text style={s.emptyVendorsText}>
                 {category ? `No ${category.title} vendors available` : 'No vendors available'}
               </Text>
             </View>
@@ -395,39 +401,39 @@ const CategoryHomeScreen = ({ navigation, route }) => {
 
 
         {/* Quick Actions */}
-        <View style={styles.quickActionsSection}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
-          <View style={styles.quickActionsGrid}>
+        <View style={s.quickActionsSection}>
+          <Text style={s.sectionTitle}>Quick Actions</Text>
+          <View style={s.quickActionsGrid}>
             <TouchableOpacity
-              style={styles.quickActionCard}
+              style={s.quickActionCard}
               onPress={() => navigation.navigate('Orders')}
             >
-              <Icon name="clipboard-text" size={32} color="#FF6B35" />
-              <Text style={styles.quickActionText}>My Orders</Text>
+              <Icon name="clipboard-text" size={32} color={colors.accent} />
+              <Text style={s.quickActionText}>My Orders</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.quickActionCard}
+              style={s.quickActionCard}
               onPress={() => navigation.navigate('Cart')}
             >
-              <Icon name="cart" size={32} color="#2196F3" />
-              <Text style={styles.quickActionText}>Cart</Text>
+              <Icon name="cart" size={32} color={colors.info} />
+              <Text style={s.quickActionText}>Cart</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.quickActionCard}
+              style={s.quickActionCard}
               onPress={() => navigation.navigate('Profile')}
             >
-              <Icon name="account" size={32} color="#4CAF50" />
-              <Text style={styles.quickActionText}>Profile</Text>
+              <Icon name="account" size={32} color={colors.accent} />
+              <Text style={s.quickActionText}>Profile</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.quickActionCard}
+              style={s.quickActionCard}
               onPress={() => navigation.navigate('Search')}
             >
-              <Icon name="magnify" size={32} color="#9C27B0" />
-              <Text style={styles.quickActionText}>Search</Text>
+              <Icon name="magnify" size={32} color={colors.accent} />
+              <Text style={s.quickActionText}>Search</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -438,77 +444,77 @@ const CategoryHomeScreen = ({ navigation, route }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    backgroundColor: '#FFFFFF',
+    paddingHorizontal: Math.round(16 * scale),
+    paddingVertical: Math.round(16 * scale),
+    backgroundColor: colors.surface,
   },
   welcomeContainer: {
     flex: 1,
   },
   welcomeText: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   userName: {
-    fontSize: 20,
+    fontSize: Math.round(20 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginTop: 4,
+    color: colors.textPrimary,
+    marginTop: Math.round(4 * scale),
   },
   locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 4,
+    marginTop: Math.round(4 * scale),
   },
   locationText: {
-    fontSize: 12,
-    color: '#6C757D',
-    marginLeft: 4,
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
+    marginLeft: Math.round(4 * scale),
   },
   notificationButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#F8F9FA',
+    width: Math.round(44 * scale),
+    height: Math.round(44 * scale),
+    borderRadius: Math.round(22 * scale),
+    backgroundColor: colors.surfaceVariant,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
   },
   badge: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: '#FF6B35',
-    borderRadius: 8,
-    minWidth: 16,
-    height: 16,
+    top: Math.round(8 * scale),
+    right: Math.round(8 * scale),
+    backgroundColor: colors.accent,
+    borderRadius: Math.round(8 * scale),
+    minWidth: Math.round(16 * scale),
+    height: Math.round(16 * scale),
     justifyContent: 'center',
     alignItems: 'center',
   },
   badgeText: {
-    color: '#FFFFFF',
-    fontSize: 10,
+    color: colors.textInverse,
+    fontSize: Math.round(10 * scale),
     fontWeight: 'bold',
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    marginHorizontal: 16,
-    marginVertical: 12,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    height: 48,
-    shadowColor: '#000',
+    backgroundColor: colors.surface,
+    marginHorizontal: Math.round(16 * scale),
+    marginVertical: Math.round(12 * scale),
+    borderRadius: Math.round(12 * scale),
+    paddingHorizontal: Math.round(16 * scale),
+    height: Math.round(48 * scale),
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -516,48 +522,48 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
-    color: '#1D3557',
-    marginLeft: 12,
+    fontSize: Math.round(16 * scale),
+    color: colors.textPrimary,
+    marginLeft: Math.round(12 * scale),
   },
   titleContainer: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 8,
+    paddingHorizontal: Math.round(16 * scale),
+    paddingTop: Math.round(16 * scale),
+    paddingBottom: Math.round(8 * scale),
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: Math.round(20 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   sectionSubtitle: {
-    fontSize: 14,
-    color: '#6C757D',
-    marginTop: 4,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginTop: Math.round(4 * scale),
   },
   categoriesHorizontal: {
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: Math.round(16 * scale),
+    paddingVertical: Math.round(16 * scale),
   },
   categoryCircle: {
     alignItems: 'center',
-    marginRight: 20,
-    width: 85,
+    marginRight: Math.round(20 * scale),
+    width: Math.round(85 * scale),
   },
   categoryCardWrapper: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: Math.round(80 * scale),
+    height: Math.round(80 * scale),
+    borderRadius: Math.round(40 * scale),
     overflow: 'hidden',
-    marginBottom: 8,
-    shadowColor: '#000',
+    marginBottom: Math.round(8 * scale),
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
     shadowRadius: 6,
     elevation: 6,
     position: 'relative',
     borderWidth: 3,
-    borderColor: '#FFFFFF',
+    borderColor: colors.surface,
   },
   categoryBackgroundImage: {
     width: '100%',
@@ -572,40 +578,40 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   circleIconContainer: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: Math.round(50 * scale),
+    height: Math.round(50 * scale),
+    borderRadius: Math.round(25 * scale),
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
   },
   circleBadge: {
     position: 'absolute',
-    top: 5,
-    right: 5,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: '#2196F3',
+    top: Math.round(5 * scale),
+    right: Math.round(5 * scale),
+    width: Math.round(22 * scale),
+    height: Math.round(22 * scale),
+    borderRadius: Math.round(11 * scale),
+    backgroundColor: colors.info,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: colors.surface,
   },
   circleCategoryTitle: {
-    fontSize: 11,
+    fontSize: Math.round(11 * scale),
     fontWeight: '600',
-    color: '#1D3557',
+    color: colors.textPrimary,
     textAlign: 'center',
-    lineHeight: 14,
+    lineHeight: Math.round(14 * scale),
   },
   circleContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: Math.round(80 * scale),
+    height: Math.round(80 * scale),
+    borderRadius: Math.round(40 * scale),
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
     shadowRadius: 6,
@@ -613,51 +619,51 @@ const styles = StyleSheet.create({
   },
   circleSelected: {
     borderWidth: 4,
-    borderColor: '#FFFFFF',
+    borderColor: colors.surface,
     transform: [{ scale: 1.1 }],
     shadowOpacity: 0.4,
     shadowRadius: 10,
     elevation: 10,
   },
   circleCategoryTitleSelected: {
-    color: '#FF6B35',
+    color: colors.accent,
     fontWeight: 'bold',
   },
   recentOrdersSection: {
-    paddingHorizontal: 16,
-    paddingTop: 24,
-    paddingBottom: 12,
+    paddingHorizontal: Math.round(16 * scale),
+    paddingTop: Math.round(24 * scale),
+    paddingBottom: Math.round(12 * scale),
     borderTopWidth: 1,
-    borderTopColor: '#E9ECEF',
+    borderTopColor: colors.border,
   },
   ordersContainer: {
     flex: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.round(16 * scale),
   },
   emptyOrders: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 60,
+    paddingVertical: Math.round(60 * scale),
   },
   emptyOrdersText: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginTop: 16,
+    color: colors.textPrimary,
+    marginTop: Math.round(16 * scale),
   },
   emptyOrdersSubtext: {
-    fontSize: 14,
-    color: '#6C757D',
-    marginTop: 8,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginTop: Math.round(8 * scale),
     textAlign: 'center',
-    paddingHorizontal: 32,
+    paddingHorizontal: Math.round(32 * scale),
   },
   orderCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
+    padding: Math.round(16 * scale),
+    marginBottom: Math.round(12 * scale),
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -667,133 +673,133 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 12,
+    marginBottom: Math.round(12 * scale),
   },
   orderRestaurant: {
     flexDirection: 'row',
     flex: 1,
-    marginRight: 12,
+    marginRight: Math.round(12 * scale),
   },
   orderRestaurantImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 8,
-    marginRight: 12,
+    width: Math.round(50 * scale),
+    height: Math.round(50 * scale),
+    borderRadius: Math.round(8 * scale),
+    marginRight: Math.round(12 * scale),
   },
   orderRestaurantInfo: {
     flex: 1,
     justifyContent: 'center',
   },
   orderRestaurantName: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#1D3557',
-    marginBottom: 4,
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   orderDate: {
-    fontSize: 12,
-    color: '#6C757D',
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
   },
   orderStatusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    paddingHorizontal: Math.round(12 * scale),
+    paddingVertical: Math.round(6 * scale),
+    borderRadius: Math.round(12 * scale),
   },
   orderStatusText: {
-    fontSize: 11,
+    fontSize: Math.round(11 * scale),
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.textInverse,
     textTransform: 'uppercase',
   },
   orderItems: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: Math.round(12 * scale),
     borderTopWidth: 1,
-    borderTopColor: '#E9ECEF',
+    borderTopColor: colors.border,
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   orderItemsText: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   orderAmount: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   orderFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: Math.round(12 * scale),
   },
   orderIdText: {
-    fontSize: 12,
-    color: '#6C757D',
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
   },
   viewAllButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    marginTop: 8,
-    marginBottom: 100,
+    paddingVertical: Math.round(16 * scale),
+    marginTop: Math.round(8 * scale),
+    marginBottom: Math.round(100 * scale),
   },
   viewAllText: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#FF6B35',
-    marginRight: 8,
+    color: colors.accent,
+    marginRight: Math.round(8 * scale),
   },
   mainScroll: {
     flex: 1,
   },
   featuredSection: {
-    marginTop: 16,
-    marginBottom: 24,
+    marginTop: Math.round(16 * scale),
+    marginBottom: Math.round(24 * scale),
   },
   productsSection: {
-    marginTop: 16,
-    marginBottom: 24,
+    marginTop: Math.round(16 * scale),
+    marginBottom: Math.round(24 * scale),
   },
   productCount: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   productsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: 8,
+    paddingHorizontal: Math.round(8 * scale),
     justifyContent: 'space-between',
   },
   productGridItem: {
     width: '48%',
-    marginBottom: 16,
+    marginBottom: Math.round(16 * scale),
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    marginBottom: 16,
+    paddingHorizontal: Math.round(16 * scale),
+    marginBottom: Math.round(16 * scale),
   },
   seeAllText: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#FF6B35',
+    color: colors.accent,
   },
   featuredList: {
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.round(16 * scale),
   },
   featuredCard: {
-    width: 160,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    marginRight: 16,
-    shadowColor: '#000',
+    width: Math.round(160 * scale),
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(16 * scale),
+    marginRight: Math.round(16 * scale),
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -802,23 +808,23 @@ const styles = StyleSheet.create({
   },
   featuredImage: {
     width: '100%',
-    height: 120,
-    backgroundColor: '#F8F9FA',
+    height: Math.round(120 * scale),
+    backgroundColor: colors.surfaceVariant,
   },
   featuredInfo: {
-    padding: 12,
+    padding: Math.round(12 * scale),
   },
   featuredTitle: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#1D3557',
-    marginBottom: 4,
-    height: 36,
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
+    height: Math.round(36 * scale),
   },
   featuredRestaurant: {
-    fontSize: 12,
-    color: '#6C757D',
-    marginBottom: 8,
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
+    marginBottom: Math.round(8 * scale),
   },
   featuredFooter: {
     flexDirection: 'row',
@@ -826,143 +832,143 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   featuredPrice: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
-    color: '#FF6B35',
+    color: colors.accent,
   },
   addButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#FF6B35',
+    width: Math.round(28 * scale),
+    height: Math.round(28 * scale),
+    borderRadius: Math.round(14 * scale),
+    backgroundColor: colors.accent,
     justifyContent: 'center',
     alignItems: 'center',
   },
   quickActionsSection: {
-    paddingHorizontal: 16,
-    marginTop: 24,
-    marginBottom: 24,
+    paddingHorizontal: Math.round(16 * scale),
+    marginTop: Math.round(24 * scale),
+    marginBottom: Math.round(24 * scale),
   },
   quickActionsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginTop: 16,
+    marginTop: Math.round(16 * scale),
   },
   quickActionCard: {
     width: '48%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 20,
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(16 * scale),
+    padding: Math.round(20 * scale),
     alignItems: 'center',
-    marginBottom: 16,
-    shadowColor: '#000',
+    marginBottom: Math.round(16 * scale),
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
   quickActionText: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#1D3557',
-    marginTop: 8,
+    color: colors.textPrimary,
+    marginTop: Math.round(8 * scale),
   },
   loadingContainer: {
-    paddingVertical: 40,
+    paddingVertical: Math.round(40 * scale),
     alignItems: 'center',
   },
   loadingText: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   emptyFeatured: {
-    paddingVertical: 40,
+    paddingVertical: Math.round(40 * scale),
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.round(16 * scale),
   },
   emptyFeaturedText: {
-    fontSize: 14,
-    color: '#6C757D',
-    marginTop: 12,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginTop: Math.round(12 * scale),
   },
   errorContainer: {
-    paddingVertical: 40,
+    paddingVertical: Math.round(40 * scale),
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.round(16 * scale),
   },
   errorText: {
-    fontSize: 16,
-    color: '#E63946',
-    marginTop: 12,
-    marginBottom: 16,
+    fontSize: Math.round(16 * scale),
+    color: colors.error,
+    marginTop: Math.round(12 * scale),
+    marginBottom: Math.round(16 * scale),
   },
   retryButton: {
-    backgroundColor: '#FF6B35',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
+    backgroundColor: colors.accent,
+    paddingHorizontal: Math.round(24 * scale),
+    paddingVertical: Math.round(12 * scale),
+    borderRadius: Math.round(8 * scale),
   },
   retryText: {
-    color: '#FFFFFF',
-    fontSize: 14,
+    color: colors.textInverse,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
   },
   emptyContainer: {
-    paddingVertical: 40,
+    paddingVertical: Math.round(40 * scale),
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.round(16 * scale),
   },
   emptyText: {
-    fontSize: 14,
-    color: '#6C757D',
-    marginTop: 12,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginTop: Math.round(12 * scale),
   },
   // Vendors Section
   vendorsSection: {
-    paddingHorizontal: 16,
-    paddingTop: 24,
-    paddingBottom: 24,
+    paddingHorizontal: Math.round(16 * scale),
+    paddingTop: Math.round(24 * scale),
+    paddingBottom: Math.round(24 * scale),
   },
   vendorCount: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   vendorsList: {
-    marginTop: 12,
+    marginTop: Math.round(12 * scale),
   },
   vendorCard: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    marginBottom: 12,
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
+    marginBottom: Math.round(12 * scale),
     overflow: 'hidden',
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 3,
   },
   vendorImage: {
-    width: 100,
-    height: 100,
+    width: Math.round(100 * scale),
+    height: Math.round(100 * scale),
     resizeMode: 'cover',
   },
   vendorInfo: {
     flex: 1,
-    padding: 12,
+    padding: Math.round(12 * scale),
     justifyContent: 'space-between',
   },
   vendorName: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginBottom: 4,
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   vendorType: {
-    fontSize: 13,
-    color: '#6C757D',
-    marginBottom: 8,
+    fontSize: Math.round(13 * scale),
+    color: colors.textSecondary,
+    marginBottom: Math.round(8 * scale),
   },
   vendorMeta: {
     flexDirection: 'row',
@@ -971,32 +977,32 @@ const styles = StyleSheet.create({
   vendorRating: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: Math.round(16 * scale),
   },
   vendorRatingText: {
-    fontSize: 12,
+    fontSize: Math.round(12 * scale),
     fontWeight: '600',
-    color: '#1D3557',
-    marginLeft: 4,
+    color: colors.textPrimary,
+    marginLeft: Math.round(4 * scale),
   },
   vendorDelivery: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   vendorDeliveryText: {
-    fontSize: 12,
-    color: '#6C757D',
-    marginLeft: 4,
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
+    marginLeft: Math.round(4 * scale),
   },
   emptyVendors: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 40,
+    paddingVertical: Math.round(40 * scale),
   },
   emptyVendorsText: {
-    fontSize: 14,
-    color: '#6C757D',
-    marginTop: 12,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginTop: Math.round(12 * scale),
     textAlign: 'center',
   },
 });

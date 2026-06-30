@@ -10,11 +10,14 @@ import {
   Platform,
   TouchableOpacity,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery, useSubscription } from '@apollo/client';
 import { GET_ORDER } from '../api/queries';
 import MapView, { Marker, AnimatedRegion } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
+import { useTheme } from '../theme';
+import useResponsive from '../hooks/useResponsive';
 
 const { width } = Dimensions.get('window');
 const ASPECT_RATIO = width / Dimensions.get('window').height;
@@ -41,6 +44,8 @@ const RIDER_LOCATION_SUBSCRIPTION = `
 `;
 
 const OrderTrackingScreenSmooth = ({ route }) => {
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
   const { orderId, orderNumber } = route.params;
   const [refreshing, setRefreshing] = useState(false);
   const mapRef = useRef(null);
@@ -111,17 +116,17 @@ const OrderTrackingScreenSmooth = ({ route }) => {
 
   if (loading && !data) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
-        <Text style={styles.loadingText}>Loading order details...</Text>
+      <View style={s.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.success} />
+        <Text style={s.loadingText}>Loading order details...</Text>
       </View>
     );
   }
 
   if (!data?.order) {
     return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Order not found</Text>
+      <View style={s.errorContainer}>
+        <Text style={s.errorText}>Order not found</Text>
       </View>
     );
   }
@@ -165,38 +170,38 @@ const OrderTrackingScreenSmooth = ({ route }) => {
     switch (status) {
       case 'pending':
         return {
-          icon: '🔍',
+          icon: 'Searching for Rider',
           title: 'Searching for Rider',
           message: 'We are finding the best rider for your delivery',
-          color: '#FF9800'
+          color: colors.warning
         };
       case 'accepted':
         return {
-          icon: '✅',
+          icon: 'Rider Accepted',
           title: 'Rider Accepted',
           message: 'Rider is heading to the restaurant',
-          color: '#2196F3'
+          color: colors.info
         };
       case 'picked':
         return {
-          icon: '📦',
+          icon: 'Order Picked Up',
           title: 'Order Picked Up',
           message: 'Rider is on the way to you',
-          color: '#9C27B0'
+          color: colors.accent
         };
       case 'delivered':
         return {
-          icon: '🎉',
+          icon: 'Order Delivered',
           title: 'Order Delivered',
           message: 'Enjoy your meal!',
-          color: '#4CAF50'
+          color: colors.success
         };
       default:
         return {
-          icon: '📋',
+          icon: status,
           title: status,
           message: 'Order in progress',
-          color: '#666'
+          color: colors.textSecondary
         };
     }
   };
@@ -245,14 +250,17 @@ const OrderTrackingScreenSmooth = ({ route }) => {
     }
   };
 
+  const s = styles(colors, typography, scale);
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={s.container} edges={['top']}>
+    <View style={s.container}>
       {/* Map View - Full Screen */}
       {(shopCoords || customerCoords || riderCoords) && (
-        <View style={styles.mapContainer}>
+        <View style={s.mapContainer}>
           <MapView
             ref={mapRef}
-            style={styles.map}
+            style={s.map}
             initialRegion={{
               latitude: customerCoords?.latitude || 0,
               longitude: customerCoords?.longitude || 0,
@@ -268,8 +276,8 @@ const OrderTrackingScreenSmooth = ({ route }) => {
                 title="Shop Location"
                 description={order.restaurant.name}
               >
-                <View style={styles.shopMarker}>
-                  <Icon name="store" size={24} color="#FFFFFF" />
+                <View style={s.shopMarker}>
+                  <Icon name="store" size={24} color={colors.textInverse} />
                 </View>
               </Marker>
             )}
@@ -281,8 +289,8 @@ const OrderTrackingScreenSmooth = ({ route }) => {
                 title="Your Location"
                 description={order.deliveryAddress.deliveryAddress}
               >
-                <View style={styles.customerMarker}>
-                  <Icon name="home" size={24} color="#FFFFFF" />
+                <View style={s.customerMarker}>
+                  <Icon name="home" size={24} color={colors.textInverse} />
                 </View>
               </Marker>
             )}
@@ -296,8 +304,8 @@ const OrderTrackingScreenSmooth = ({ route }) => {
                 description={order.rider.name}
                 anchor={{ x: 0.5, y: 0.5 }}
               >
-                <View style={[styles.riderMarker, { transform: [{ rotate: `${riderHeading}deg` }] }]}>
-                  <Icon name="bike-fast" size={28} color="#FFFFFF" />
+                <View style={[s.riderMarker, { transform: [{ rotate: `${riderHeading}deg` }] }]}>
+                  <Icon name="bike-fast" size={28} color={colors.textInverse} />
                 </View>
               </Marker.Animated>
             )}
@@ -309,7 +317,7 @@ const OrderTrackingScreenSmooth = ({ route }) => {
                 destination={customerCoords}
                 apikey={GOOGLE_MAP_KEY}
                 strokeWidth={4}
-                strokeColor="#4CAF50"
+                strokeColor={colors.success}
                 optimizeWaypoints={true}
                 onReady={result => {
                   fetchTime(result.distance, result.duration);
@@ -323,35 +331,35 @@ const OrderTrackingScreenSmooth = ({ route }) => {
 
           {/* Center Map Button */}
           <TouchableOpacity
-            style={styles.centerButton}
+            style={s.centerButton}
             onPress={centerMap}
           >
-            <Icon name="crosshairs-gps" size={24} color="#4CAF50" />
+            <Icon name="crosshairs-gps" size={24} color={colors.success} />
           </TouchableOpacity>
 
           {/* Status Card Overlay */}
-          <View style={styles.statusOverlay}>
-            <View style={[styles.statusCard, { borderLeftColor: statusInfo.color }]}>
-              <Text style={styles.statusIcon}>{statusInfo.icon}</Text>
-              <View style={styles.statusContent}>
-                <Text style={[styles.statusTitle, { color: statusInfo.color }]}>
+          <View style={s.statusOverlay}>
+            <View style={[s.statusCard, { borderLeftColor: statusInfo.color }]}>
+              <Text style={s.statusIcon}>{statusInfo.icon}</Text>
+              <View style={s.statusContent}>
+                <Text style={[s.statusTitle, { color: statusInfo.color }]}>
                   {statusInfo.title}
                 </Text>
-                <Text style={styles.statusMessage}>{statusInfo.message}</Text>
+                <Text style={s.statusMessage}>{statusInfo.message}</Text>
               </View>
             </View>
 
             {/* ETA Info */}
             {distance && duration && (
-              <View style={styles.etaCard}>
-                <View style={styles.etaItem}>
-                  <Icon name="map-marker-distance" size={18} color="#4CAF50" />
-                  <Text style={styles.etaText}>{distance.toFixed(1)} km</Text>
+              <View style={s.etaCard}>
+                <View style={s.etaItem}>
+                  <Icon name="map-marker-distance" size={18} color={colors.success} />
+                  <Text style={s.etaText}>{distance.toFixed(1)} km</Text>
                 </View>
-                <View style={styles.etaDivider} />
-                <View style={styles.etaItem}>
-                  <Icon name="clock-outline" size={18} color="#4CAF50" />
-                  <Text style={styles.etaText}>{Math.ceil(duration)} min</Text>
+                <View style={s.etaDivider} />
+                <View style={s.etaItem}>
+                  <Icon name="clock-outline" size={18} color={colors.success} />
+                  <Text style={s.etaText}>{Math.ceil(duration)} min</Text>
                 </View>
               </View>
             )}
@@ -360,8 +368,8 @@ const OrderTrackingScreenSmooth = ({ route }) => {
       )}
 
       {/* Bottom Sheet with Order Details */}
-      <View style={styles.bottomSheet}>
-        <View style={styles.handle} />
+      <View style={s.bottomSheet}>
+        <View style={s.handle} />
         
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -370,80 +378,81 @@ const OrderTrackingScreenSmooth = ({ route }) => {
           }
         >
           {/* Order Header */}
-          <View style={styles.orderHeader}>
-            <Text style={styles.orderNumber}>Order #{order.orderId}</Text>
-            <Text style={styles.orderDate}>{formatDateTime(order.createdAt)}</Text>
+          <View style={s.orderHeader}>
+            <Text style={s.orderNumber}>Order #{order.orderId}</Text>
+            <Text style={s.orderDate}>{formatDateTime(order.createdAt)}</Text>
           </View>
 
           {/* Progress Bar */}
-          <View style={styles.progressSection}>
-            <View style={styles.progressBar}>
+          <View style={s.progressSection}>
+            <View style={s.progressBar}>
               <View
                 style={[
-                  styles.progressFill,
+                  s.progressFill,
                   { width: `${progress.percentage}%`, backgroundColor: statusInfo.color }
                 ]}
               />
             </View>
-            <Text style={styles.progressText}>
+            <Text style={s.progressText}>
               Step {progress.current} of {progress.total}
             </Text>
           </View>
 
           {/* Rider Information */}
           {order.rider && (
-            <View style={styles.riderInfo}>
-              <View style={styles.riderAvatar}>
-                <Icon name="account" size={32} color="#FFFFFF" />
+            <View style={s.riderInfo}>
+              <View style={s.riderAvatar}>
+                <Icon name="account" size={32} color={colors.textInverse} />
               </View>
-              <View style={styles.riderDetails}>
-                <Text style={styles.riderName}>{order.rider.name}</Text>
-                <Text style={styles.riderVehicle}>
+              <View style={s.riderDetails}>
+                <Text style={s.riderName}>{order.rider.name}</Text>
+                <Text style={s.riderVehicle}>
                   {order.rider.vehicleType} - {order.rider.vehicleNumber}
                 </Text>
               </View>
-              <TouchableOpacity style={styles.callButton}>
-                <Icon name="phone" size={24} color="#4CAF50" />
+              <TouchableOpacity style={s.callButton}>
+                <Icon name="phone" size={24} color={colors.success} />
               </TouchableOpacity>
             </View>
           )}
 
           {/* Order Items */}
-          <View style={styles.orderItems}>
-            <Text style={styles.sectionTitle}>Order Items</Text>
+          <View style={s.orderItems}>
+            <Text style={s.sectionTitle}>Order Items</Text>
             {order.items.map((item, index) => (
-              <View key={index} style={styles.orderItem}>
-                <Text style={styles.itemQuantity}>{item.quantity}x</Text>
-                <Text style={styles.itemName}>{item.food.title}</Text>
-                <Text style={styles.itemPrice}>ETB {item.food.price.toFixed(2)}</Text>
+              <View key={index} style={s.orderItem}>
+                <Text style={s.itemQuantity}>{item.quantity}x</Text>
+                <Text style={s.itemName}>{item.food.title}</Text>
+                <Text style={s.itemPrice}>PKR {item.food.price.toFixed(2)}</Text>
               </View>
             ))}
           </View>
 
           {/* Payment Summary */}
-          <View style={styles.paymentSection}>
-            <Text style={styles.sectionTitle}>Payment Summary</Text>
-            <View style={styles.paymentRow}>
-              <Text style={styles.paymentLabel}>Order Amount:</Text>
-              <Text style={styles.paymentValue}>ETB {order.orderAmount.toFixed(2)}</Text>
+          <View style={s.paymentSection}>
+            <Text style={s.sectionTitle}>Payment Summary</Text>
+            <View style={s.paymentRow}>
+              <Text style={s.paymentLabel}>Order Amount:</Text>
+              <Text style={s.paymentValue}>PKR {order.orderAmount.toFixed(2)}</Text>
             </View>
-            <View style={styles.paymentRow}>
-              <Text style={styles.paymentLabel}>Payment Method:</Text>
-              <Text style={styles.paymentValue}>{order.paymentMethod}</Text>
+            <View style={s.paymentRow}>
+              <Text style={s.paymentLabel}>Payment Method:</Text>
+              <Text style={s.paymentValue}>{order.paymentMethod}</Text>
             </View>
           </View>
 
-          <View style={styles.bottomSpacer} />
+          <View style={s.bottomSpacer} />
         </ScrollView>
       </View>
     </View>
+    </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
@@ -451,9 +460,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#666',
+    marginTop: Math.round(10 * scale),
+    fontSize: Math.round(16 * scale),
+    color: colors.textSecondary,
   },
   errorContainer: {
     flex: 1,
@@ -461,8 +470,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   errorText: {
-    fontSize: 16,
-    color: '#f44336',
+    fontSize: Math.round(16 * scale),
+    color: colors.error,
   },
   mapContainer: {
     flex: 1,
@@ -472,45 +481,45 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   shopMarker: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#FF6B35',
+    width: Math.round(44 * scale),
+    height: Math.round(44 * scale),
+    borderRadius: Math.round(22 * scale),
+    backgroundColor: colors.accent,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
-    borderColor: '#FFFFFF',
-    shadowColor: '#000',
+    borderColor: colors.surface,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
   },
   customerMarker: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#2196F3',
+    width: Math.round(44 * scale),
+    height: Math.round(44 * scale),
+    borderRadius: Math.round(22 * scale),
+    backgroundColor: colors.info,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
-    borderColor: '#FFFFFF',
-    shadowColor: '#000',
+    borderColor: colors.surface,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
   },
   riderMarker: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#4CAF50',
+    width: Math.round(50 * scale),
+    height: Math.round(50 * scale),
+    borderRadius: Math.round(25 * scale),
+    backgroundColor: colors.success,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
-    borderColor: '#FFFFFF',
-    shadowColor: '#000',
+    borderColor: colors.surface,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -518,15 +527,15 @@ const styles = StyleSheet.create({
   },
   centerButton: {
     position: 'absolute',
-    top: 50,
-    right: 16,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#FFFFFF',
+    top: Math.round(50 * scale),
+    right: Math.round(16 * scale),
+    width: Math.round(44 * scale),
+    height: Math.round(44 * scale),
+    borderRadius: Math.round(22 * scale),
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -534,48 +543,48 @@ const styles = StyleSheet.create({
   },
   statusOverlay: {
     position: 'absolute',
-    top: 50,
-    left: 16,
-    right: 70,
+    top: Math.round(50 * scale),
+    left: Math.round(16 * scale),
+    right: Math.round(70 * scale),
   },
   statusCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
+    padding: Math.round(16 * scale),
     flexDirection: 'row',
     alignItems: 'center',
     borderLeftWidth: 4,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 4,
   },
   statusIcon: {
-    fontSize: 32,
-    marginRight: 12,
+    fontSize: Math.round(32 * scale),
+    marginRight: Math.round(12 * scale),
   },
   statusContent: {
     flex: 1,
   },
   statusTitle: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
-    marginBottom: 2,
+    marginBottom: Math.round(2 * scale),
   },
   statusMessage: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
   },
   etaCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 12,
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
+    padding: Math.round(12 * scale),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    marginTop: 8,
-    shadowColor: '#000',
+    marginTop: Math.round(8 * scale),
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -587,164 +596,164 @@ const styles = StyleSheet.create({
   },
   etaDivider: {
     width: 1,
-    height: 20,
-    backgroundColor: '#E0E0E0',
+    height: Math.round(20 * scale),
+    backgroundColor: colors.divider,
   },
   etaText: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#333',
-    marginLeft: 6,
+    color: colors.textPrimary,
+    marginLeft: Math.round(6 * scale),
   },
   bottomSheet: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: Math.round(24 * scale),
+    borderTopRightRadius: Math.round(24 * scale),
     maxHeight: '40%',
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 8,
   },
   handle: {
-    width: 40,
-    height: 4,
-    backgroundColor: '#E0E0E0',
-    borderRadius: 2,
+    width: Math.round(40 * scale),
+    height: Math.round(4 * scale),
+    backgroundColor: colors.divider,
+    borderRadius: Math.round(2 * scale),
     alignSelf: 'center',
-    marginTop: 8,
-    marginBottom: 16,
+    marginTop: Math.round(8 * scale),
+    marginBottom: Math.round(16 * scale),
   },
   orderHeader: {
-    paddingHorizontal: 20,
-    paddingBottom: 16,
+    paddingHorizontal: Math.round(20 * scale),
+    paddingBottom: Math.round(16 * scale),
     borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    borderBottomColor: colors.divider,
   },
   orderNumber: {
-    fontSize: 20,
+    fontSize: Math.round(20 * scale),
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
   },
   orderDate: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 4,
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
+    marginTop: Math.round(4 * scale),
   },
   progressSection: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: Math.round(20 * scale),
+    paddingVertical: Math.round(16 * scale),
   },
   progressBar: {
-    height: 6,
-    backgroundColor: '#E0E0E0',
-    borderRadius: 3,
+    height: Math.round(6 * scale),
+    backgroundColor: colors.divider,
+    borderRadius: Math.round(3 * scale),
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    borderRadius: 3,
+    borderRadius: Math.round(3 * scale),
   },
   progressText: {
     textAlign: 'center',
-    marginTop: 8,
-    fontSize: 12,
-    color: '#666',
+    marginTop: Math.round(8 * scale),
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
   },
   riderInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#F5F5F5',
-    marginHorizontal: 20,
-    borderRadius: 12,
-    marginBottom: 16,
+    paddingHorizontal: Math.round(20 * scale),
+    paddingVertical: Math.round(16 * scale),
+    backgroundColor: colors.surfaceVariant,
+    marginHorizontal: Math.round(20 * scale),
+    borderRadius: Math.round(12 * scale),
+    marginBottom: Math.round(16 * scale),
   },
   riderAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#4CAF50',
+    width: Math.round(48 * scale),
+    height: Math.round(48 * scale),
+    borderRadius: Math.round(24 * scale),
+    backgroundColor: colors.success,
     justifyContent: 'center',
     alignItems: 'center',
   },
   riderDetails: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: Math.round(12 * scale),
   },
   riderName: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#333',
+    color: colors.textPrimary,
   },
   riderVehicle: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 2,
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
+    marginTop: Math.round(2 * scale),
   },
   callButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#E8F5E9',
+    width: Math.round(44 * scale),
+    height: Math.round(44 * scale),
+    borderRadius: Math.round(22 * scale),
+    backgroundColor: colors.surfaceVariant,
     justifyContent: 'center',
     alignItems: 'center',
   },
   orderItems: {
-    paddingHorizontal: 20,
-    marginBottom: 16,
+    paddingHorizontal: Math.round(20 * scale),
+    marginBottom: Math.round(16 * scale),
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 12,
+    color: colors.textPrimary,
+    marginBottom: Math.round(12 * scale),
   },
   orderItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: Math.round(8 * scale),
   },
   itemQuantity: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#666',
-    width: 40,
+    color: colors.textSecondary,
+    width: Math.round(40 * scale),
   },
   itemName: {
     flex: 1,
-    fontSize: 14,
-    color: '#333',
+    fontSize: Math.round(14 * scale),
+    color: colors.textPrimary,
   },
   itemPrice: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#4CAF50',
+    color: colors.success,
   },
   paymentSection: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
+    paddingHorizontal: Math.round(20 * scale),
+    paddingTop: Math.round(16 * scale),
     borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
+    borderTopColor: colors.divider,
   },
   paymentRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: Math.round(8 * scale),
   },
   paymentLabel: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   paymentValue: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#333',
+    color: colors.textPrimary,
   },
   bottomSpacer: {
-    height: 20,
+    height: Math.round(20 * scale),
   },
 });
 

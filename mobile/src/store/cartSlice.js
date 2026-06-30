@@ -35,11 +35,11 @@ const calculateTotals = (state) => {
 
   // Auto-calculate delivery fee if not manually set
   if (state.items.length > 0 && state.deliveryFee === 0) {
-    // Base delivery fee: ETB 20
+    // Base delivery fee: PKR 20
     const baseDeliveryFee = 20;
-    // Add ETB 5 for every ETB 100 in subtotal
+    // Add PKR 5 for every PKR 100 in subtotal
     const additionalFee = Math.floor(state.subtotal / 100) * 5;
-    // Maximum delivery fee: ETB 50
+    // Maximum delivery fee: PKR 50
     state.deliveryFee = Math.min(baseDeliveryFee + additionalFee, 50);
   }
 

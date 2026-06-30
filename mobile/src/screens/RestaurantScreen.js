@@ -16,8 +16,12 @@ import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 
 import { GET_RESTAURANT, GET_FOODS } from '../api/queries';
 import { setSelectedRestaurant } from '../store/restaurantSlice';
+import { useTheme } from '../theme';
+import useResponsive from '../hooks/useResponsive';
 
 const RestaurantScreen = ({ navigation, route }) => {
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
   const dispatch = useDispatch();
   const { restaurant: initialRestaurant } = route.params;
   const [searchQuery, setSearchQuery] = useState('');
@@ -55,51 +59,51 @@ const RestaurantScreen = ({ navigation, route }) => {
   const filteredFoods = selectedCategory ? foodsByCategory[selectedCategory] : foods;
 
   const renderHeader = () => (
-    <View style={styles.header}>
-      <Image source={{ uri: restaurant.image }} style={styles.restaurantImage} />
-      <View style={styles.headerOverlay}>
+    <View style={s.header}>
+      <Image source={{ uri: restaurant.image }} style={s.restaurantImage} />
+      <View style={s.headerOverlay}>
         <TouchableOpacity
-          style={styles.backButton}
+          style={s.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Icon name="arrow-left" size={24} color="#FFFFFF" />
+          <Icon name="arrow-left" size={24} color={colors.textInverse} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.favoriteButton}>
-          <Icon name="heart-outline" size={24} color="#FFFFFF" />
+        <TouchableOpacity style={s.favoriteButton}>
+          <Icon name="heart-outline" size={24} color={colors.textInverse} />
         </TouchableOpacity>
       </View>
     </View>
   );
 
   const renderRestaurantInfo = () => (
-    <View style={styles.restaurantInfo}>
-      <Text style={styles.restaurantName}>{restaurant.name}</Text>
-      <Text style={styles.restaurantCuisine}>{restaurant.shopType}</Text>
+    <View style={s.restaurantInfo}>
+      <Text style={s.restaurantName}>{restaurant.name}</Text>
+      <Text style={s.restaurantCuisine}>{restaurant.shopType}</Text>
 
-      <View style={styles.restaurantMeta}>
-        <View style={styles.ratingContainer}>
+      <View style={s.restaurantMeta}>
+        <View style={s.ratingContainer}>
           <Icon name="star" size={16} color="#FFD700" />
-          <Text style={styles.ratingText}>{String(restaurant.rating || '4.2')}</Text>
-          <Text style={styles.reviewCount}>{`(${restaurant.reviewCount || '150'} reviews)`}</Text>
+          <Text style={s.ratingText}>{String(restaurant.rating || '4.2')}</Text>
+          <Text style={s.reviewCount}>{`(${restaurant.reviewCount || '150'} reviews)`}</Text>
         </View>
-        <Text style={styles.deliveryTime}>{`${restaurant.deliveryTime || '25-35'} min`}</Text>
-        <Text style={styles.minOrder}>{`Min ETB ${restaurant.minimumOrder || '15'}`}</Text>
+        <Text style={s.deliveryTime}>{`${restaurant.deliveryTime || '25-35'} min`}</Text>
+        <Text style={s.minOrder}>{`Min PKR ${restaurant.minimumOrder || '15'}`}</Text>
       </View>
 
-      <Text style={styles.restaurantDescription}>
+      <Text style={s.restaurantDescription}>
         {restaurant.description || 'Quality products from a trusted shop.'}
       </Text>
     </View>
   );
 
   const renderSearchBar = () => (
-    <View style={styles.searchContainer}>
-      <Icon name="magnify" size={20} color="#6C757D" style={styles.searchIcon} />
+    <View style={s.searchContainer}>
+      <Icon name="magnify" size={20} color={colors.textSecondary} style={s.searchIcon} />
       <TextInput
-        style={styles.searchInput}
+        style={s.searchInput}
         placeholder="Search products..."
-        placeholderTextColor="#A8DADC"
+        placeholderTextColor={colors.inputPlaceholder}
         value={searchQuery}
         onChangeText={setSearchQuery}
       />
@@ -110,19 +114,19 @@ const RestaurantScreen = ({ navigation, route }) => {
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      style={styles.categoriesScroll}
-      contentContainerStyle={styles.categoriesContainer}
+      style={s.categoriesScroll}
+      contentContainerStyle={s.categoriesContainer}
     >
       <TouchableOpacity
         style={[
-          styles.categoryTab,
-          !selectedCategory && styles.selectedCategoryTab,
+          s.categoryTab,
+          !selectedCategory && s.selectedCategoryTab,
         ]}
         onPress={() => setSelectedCategory(null)}
       >
         <Text style={[
-          styles.categoryTabText,
-          !selectedCategory && styles.selectedCategoryTabText,
+          s.categoryTabText,
+          !selectedCategory && s.selectedCategoryTabText,
         ]}>
           All
         </Text>
@@ -132,14 +136,14 @@ const RestaurantScreen = ({ navigation, route }) => {
         <TouchableOpacity
           key={category}
           style={[
-            styles.categoryTab,
-            selectedCategory === category && styles.selectedCategoryTab,
+            s.categoryTab,
+            selectedCategory === category && s.selectedCategoryTab,
           ]}
           onPress={() => setSelectedCategory(category)}
         >
           <Text style={[
-            styles.categoryTabText,
-            selectedCategory === category && styles.selectedCategoryTabText,
+            s.categoryTabText,
+            selectedCategory === category && s.selectedCategoryTabText,
           ]}>
             {category}
           </Text>
@@ -150,32 +154,34 @@ const RestaurantScreen = ({ navigation, route }) => {
 
   const renderFoodItem = ({ item }) => (
     <TouchableOpacity
-      style={styles.foodItem}
+      style={s.foodItem}
       onPress={() => navigation.navigate('FoodDetail', { food: item })}
     >
-      <Image source={{ uri: item.image }} style={styles.foodImage} />
-      <View style={styles.foodInfo}>
-        <Text style={styles.foodName} numberOfLines={2}>{item.title}</Text>
-        <Text style={styles.foodDescription} numberOfLines={2}>
+      <Image source={{ uri: item.image }} style={s.foodImage} />
+      <View style={s.foodInfo}>
+        <Text style={s.foodName} numberOfLines={2}>{item.title}</Text>
+        <Text style={s.foodDescription} numberOfLines={2}>
           {item.description}
         </Text>
-        <Text style={styles.foodPrice}>
-          ETB {item.variations?.[0]?.price || '12.99'}
+        <Text style={s.foodPrice}>
+          PKR {item.variations?.[0]?.price || '12.99'}
           {item.variations?.[0]?.discounted && (
-            <Text style={styles.foodOriginalPrice}>
-              ETB {(item.variations[0].price * 1.2).toFixed(2)}
+            <Text style={s.foodOriginalPrice}>
+              PKR {(item.variations[0].price * 1.2).toFixed(2)}
             </Text>
           )}
         </Text>
       </View>
     </TouchableOpacity>
   );
+  const s = styles(colors, typography, scale);
+
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={s.container}>
       {renderHeader()}
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={s.content} showsVerticalScrollIndicator={false}>
         {renderRestaurantInfo()}
         {renderSearchBar()}
         {renderCategoryTabs()}
@@ -185,24 +191,24 @@ const RestaurantScreen = ({ navigation, route }) => {
           keyExtractor={(item) => item.id || item._id}
           renderItem={renderFoodItem}
           scrollEnabled={false}
-          contentContainerStyle={styles.foodsContainer}
+          contentContainerStyle={s.foodsContainer}
         />
       </ScrollView>
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   header: {
     position: 'relative',
   },
   restaurantImage: {
     width: '100%',
-    height: 200,
+    height: Math.round(200 * scale),
     resizeMode: 'cover',
   },
   headerOverlay: {
@@ -214,166 +220,166 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    paddingHorizontal: 16,
-    paddingTop: 50,
+    paddingHorizontal: Math.round(16 * scale),
+    paddingTop: Math.round(50 * scale),
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: Math.round(40 * scale),
+    height: Math.round(40 * scale),
+    borderRadius: Math.round(20 * scale),
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   favoriteButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: Math.round(40 * scale),
+    height: Math.round(40 * scale),
+    borderRadius: Math.round(20 * scale),
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   content: {
     flex: 1,
-    marginTop: -20,
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    marginTop: Math.round(-20 * scale),
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: Math.round(20 * scale),
+    borderTopRightRadius: Math.round(20 * scale),
   },
   restaurantInfo: {
-    padding: 16,
+    padding: Math.round(16 * scale),
   },
   restaurantName: {
-    fontSize: 24,
+    fontSize: Math.round(24 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginBottom: 4,
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   restaurantCuisine: {
-    fontSize: 16,
-    color: '#6C757D',
-    marginBottom: 8,
+    fontSize: Math.round(16 * scale),
+    color: colors.textSecondary,
+    marginBottom: Math.round(8 * scale),
   },
   restaurantMeta: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: Math.round(12 * scale),
   },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   ratingText: {
-    fontSize: 14,
-    color: '#1D3557',
-    marginLeft: 4,
+    fontSize: Math.round(14 * scale),
+    color: colors.textPrimary,
+    marginLeft: Math.round(4 * scale),
     fontWeight: '600',
   },
   reviewCount: {
-    fontSize: 12,
-    color: '#6C757D',
-    marginLeft: 4,
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
+    marginLeft: Math.round(4 * scale),
   },
   deliveryTime: {
-    fontSize: 14,
-    color: '#1D3557',
+    fontSize: Math.round(14 * scale),
+    color: colors.textPrimary,
   },
   minOrder: {
-    fontSize: 14,
-    color: '#1D3557',
+    fontSize: Math.round(14 * scale),
+    color: colors.textPrimary,
   },
   restaurantDescription: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
     lineHeight: 20,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8F9FA',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    marginHorizontal: 16,
-    marginBottom: 16,
-    height: 44,
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
+    paddingHorizontal: Math.round(16 * scale),
+    marginHorizontal: Math.round(16 * scale),
+    marginBottom: Math.round(16 * scale),
+    height: Math.round(44 * scale),
     borderWidth: 1,
-    borderColor: '#E9ECEF',
+    borderColor: colors.border,
   },
   searchIcon: {
-    marginRight: 12,
+    marginRight: Math.round(12 * scale),
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
-    color: '#1D3557',
+    fontSize: Math.round(16 * scale),
+    color: colors.textPrimary,
   },
   categoriesScroll: {
-    marginBottom: 16,
+    marginBottom: Math.round(16 * scale),
   },
   categoriesContainer: {
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.round(16 * scale),
   },
   categoryTab: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: '#F8F9FA',
-    borderRadius: 20,
-    marginRight: 8,
+    paddingHorizontal: Math.round(16 * scale),
+    paddingVertical: Math.round(8 * scale),
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(20 * scale),
+    marginRight: Math.round(8 * scale),
   },
   selectedCategoryTab: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: colors.accent,
   },
   categoryTabText: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
     fontWeight: '500',
   },
   selectedCategoryTabText: {
-    color: '#FFFFFF',
+    color: colors.textInverse,
   },
   foodsContainer: {
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.round(16 * scale),
   },
   foodItem: {
     flexDirection: 'row',
-    backgroundColor: '#F8F9FA',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
+    padding: Math.round(12 * scale),
+    marginBottom: Math.round(12 * scale),
   },
   foodImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    marginRight: 12,
+    width: Math.round(80 * scale),
+    height: Math.round(80 * scale),
+    borderRadius: Math.round(8 * scale),
+    marginRight: Math.round(12 * scale),
   },
   foodInfo: {
     flex: 1,
     justifyContent: 'space-between',
   },
   foodName: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#1D3557',
-    marginBottom: 4,
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   foodDescription: {
-    fontSize: 12,
-    color: '#6C757D',
-    marginBottom: 8,
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
+    marginBottom: Math.round(8 * scale),
   },
   foodPrice: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   foodOriginalPrice: {
-    fontSize: 12,
-    color: '#6C757D',
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
     textDecorationLine: 'line-through',
-    marginLeft: 8,
+    marginLeft: Math.round(8 * scale),
   },
 });
 

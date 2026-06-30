@@ -8,10 +8,12 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
+import { useTheme } from '../theme';
 
 const { width, height } = Dimensions.get('window');
 
 const LoadingScreen = () => {
+  const { colors, typography } = useTheme();
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -55,53 +57,55 @@ const LoadingScreen = () => {
     outputRange: ['0deg', '360deg'],
   });
 
+  const s = styles(colors, typography);
+
   return (
     <LinearGradient
       colors={['#FF6B35', '#F7931E', '#FFB84D']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      style={styles.container}
+      style={s.container}
     >
       {/* Decorative circles */}
-      <View style={styles.circleTop} />
-      <View style={styles.circleBottom} />
-      <View style={styles.circleMiddle} />
+      <View style={s.circleTop} />
+      <View style={s.circleBottom} />
+      <View style={s.circleMiddle} />
 
-      <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
+      <Animated.View style={[s.content, { opacity: fadeAnim }]}>
         {/* Rotating outer circle */}
         <Animated.View
           style={[
-            styles.outerCircle,
+            s.outerCircle,
             { transform: [{ rotate }] },
           ]}
         >
-          <View style={styles.outerCircleDot} />
-          <View style={[styles.outerCircleDot, styles.outerCircleDot2]} />
-          <View style={[styles.outerCircleDot, styles.outerCircleDot3]} />
+          <View style={s.outerCircleDot} />
+          <View style={[s.outerCircleDot, s.outerCircleDot2]} />
+          <View style={[s.outerCircleDot, s.outerCircleDot3]} />
         </Animated.View>
 
         {/* Pulsing logo circle */}
         <Animated.View
           style={[
-            styles.logoCircle,
+            s.logoCircle,
             { transform: [{ scale: pulseAnim }] },
           ]}
         >
-          <View style={styles.logoInnerCircle}>
-            <Icon name="shopping" size={70} color="#FF6B35" />
+          <View style={s.logoInnerCircle}>
+            <Icon name="shopping" size={70} color={colors.accent} />
           </View>
         </Animated.View>
 
         {/* App name */}
-        <Text style={styles.appName}>Aksum Delivery</Text>
-        <Text style={styles.tagline}>Your everything store</Text>
+        <Text style={s.appName}>Aksum Delivery</Text>
+        <Text style={s.tagline}>Your everything store</Text>
 
         {/* Loading indicator */}
-        <View style={styles.loadingContainer}>
-          <View style={styles.loadingDots}>
-            <Animated.View style={[styles.dot, { opacity: pulseAnim }]} />
-            <Animated.View style={[styles.dot, { opacity: pulseAnim }]} />
-            <Animated.View style={[styles.dot, { opacity: pulseAnim }]} />
+        <View style={s.loadingContainer}>
+          <View style={s.loadingDots}>
+            <Animated.View style={[s.dot, { opacity: pulseAnim }]} />
+            <Animated.View style={[s.dot, { opacity: pulseAnim }]} />
+            <Animated.View style={[s.dot, { opacity: pulseAnim }]} />
           </View>
         </View>
       </Animated.View>
@@ -109,7 +113,7 @@ const LoadingScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography) => StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
@@ -161,7 +165,7 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     top: -6,
     left: '50%',
     marginLeft: -6,
@@ -193,10 +197,10 @@ const styles = StyleSheet.create({
     width: 130,
     height: 130,
     borderRadius: 65,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.3,
     shadowRadius: 15,
@@ -206,7 +210,7 @@ const styles = StyleSheet.create({
   appName: {
     fontSize: 42,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: colors.textInverse,
     marginTop: 40,
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 0, height: 2 },
@@ -214,7 +218,7 @@ const styles = StyleSheet.create({
   },
   tagline: {
     fontSize: 16,
-    color: '#FFFFFF',
+    color: colors.textInverse,
     marginTop: 8,
     opacity: 0.9,
     fontWeight: '500',
@@ -231,7 +235,7 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
 });
 

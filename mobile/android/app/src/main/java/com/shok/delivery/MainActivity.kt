@@ -1,4 +1,4 @@
-package com.fooddelivery.mobile
+package com.shok.delivery
 
 import android.os.Build
 import android.os.Bundle

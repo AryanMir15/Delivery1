@@ -10,18 +10,26 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useDispatch } from 'react-redux';
 import { useMutation, useQuery } from '@apollo/client';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { useTheme, getStatusColor } from '../../theme';
+import useResponsive from '../../hooks/useResponsive';
 
 import { CREATE_FOOD, UPDATE_FOOD, VENDOR_UPLOAD_IMAGE } from '../../api/mutations';
-import { GET_CATEGORIES } from '../../api/queries';
+import { GET_CATEGORIES, GET_RESTAURANTS_BY_OWNER } from '../../api/queries';
 import { addProduct, updateProduct } from '../../store/productSlice';
 
 export default function ProductFormScreen({ route, navigation }) {
   const dispatch = useDispatch();
-  const { selectedRestaurant } = useSelector((state) => state.auth);
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
+
+  const { data: restaurantData } = useQuery(GET_RESTAURANTS_BY_OWNER);
+  const selectedRestaurant = restaurantData?.restaurantsByOwner?.[0];
+
   const product = route.params?.product;
   const isEditing = !!product;
 
@@ -188,37 +196,40 @@ export default function ProductFormScreen({ route, navigation }) {
 
   const loading = creating || updating;
 
+  const s = styles(colors, typography, scale);
+
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.form}>
+    <SafeAreaView style={s.container} edges={['top']}>
+    <ScrollView style={s.container} contentContainerStyle={s.scrollInner}>
+      <View style={s.form}>
         {/* Primary Image Upload */}
-        <View style={styles.imageSection}>
-          <Text style={styles.label}>Primary Image *</Text>
+        <View style={s.imageSection}>
+          <Text style={s.label}>Primary Image *</Text>
           <TouchableOpacity 
-            style={styles.imageContainer} 
+            style={s.imageContainer} 
             onPress={() => handlePickImage(true)}
           >
             {formData.image ? (
-              <Image source={{ uri: formData.image }} style={styles.image} />
+              <Image source={{ uri: formData.image }} style={s.image} />
             ) : (
-              <View style={styles.imagePlaceholder}>
-                <Ionicons name="camera" size={40} color="#999" />
-                <Text style={styles.imagePlaceholderText}>Add Primary Photo</Text>
+              <View style={s.imagePlaceholder}>
+                <Ionicons name="camera" size={40} color={colors.textTertiary} />
+                <Text style={s.imagePlaceholderText}>Add Primary Photo</Text>
               </View>
             )}
             {uploading && uploadingIndex === null && (
-              <View style={styles.uploadingOverlay}>
-                <ActivityIndicator size="large" color="#4CAF50" />
+              <View style={s.uploadingOverlay}>
+                <ActivityIndicator size="large" color={colors.accent} />
               </View>
             )}
           </TouchableOpacity>
         </View>
 
         {/* Additional Images Gallery */}
-        <View style={styles.imageSection}>
-          <View style={styles.gallerySectionHeader}>
-            <Text style={styles.label}>Additional Images (Optional)</Text>
-            <Text style={styles.galleryHint}>
+        <View style={s.imageSection}>
+          <View style={s.gallerySectionHeader}>
+            <Text style={s.label}>Additional Images (Optional)</Text>
+            <Text style={s.galleryHint}>
               {formData.images.length}/5 images
             </Text>
           </View>
@@ -226,22 +237,22 @@ export default function ProductFormScreen({ route, navigation }) {
           <ScrollView 
             horizontal 
             showsHorizontalScrollIndicator={false}
-            style={styles.galleryScroll}
+            style={s.galleryScroll}
           >
-            <View style={styles.galleryContainer}>
+            <View style={s.galleryContainer}>
               {/* Existing Images */}
               {formData.images.map((img, index) => (
-                <View key={index} style={styles.galleryItem}>
-                  <Image source={{ uri: img }} style={styles.galleryImage} />
+                <View key={index} style={s.galleryItem}>
+                  <Image source={{ uri: img }} style={s.galleryImage} />
                   <TouchableOpacity
-                    style={styles.removeImageButton}
+                    style={s.removeImageButton}
                     onPress={() => handleRemoveImage(index)}
                   >
-                    <Ionicons name="close-circle" size={24} color="#F44336" />
+                    <Ionicons name="close-circle" size={24} color={colors.error} />
                   </TouchableOpacity>
                   {uploading && uploadingIndex === index && (
-                    <View style={styles.uploadingOverlay}>
-                      <ActivityIndicator size="small" color="#4CAF50" />
+                    <View style={s.uploadingOverlay}>
+                      <ActivityIndicator size="small" color={colors.accent} />
                     </View>
                   )}
                 </View>
@@ -250,25 +261,25 @@ export default function ProductFormScreen({ route, navigation }) {
               {/* Add More Button */}
               {formData.images.length < 5 && (
                 <TouchableOpacity
-                  style={styles.addImageButton}
+                  style={s.addImageButton}
                   onPress={() => handlePickImage(false, formData.images.length)}
                 >
-                  <Ionicons name="add-circle" size={40} color="#4CAF50" />
-                  <Text style={styles.addImageText}>Add Image</Text>
+                  <Ionicons name="add-circle" size={40} color={colors.accent} />
+                  <Text style={s.addImageText}>Add Image</Text>
                 </TouchableOpacity>
               )}
             </View>
           </ScrollView>
-          <Text style={styles.galleryNote}>
+          <Text style={s.galleryNote}>
             Tip: Add multiple angles and details of your product
           </Text>
         </View>
 
         {/* Title */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Product Name *</Text>
+        <View style={s.inputGroup}>
+          <Text style={s.label}>Product Name *</Text>
           <TextInput
-            style={styles.input}
+            style={s.input}
             placeholder="e.g., Margherita Pizza"
             value={formData.title}
             onChangeText={(text) => setFormData({ ...formData, title: text })}
@@ -276,10 +287,10 @@ export default function ProductFormScreen({ route, navigation }) {
         </View>
 
         {/* Description */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Description</Text>
+        <View style={s.inputGroup}>
+          <Text style={s.label}>Description</Text>
           <TextInput
-            style={[styles.input, styles.textArea]}
+            style={[s.input, s.textArea]}
             placeholder="Describe your product..."
             value={formData.description}
             onChangeText={(text) => setFormData({ ...formData, description: text })}
@@ -289,16 +300,16 @@ export default function ProductFormScreen({ route, navigation }) {
         </View>
 
         {/* Category */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Category *</Text>
+        <View style={s.inputGroup}>
+          <Text style={s.label}>Category *</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={styles.categoryList}>
+            <View style={s.categoryList}>
               {categories.map((cat) => (
                 <TouchableOpacity
                   key={cat._id}
                   style={[
-                    styles.categoryChip,
-                    formData.category === cat._id && styles.categoryChipActive,
+                    s.categoryChip,
+                    formData.category === cat._id && s.categoryChipActive,
                   ]}
                   onPress={() => {
                     setFormData({ ...formData, category: cat._id });
@@ -307,8 +318,8 @@ export default function ProductFormScreen({ route, navigation }) {
                 >
                   <Text
                     style={[
-                      styles.categoryChipText,
-                      formData.category === cat._id && styles.categoryChipTextActive,
+                      s.categoryChipText,
+                      formData.category === cat._id && s.categoryChipTextActive,
                     ]}
                   >
                     {cat.title}
@@ -320,10 +331,10 @@ export default function ProductFormScreen({ route, navigation }) {
         </View>
 
         {/* Sub Category */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Sub Category (Optional)</Text>
+        <View style={s.inputGroup}>
+          <Text style={s.label}>Sub Category (Optional)</Text>
           <TextInput
-            style={styles.input}
+            style={s.input}
             placeholder="e.g., Vegetarian, Spicy"
             value={formData.subCategory}
             onChangeText={(text) => setFormData({ ...formData, subCategory: text })}
@@ -331,40 +342,40 @@ export default function ProductFormScreen({ route, navigation }) {
         </View>
 
         {/* Variations */}
-        <View style={styles.inputGroup}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.label}>Variations *</Text>
+        <View style={s.inputGroup}>
+          <View style={s.sectionHeader}>
+            <Text style={s.label}>Variations *</Text>
             <TouchableOpacity
-              style={styles.addVariationButton}
+              style={s.addVariationButton}
               onPress={handleAddVariation}
             >
-              <Ionicons name="add-circle" size={24} color="#4CAF50" />
+              <Ionicons name="add-circle" size={24} color={colors.accent} />
             </TouchableOpacity>
           </View>
 
           {formData.variations.map((variation, index) => (
-            <View key={index} style={styles.variationCard}>
-              <View style={styles.variationHeader}>
-                <Text style={styles.variationTitle}>Variation {index + 1}</Text>
+            <View key={index} style={s.variationCard}>
+              <View style={s.variationHeader}>
+                <Text style={s.variationTitle}>Variation {index + 1}</Text>
                 {formData.variations.length > 1 && (
                   <TouchableOpacity onPress={() => handleRemoveVariation(index)}>
-                    <Ionicons name="trash" size={20} color="#F44336" />
+                    <Ionicons name="trash" size={20} color={colors.error} />
                   </TouchableOpacity>
                 )}
               </View>
 
               <TextInput
-                style={styles.input}
+                style={s.input}
                 placeholder="Size/Type (e.g., Small, Medium, Large)"
                 value={variation.title}
                 onChangeText={(text) => handleVariationChange(index, 'title', text)}
               />
 
-              <View style={styles.priceRow}>
-                <View style={styles.priceInput}>
-                  <Text style={styles.priceLabel}>Price (ETB) *</Text>
+              <View style={s.priceRow}>
+                <View style={s.priceInput}>
+                  <Text style={s.priceLabel}>Price (PKR) *</Text>
                   <TextInput
-                    style={styles.input}
+                    style={s.input}
                     placeholder="0.00"
                     value={variation.price.toString()}
                     onChangeText={(text) => handleVariationChange(index, 'price', text)}
@@ -372,10 +383,10 @@ export default function ProductFormScreen({ route, navigation }) {
                   />
                 </View>
 
-                <View style={styles.priceInput}>
-                  <Text style={styles.priceLabel}>Discounted Price</Text>
+                <View style={s.priceInput}>
+                  <Text style={s.priceLabel}>Discounted Price</Text>
                   <TextInput
-                    style={styles.input}
+                    style={s.input}
                     placeholder="0.00"
                     value={variation.discounted.toString()}
                     onChangeText={(text) =>
@@ -391,42 +402,46 @@ export default function ProductFormScreen({ route, navigation }) {
 
         {/* Submit Button */}
         <TouchableOpacity
-          style={[styles.submitButton, loading && styles.submitButtonDisabled]}
+          style={[s.submitButton, loading && s.submitButtonDisabled]}
           onPress={handleSubmit}
           disabled={loading}
         >
           {loading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color={colors.textInverse} />
           ) : (
-            <Text style={styles.submitButtonText}>
+            <Text style={s.submitButtonText}>
               {isEditing ? 'Update Product' : 'Create Product'}
             </Text>
           )}
         </TouchableOpacity>
       </View>
     </ScrollView>
+    </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background,
+  },
+  scrollInner: {
+    paddingBottom: Math.round(40 * scale),
   },
   form: {
-    padding: 20,
+    padding: Math.round(20 * scale),
   },
   imageSection: {
-    marginBottom: 20,
+    marginBottom: Math.round(20 * scale),
   },
   imageContainer: {
     width: '100%',
-    height: 200,
-    borderRadius: 10,
+    height: Math.round(200 * scale),
+    borderRadius: Math.round(10 * scale),
     overflow: 'hidden',
-    backgroundColor: '#f0f0f0',
+    backgroundColor: colors.surfaceVariant,
     borderWidth: 2,
-    borderColor: '#4CAF50',
+    borderColor: colors.accent,
     borderStyle: 'dashed',
   },
   image: {
@@ -439,9 +454,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   imagePlaceholderText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#999',
+    marginTop: Math.round(10 * scale),
+    fontSize: Math.round(16 * scale),
+    color: colors.textTertiary,
   },
   uploadingOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -453,25 +468,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: Math.round(10 * scale),
   },
   galleryHint: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
   },
   galleryScroll: {
-    marginBottom: 5,
+    marginBottom: Math.round(5 * scale),
   },
   galleryContainer: {
     flexDirection: 'row',
-    gap: 10,
+    gap: Math.round(10 * scale),
   },
   galleryItem: {
-    width: 100,
-    height: 100,
-    borderRadius: 8,
+    width: Math.round(100 * scale),
+    height: Math.round(100 * scale),
+    borderRadius: Math.round(8 * scale),
     overflow: 'hidden',
-    backgroundColor: '#f0f0f0',
+    backgroundColor: colors.surfaceVariant,
     position: 'relative',
   },
   galleryImage: {
@@ -480,134 +495,135 @@ const styles = StyleSheet.create({
   },
   removeImageButton: {
     position: 'absolute',
-    top: 5,
-    right: 5,
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    top: Math.round(5 * scale),
+    right: Math.round(5 * scale),
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
   },
   addImageButton: {
-    width: 100,
-    height: 100,
-    borderRadius: 8,
-    backgroundColor: '#f0f0f0',
+    width: Math.round(100 * scale),
+    height: Math.round(100 * scale),
+    borderRadius: Math.round(8 * scale),
+    backgroundColor: colors.surfaceVariant,
     borderWidth: 2,
-    borderColor: '#4CAF50',
+    borderColor: colors.accent,
     borderStyle: 'dashed',
     justifyContent: 'center',
     alignItems: 'center',
   },
   addImageText: {
-    marginTop: 5,
-    fontSize: 12,
-    color: '#4CAF50',
+    marginTop: Math.round(5 * scale),
+    fontSize: Math.round(12 * scale),
+    color: colors.accent,
     fontWeight: '600',
   },
   galleryNote: {
-    fontSize: 11,
-    color: '#999',
+    fontSize: Math.round(11 * scale),
+    color: colors.textTertiary,
     fontStyle: 'italic',
-    marginTop: 5,
+    marginTop: Math.round(5 * scale),
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: Math.round(20 * scale),
   },
   label: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
+    color: colors.textPrimary,
+    marginBottom: Math.round(8 * scale),
   },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
+    borderColor: colors.divider,
+    borderRadius: Math.round(8 * scale),
+    padding: Math.round(12 * scale),
+    fontSize: Math.round(16 * scale),
+    color: colors.textPrimary,
   },
   textArea: {
-    height: 100,
+    height: Math.round(100 * scale),
     textAlignVertical: 'top',
   },
   categoryList: {
     flexDirection: 'row',
-    gap: 10,
+    gap: Math.round(10 * scale),
   },
   categoryChip: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: '#fff',
+    paddingHorizontal: Math.round(20 * scale),
+    paddingVertical: Math.round(10 * scale),
+    borderRadius: Math.round(20 * scale),
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.divider,
   },
   categoryChipActive: {
-    backgroundColor: '#4CAF50',
-    borderColor: '#4CAF50',
+    backgroundColor: colors.accent,
+    borderColor: colors.accent,
   },
   categoryChipText: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   categoryChipTextActive: {
-    color: '#fff',
+    color: colors.textInverse,
     fontWeight: 'bold',
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: Math.round(10 * scale),
   },
   addVariationButton: {
-    padding: 5,
+    padding: Math.round(5 * scale),
   },
   variationCard: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
+    backgroundColor: colors.surface,
+    padding: Math.round(15 * scale),
+    borderRadius: Math.round(10 * scale),
+    marginBottom: Math.round(10 * scale),
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.divider,
   },
   variationHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: Math.round(10 * scale),
   },
   variationTitle: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: 'bold',
-    color: '#666',
+    color: colors.textSecondary,
   },
   priceRow: {
     flexDirection: 'row',
-    gap: 10,
-    marginTop: 10,
+    gap: Math.round(10 * scale),
+    marginTop: Math.round(10 * scale),
   },
   priceInput: {
     flex: 1,
   },
   priceLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 5,
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
+    marginBottom: Math.round(5 * scale),
   },
   submitButton: {
-    backgroundColor: '#4CAF50',
-    padding: 16,
-    borderRadius: 10,
+    backgroundColor: colors.accent,
+    padding: Math.round(16 * scale),
+    borderRadius: Math.round(10 * scale),
     alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 40,
+    marginTop: Math.round(20 * scale),
+    marginBottom: Math.round(40 * scale),
   },
   submitButtonDisabled: {
-    backgroundColor: '#a5d6a7',
+    backgroundColor: colors.buttonDisabled,
   },
   submitButtonText: {
-    color: '#fff',
-    fontSize: 18,
+    color: colors.textInverse,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
   },
 });

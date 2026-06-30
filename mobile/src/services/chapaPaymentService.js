@@ -90,11 +90,11 @@ class ChapaPaymentService {
 
   /**
    * Format amount for display
-   * @param {number} amount - Amount in ETB
+   * @param {number} amount - Amount in PKR
    * @returns {string} Formatted amount
    */
   formatAmount(amount) {
-    return `ETB ${parseFloat(amount).toFixed(2)}`;
+    return `PKR ${parseFloat(amount).toFixed(2)}`;
   }
 
   /**

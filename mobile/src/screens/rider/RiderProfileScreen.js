@@ -14,6 +14,9 @@ import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useQuery } from '@apollo/client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { useTheme } from '../../theme';
+import useResponsive from '../../hooks/useResponsive';
+import StatusBadge from '../../components/StatusBadge';
 import { GET_ME, GET_RIDER_PROFILE, GET_RIDER_ORDERS } from '../../api/queries';
 import { logout } from '../../store/authSlice';
 import socketService from '../../services/socketService';
@@ -21,7 +24,9 @@ import LocationService from '../../services/rider/LocationService';
 
 const ProfileScreen = () => {
   const dispatch = useDispatch();
-  const { rider, isAvailable } = useSelector((state) => state.auth);
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
+  const { user: rider, isAvailable } = useSelector((state) => state.auth);
 
   const { data: meData } = useQuery(GET_ME, {
     fetchPolicy: 'cache-first',
@@ -90,113 +95,106 @@ const ProfileScreen = () => {
     );
   };
 
-  const MenuItem = ({ icon, title, subtitle, onPress, iconColor = '#2EC4B6', showChevron = true }) => (
-    <TouchableOpacity style={styles.menuItem} onPress={onPress}>
-      <View style={styles.menuLeft}>
-        <View style={[styles.iconContainer, { backgroundColor: `${iconColor}15` }]}>
+  const s = styles(colors, typography, scale);
+
+  const MenuItem = ({ icon, title, subtitle, onPress, iconColor = colors.accent, showChevron = true }) => (
+    <TouchableOpacity style={s.menuItem} onPress={onPress}>
+      <View style={s.menuLeft}>
+        <View style={[s.iconContainer, { backgroundColor: `${iconColor}15` }]}>
           <Icon name={icon} size={22} color={iconColor} />
         </View>
-        <View style={styles.menuTextContainer}>
-          <Text style={styles.menuTitle}>{title}</Text>
-          {subtitle && <Text style={styles.menuSubtitle}>{subtitle}</Text>}
+        <View style={s.menuTextContainer}>
+          <Text style={s.menuTitle}>{title}</Text>
+          {subtitle && <Text style={s.menuSubtitle}>{subtitle}</Text>}
         </View>
       </View>
-      {showChevron && <Icon name="chevron-right" size={24} color="#CED4DA" />}
+      {showChevron && <Icon name="chevron-right" size={24} color={colors.border} />}
     </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Profile</Text>
+    <SafeAreaView style={s.container}>
+      <View style={s.header}>
+        <Text style={s.title}>Profile</Text>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Profile Card */}
-        <View style={styles.profileCard}>
-          <View style={styles.avatarContainer}>
-            <View style={styles.avatar}>
-              <Icon name="account" size={50} color="#FFFFFF" />
+        <View style={s.profileCard}>
+          <View style={s.avatarContainer}>
+            <View style={s.avatar}>
+              <Icon name="account" size={50} color={colors.surface} />
             </View>
             <View
               style={[
-                styles.statusIndicator,
-                { backgroundColor: isAvailable ? '#28A745' : '#E63946' },
+                s.statusIndicator,
+                { backgroundColor: isAvailable ? colors.success : colors.error },
               ]}
             />
           </View>
 
-          <Text style={styles.name}>{riderProfile?.name || 'Rider Name'}</Text>
-          <Text style={styles.email}>{riderProfile?.email || 'rider@example.com'}</Text>
+          <Text style={s.name}>{riderProfile?.name || 'Rider Name'}</Text>
+          <Text style={s.email}>{riderProfile?.email || 'rider@example.com'}</Text>
 
           {riderProfile?.phone && (
-            <View style={styles.phoneContainer}>
-              <Icon name="phone" size={16} color="#6C757D" />
-              <Text style={styles.phone}>{riderProfile.phone}</Text>
+            <View style={s.phoneContainer}>
+              <Icon name="phone" size={16} color={colors.textSecondary} />
+              <Text style={s.phone}>{riderProfile.phone}</Text>
             </View>
           )}
 
-          <View style={styles.statusBadge}>
-            <Icon
-              name={isAvailable ? 'check-circle' : 'close-circle'}
-              size={16}
-              color={isAvailable ? '#28A745' : '#E63946'}
-            />
-            <Text style={[styles.statusText, { color: isAvailable ? '#28A745' : '#E63946' }]}>
-              {isAvailable ? 'Online' : 'Offline'}
-            </Text>
-          </View>
+          <StatusBadge status={isAvailable ? 'online' : 'offline'} />
         </View>
 
         {/* Stats Card */}
-        <View style={styles.statsCard}>
-          <View style={styles.statItem}>
-            <Icon name="bike-fast" size={28} color="#2EC4B6" />
-            <Text style={styles.statValue}>{completedOrders}</Text>
-            <Text style={styles.statLabel}>Deliveries</Text>
+        <View style={s.statsCard}>
+          <View style={s.statItem}>
+            <Icon name="bike-fast" size={28} color={colors.accent} />
+            <Text style={s.statValue}>{completedOrders}</Text>
+            <Text style={s.statLabel}>Deliveries</Text>
           </View>
 
-          <View style={styles.statDivider} />
+          <View style={s.statDivider} />
 
-          <View style={styles.statItem}>
-            <Icon name="cash-multiple" size={28} color="#2EC4B6" />
-            <Text style={styles.statValue}>ETB {totalEarnings.toFixed(0)}</Text>
-            <Text style={styles.statLabel}>Earned</Text>
+          <View style={s.statItem}>
+            <Icon name="cash-multiple" size={28} color={colors.accent} />
+            <Text style={s.statValue}>PKR {totalEarnings.toFixed(0)}</Text>
+            <Text style={s.statLabel}>Earned</Text>
           </View>
 
-          <View style={styles.statDivider} />
+          <View style={s.statDivider} />
 
-          <View style={styles.statItem}>
+          <View style={s.statItem}>
             <Icon name="star" size={28} color="#FFC107" />
-            <Text style={styles.statValue}>5.0</Text>
-            <Text style={styles.statLabel}>Rating</Text>
+            <Text style={s.statValue}>5.0</Text>
+            <Text style={s.statLabel}>Rating</Text>
           </View>
         </View>
 
         {/* Vehicle Information */}
         {(riderProfile?.vehicleType || riderProfile?.vehicleNumber) && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Vehicle Information</Text>
-            <View style={styles.vehicleCard}>
+          <View style={s.section}>
+            <Text style={s.sectionTitle}>Vehicle Information</Text>
+            <View style={s.vehicleCard}>
               {riderProfile?.vehicleType && (
-                <View style={styles.vehicleRow}>
-                  <Icon name="motorbike" size={20} color="#6C757D" />
-                  <Text style={styles.vehicleLabel}>Type:</Text>
-                  <Text style={styles.vehicleValue}>{riderProfile.vehicleType}</Text>
+                <View style={s.vehicleRow}>
+                  <Icon name="motorbike" size={20} color={colors.textSecondary} />
+                  <Text style={s.vehicleLabel}>Type:</Text>
+                  <Text style={s.vehicleValue}>{riderProfile.vehicleType}</Text>
                 </View>
               )}
               {riderProfile?.vehicleNumber && (
-                <View style={styles.vehicleRow}>
-                  <Icon name="card-text" size={20} color="#6C757D" />
-                  <Text style={styles.vehicleLabel}>Plate:</Text>
-                  <Text style={styles.vehicleValue}>{riderProfile.vehicleNumber}</Text>
+                <View style={s.vehicleRow}>
+                  <Icon name="card-text" size={20} color={colors.textSecondary} />
+                  <Text style={s.vehicleLabel}>Plate:</Text>
+                  <Text style={s.vehicleValue}>{riderProfile.vehicleNumber}</Text>
                 </View>
               )}
               {riderProfile?.licenseNumber && (
-                <View style={styles.vehicleRow}>
-                  <Icon name="card-account-details" size={20} color="#6C757D" />
-                  <Text style={styles.vehicleLabel}>License:</Text>
-                  <Text style={styles.vehicleValue}>{riderProfile.licenseNumber}</Text>
+                <View style={s.vehicleRow}>
+                  <Icon name="card-account-details" size={20} color={colors.textSecondary} />
+                  <Text style={s.vehicleLabel}>License:</Text>
+                  <Text style={s.vehicleValue}>{riderProfile.licenseNumber}</Text>
                 </View>
               )}
             </View>
@@ -204,9 +202,9 @@ const ProfileScreen = () => {
         )}
 
         {/* Account Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Account</Text>
-          <View style={styles.menuContainer}>
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Account</Text>
+          <View style={s.menuContainer}>
             <MenuItem
               icon="account-edit"
               title="Edit Profile"
@@ -229,9 +227,9 @@ const ProfileScreen = () => {
         </View>
 
         {/* App Settings */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>App Settings</Text>
-          <View style={styles.menuContainer}>
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>App Settings</Text>
+          <View style={s.menuContainer}>
             <MenuItem
               icon="bell-outline"
               title="Notifications"
@@ -254,9 +252,9 @@ const ProfileScreen = () => {
         </View>
 
         {/* Support Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Support</Text>
-          <View style={styles.menuContainer}>
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Support</Text>
+          <View style={s.menuContainer}>
             <MenuItem
               icon="help-circle-outline"
               title="Help Center"
@@ -289,118 +287,106 @@ const ProfileScreen = () => {
         </View>
 
         {/* Logout Button */}
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Icon name="logout" size={24} color="#E63946" />
-          <Text style={styles.logoutText}>Logout</Text>
+        <TouchableOpacity style={s.logoutButton} onPress={handleLogout}>
+          <Icon name="logout" size={24} color={colors.error} />
+          <Text style={s.logoutText}>Logout</Text>
         </TouchableOpacity>
 
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Rider App v1.0.0</Text>
-          <Text style={styles.footerSubtext}>© 2024 Delivery Platform</Text>
+        <View style={s.footer}>
+          <Text style={s.footerText}>Rider App v1.0.0</Text>
+          <Text style={s.footerSubtext}>© 2024 Delivery Platform</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.background,
   },
   header: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 12,
+    backgroundColor: colors.surface,
+    paddingHorizontal: Math.round(16 * scale),
+    paddingTop: Math.round(16 * scale),
+    paddingBottom: Math.round(12 * scale),
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   title: {
-    fontSize: 28,
+    fontSize: Math.round(28 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   profileCard: {
-    backgroundColor: '#FFFFFF',
-    marginHorizontal: 16,
-    marginTop: 16,
-    borderRadius: 16,
-    padding: 24,
+    backgroundColor: colors.surface,
+    marginHorizontal: Math.round(16 * scale),
+    marginTop: Math.round(16 * scale),
+    borderRadius: Math.round(16 * scale),
+    padding: Math.round(24 * scale),
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: Math.round(2 * scale) },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: Math.round(4 * scale),
     elevation: 3,
   },
   avatarContainer: {
     position: 'relative',
-    marginBottom: 16,
+    marginBottom: Math.round(16 * scale),
   },
   avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#2EC4B6',
+    width: Math.round(100 * scale),
+    height: Math.round(100 * scale),
+    borderRadius: Math.round(50 * scale),
+    backgroundColor: colors.accent,
     justifyContent: 'center',
     alignItems: 'center',
   },
   statusIndicator: {
     position: 'absolute',
-    bottom: 4,
-    right: 4,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    bottom: Math.round(4 * scale),
+    right: Math.round(4 * scale),
+    width: Math.round(20 * scale),
+    height: Math.round(20 * scale),
+    borderRadius: Math.round(10 * scale),
     borderWidth: 3,
-    borderColor: '#FFFFFF',
+    borderColor: colors.surface,
   },
   name: {
-    fontSize: 24,
+    fontSize: Math.round(24 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginBottom: 4,
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   email: {
-    fontSize: 14,
-    color: '#6C757D',
-    marginBottom: 8,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginBottom: Math.round(8 * scale),
   },
   phoneContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: Math.round(12 * scale),
   },
   phone: {
-    fontSize: 14,
-    color: '#6C757D',
-    marginLeft: 6,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginLeft: Math.round(6 * scale),
   },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#F8F9FA',
-  },
-  statusText: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginLeft: 6,
-  },
+
   statsCard: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    marginHorizontal: 16,
-    marginTop: 12,
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    backgroundColor: colors.surface,
+    marginHorizontal: Math.round(16 * scale),
+    marginTop: Math.round(12 * scale),
+    borderRadius: Math.round(12 * scale),
+    padding: Math.round(16 * scale),
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: Math.round(2 * scale) },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: Math.round(4 * scale),
     elevation: 3,
   },
   statItem: {
@@ -408,76 +394,76 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statValue: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginTop: 8,
+    color: colors.textPrimary,
+    marginTop: Math.round(8 * scale),
   },
   statLabel: {
-    fontSize: 12,
-    color: '#6C757D',
-    marginTop: 4,
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
+    marginTop: Math.round(4 * scale),
   },
   statDivider: {
     width: 1,
-    backgroundColor: '#E9ECEF',
+    backgroundColor: colors.border,
   },
   section: {
-    marginTop: 24,
-    paddingHorizontal: 16,
+    marginTop: Math.round(24 * scale),
+    paddingHorizontal: Math.round(16 * scale),
   },
   sectionTitle: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#6C757D',
-    marginBottom: 8,
+    color: colors.textSecondary,
+    marginBottom: Math.round(8 * scale),
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   vehicleCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
+    padding: Math.round(16 * scale),
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: Math.round(2 * scale) },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: Math.round(4 * scale),
     elevation: 3,
   },
   vehicleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: Math.round(12 * scale),
   },
   vehicleLabel: {
-    fontSize: 14,
-    color: '#6C757D',
-    marginLeft: 12,
-    width: 60,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginLeft: Math.round(12 * scale),
+    width: Math.round(60 * scale),
   },
   vehicleValue: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#1D3557',
+    color: colors.textPrimary,
     flex: 1,
   },
   menuContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: Math.round(2 * scale) },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: Math.round(4 * scale),
     elevation: 3,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
+    padding: Math.round(16 * scale),
     borderBottomWidth: 1,
-    borderBottomColor: '#F8F9FA',
+    borderBottomColor: colors.background,
   },
   menuLeft: {
     flexDirection: 'row',
@@ -485,56 +471,56 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: Math.round(40 * scale),
+    height: Math.round(40 * scale),
+    borderRadius: Math.round(20 * scale),
     justifyContent: 'center',
     alignItems: 'center',
   },
   menuTextContainer: {
-    marginLeft: 12,
+    marginLeft: Math.round(12 * scale),
     flex: 1,
   },
   menuTitle: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '500',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   menuSubtitle: {
-    fontSize: 12,
-    color: '#6C757D',
-    marginTop: 2,
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
+    marginTop: Math.round(2 * scale),
   },
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-    marginHorizontal: 16,
-    marginTop: 24,
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: colors.surface,
+    marginHorizontal: Math.round(16 * scale),
+    marginTop: Math.round(24 * scale),
+    borderRadius: Math.round(12 * scale),
+    padding: Math.round(16 * scale),
     borderWidth: 2,
-    borderColor: '#E63946',
+    borderColor: colors.error,
   },
   logoutText: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#E63946',
-    marginLeft: 10,
+    color: colors.error,
+    marginLeft: Math.round(10 * scale),
   },
   footer: {
     alignItems: 'center',
-    paddingVertical: 24,
+    paddingVertical: Math.round(24 * scale),
   },
   footerText: {
-    fontSize: 12,
-    color: '#6C757D',
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
   },
   footerSubtext: {
-    fontSize: 11,
-    color: '#ADB5BD',
-    marginTop: 4,
+    fontSize: Math.round(11 * scale),
+    color: colors.textSecondary,
+    marginTop: Math.round(4 * scale),
   },
 });
 

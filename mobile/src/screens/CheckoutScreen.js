@@ -17,6 +17,8 @@ import { PLACE_ORDER, INITIALIZE_PAYMENT } from '../api/mutations';
 import { clearCart } from '../store/cartSlice';
 import AuthGuard from '../utils/authGuard';
 import chapaService from '../services/chapaService';
+import { useTheme } from '../theme';
+import useResponsive from '../hooks/useResponsive';
 
 const PAYMENT_METHODS = [
   { id: 'cash', name: 'Cash on Delivery', icon: 'cash' },
@@ -26,6 +28,8 @@ const PAYMENT_METHODS = [
 ];
 
 const CheckoutScreen = ({ navigation }) => {
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
   const dispatch = useDispatch();
   const cart = useSelector((state) => state.cart);
   const user = useSelector((state) => state.auth.user);
@@ -131,7 +135,7 @@ const CheckoutScreen = ({ navigation }) => {
 
     Alert.alert(
       'Confirm Order',
-      `Total: ETB ${cart.total.toFixed(2)}\nPayment: ${
+      `Total: PKR ${cart.total.toFixed(2)}\nPayment: ${
         PAYMENT_METHODS.find((p) => p.id === selectedPayment)?.name
       }`,
       [
@@ -178,42 +182,44 @@ const CheckoutScreen = ({ navigation }) => {
       ]
     );
   };
+  const s = styles(colors, typography, scale);
+
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={s.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={s.header}>
         <TouchableOpacity
-          style={styles.backButton}
+          style={s.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Icon name="arrow-left" size={24} color="#1D3557" />
+          <Icon name="arrow-left" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Checkout</Text>
+        <Text style={s.headerTitle}>Checkout</Text>
         <View style={{ width: 40 }} />
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Delivery Type */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Delivery Type</Text>
-          <View style={styles.deliveryTypeContainer}>
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Delivery Type</Text>
+          <View style={s.deliveryTypeContainer}>
             <TouchableOpacity
               style={[
-                styles.deliveryTypeButton,
-                !isPickup && styles.deliveryTypeButtonActive,
+                s.deliveryTypeButton,
+                !isPickup && s.deliveryTypeButtonActive,
               ]}
               onPress={() => setIsPickup(false)}
             >
               <Icon
                 name="bike-fast"
                 size={24}
-                color={!isPickup ? '#FF6B35' : '#6C757D'}
+                color={!isPickup ? colors.accent : colors.textSecondary}
               />
               <Text
                 style={[
-                  styles.deliveryTypeText,
-                  !isPickup && styles.deliveryTypeTextActive,
+                  s.deliveryTypeText,
+                  !isPickup && s.deliveryTypeTextActive,
                 ]}
               >
                 Delivery
@@ -221,20 +227,20 @@ const CheckoutScreen = ({ navigation }) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={[
-                styles.deliveryTypeButton,
-                isPickup && styles.deliveryTypeButtonActive,
+                s.deliveryTypeButton,
+                isPickup && s.deliveryTypeButtonActive,
               ]}
               onPress={() => setIsPickup(true)}
             >
               <Icon
                 name="store"
                 size={24}
-                color={isPickup ? '#FF6B35' : '#6C757D'}
+                color={isPickup ? colors.accent : colors.textSecondary}
               />
               <Text
                 style={[
-                  styles.deliveryTypeText,
-                  isPickup && styles.deliveryTypeTextActive,
+                  s.deliveryTypeText,
+                  isPickup && s.deliveryTypeTextActive,
                 ]}
               >
                 Pickup
@@ -245,26 +251,26 @@ const CheckoutScreen = ({ navigation }) => {
 
         {/* Delivery Address */}
         {!isPickup && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Delivery Address</Text>
+          <View style={s.section}>
+            <View style={s.sectionHeader}>
+              <Text style={s.sectionTitle}>Delivery Address</Text>
               <TouchableOpacity
                 onPress={() => Alert.alert('Address', 'Address management coming soon!')}
               >
-                <Text style={styles.changeText}>Change</Text>
+                <Text style={s.changeText}>Change</Text>
               </TouchableOpacity>
             </View>
-            <View style={styles.addressCard}>
-              <View style={styles.addressIcon}>
-                <Icon name="map-marker" size={24} color="#FF6B35" />
+            <View style={s.addressCard}>
+              <View style={s.addressIcon}>
+                <Icon name="map-marker" size={24} color={colors.accent} />
               </View>
-              <View style={styles.addressInfo}>
-                <Text style={styles.addressLabel}>{deliveryAddress.label}</Text>
-                <Text style={styles.addressText}>
+              <View style={s.addressInfo}>
+                <Text style={s.addressLabel}>{deliveryAddress.label}</Text>
+                <Text style={s.addressText}>
                   {deliveryAddress.deliveryAddress}
                 </Text>
                 {deliveryAddress.details && (
-                  <Text style={styles.addressDetails}>{deliveryAddress.details}</Text>
+                  <Text style={s.addressDetails}>{deliveryAddress.details}</Text>
                 )}
               </View>
             </View>
@@ -272,12 +278,12 @@ const CheckoutScreen = ({ navigation }) => {
         )}
 
         {/* Delivery Instructions */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Delivery Instructions (Optional)</Text>
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Delivery Instructions (Optional)</Text>
           <TextInput
-            style={styles.instructionsInput}
+            style={s.instructionsInput}
             placeholder="E.g., Ring the doorbell, Leave at door"
-            placeholderTextColor="#A8DADC"
+            placeholderTextColor={colors.inputPlaceholder}
             value={deliveryInstructions}
             onChangeText={setDeliveryInstructions}
             multiline
@@ -286,40 +292,40 @@ const CheckoutScreen = ({ navigation }) => {
         </View>
 
         {/* Payment Method */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Payment Method</Text>
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Payment Method</Text>
           {PAYMENT_METHODS.map((method) => (
             <TouchableOpacity
               key={method.id}
               style={[
-                styles.paymentCard,
-                selectedPayment === method.id && styles.paymentCardSelected,
+                s.paymentCard,
+                selectedPayment === method.id && s.paymentCardSelected,
               ]}
               onPress={() => setSelectedPayment(method.id)}
             >
-              <View style={styles.paymentLeft}>
+              <View style={s.paymentLeft}>
                 <View
                   style={[
-                    styles.paymentIcon,
-                    selectedPayment === method.id && styles.paymentIconSelected,
+                    s.paymentIcon,
+                    selectedPayment === method.id && s.paymentIconSelected,
                   ]}
                 >
                   <Icon
                     name={method.icon}
                     size={24}
-                    color={selectedPayment === method.id ? '#FF6B35' : '#6C757D'}
+                    color={selectedPayment === method.id ? colors.accent : colors.textSecondary}
                   />
                 </View>
-                <Text style={styles.paymentName}>{method.name}</Text>
+                <Text style={s.paymentName}>{method.name}</Text>
               </View>
               <View
                 style={[
-                  styles.radioButton,
-                  selectedPayment === method.id && styles.radioButtonSelected,
+                  s.radioButton,
+                  selectedPayment === method.id && s.radioButtonSelected,
                 ]}
               >
                 {selectedPayment === method.id && (
-                  <View style={styles.radioButtonInner} />
+                  <View style={s.radioButtonInner} />
                 )}
               </View>
             </TouchableOpacity>
@@ -327,40 +333,40 @@ const CheckoutScreen = ({ navigation }) => {
         </View>
 
         {/* Order Summary */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Order Summary</Text>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Items ({cart.items.length})</Text>
-            <Text style={styles.summaryValue}>{'ETB ' + String(cart.subtotal.toFixed(2))}</Text>
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Order Summary</Text>
+          <View style={s.summaryRow}>
+            <Text style={s.summaryLabel}>Items ({cart.items.length})</Text>
+            <Text style={s.summaryValue}>{'PKR ' + String(cart.subtotal.toFixed(2))}</Text>
           </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Delivery Fee</Text>
-            <Text style={styles.summaryValue}>{'ETB ' + String(cart.deliveryFee.toFixed(2))}</Text>
+          <View style={s.summaryRow}>
+            <Text style={s.summaryLabel}>Delivery Fee</Text>
+            <Text style={s.summaryValue}>{'PKR ' + String(cart.deliveryFee.toFixed(2))}</Text>
           </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Tax</Text>
-            <Text style={styles.summaryValue}>{'ETB ' + String(cart.tax.toFixed(2))}</Text>
+          <View style={s.summaryRow}>
+            <Text style={s.summaryLabel}>Tax</Text>
+            <Text style={s.summaryValue}>{'PKR ' + String(cart.tax.toFixed(2))}</Text>
           </View>
           {cart.tip > 0 && (
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Tip</Text>
-              <Text style={styles.summaryValue}>{'ETB ' + String(cart.tip.toFixed(2))}</Text>
+            <View style={s.summaryRow}>
+              <Text style={s.summaryLabel}>Tip</Text>
+              <Text style={s.summaryValue}>{'PKR ' + String(cart.tip.toFixed(2))}</Text>
             </View>
           )}
           {cart.discount > 0 && (
-            <View style={styles.summaryRow}>
-              <Text style={[styles.summaryLabel, { color: '#4CAF50' }]}>
+            <View style={s.summaryRow}>
+              <Text style={[s.summaryLabel, { color: colors.success }]}>
                 Discount
               </Text>
-              <Text style={[styles.summaryValue, { color: '#4CAF50' }]}>
-                -ETB {cart.discount.toFixed(2)}
+              <Text style={[s.summaryValue, { color: colors.success }]}>
+                -PKR {cart.discount.toFixed(2)}
               </Text>
             </View>
           )}
-          <View style={styles.dividerLine} />
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryTotal}>Total</Text>
-            <Text style={styles.summaryTotalValue}>{'ETB ' + String(cart.total.toFixed(2))}</Text>
+          <View style={s.dividerLine} />
+          <View style={s.summaryRow}>
+            <Text style={s.summaryTotal}>Total</Text>
+            <Text style={s.summaryTotalValue}>{'PKR ' + String(cart.total.toFixed(2))}</Text>
           </View>
         </View>
 
@@ -368,20 +374,20 @@ const CheckoutScreen = ({ navigation }) => {
       </ScrollView>
 
       {/* Place Order Button */}
-      <View style={styles.bottomBar}>
+      <View style={s.bottomBar}>
         <TouchableOpacity
-          style={[styles.placeOrderButton, (loading || paymentLoading) && styles.placeOrderButtonDisabled]}
+          style={[s.placeOrderButton, (loading || paymentLoading) && s.placeOrderButtonDisabled]}
           onPress={handlePlaceOrder}
           disabled={loading || paymentLoading}
         >
           {(loading || paymentLoading) ? (
-            <ActivityIndicator color="#FFFFFF" />
+            <ActivityIndicator color={colors.textInverse} />
           ) : (
             <>
-              <Text style={styles.placeOrderText}>
+              <Text style={s.placeOrderText}>
                 {selectedPayment === 'cash' ? 'Place Order' : 'Proceed to Payment'}
               </Text>
-              <Text style={styles.placeOrderPrice}>{'ETB ' + String(cart.total.toFixed(2))}</Text>
+              <Text style={s.placeOrderPrice}>{'PKR ' + String(cart.total.toFixed(2))}</Text>
             </>
           )}
         </TouchableOpacity>
@@ -390,145 +396,145 @@ const CheckoutScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.surface,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#FFFFFF',
+    paddingHorizontal: Math.round(20 * scale),
+    paddingVertical: Math.round(16 * scale),
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F8F9FA',
+    width: Math.round(40 * scale),
+    height: Math.round(40 * scale),
+    borderRadius: Math.round(20 * scale),
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerTitle: {
     flex: 1,
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginLeft: 16,
+    color: colors.textPrimary,
+    marginLeft: Math.round(16 * scale),
   },
   section: {
-    backgroundColor: '#FFFFFF',
-    padding: 20,
-    marginBottom: 12,
+    backgroundColor: colors.surface,
+    padding: Math.round(20 * scale),
+    marginBottom: Math.round(12 * scale),
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: Math.round(16 * scale),
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginBottom: 16,
+    color: colors.textPrimary,
+    marginBottom: Math.round(16 * scale),
   },
   changeText: {
-    fontSize: 14,
-    color: '#FF6B35',
+    fontSize: Math.round(14 * scale),
+    color: colors.accent,
     fontWeight: '600',
   },
   deliveryTypeContainer: {
     flexDirection: 'row',
-    gap: 12,
+    gap: Math.round(12 * scale),
   },
   deliveryTypeButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    borderRadius: 12,
+    paddingVertical: Math.round(16 * scale),
+    borderRadius: Math.round(12 * scale),
     borderWidth: 2,
-    borderColor: '#E9ECEF',
-    backgroundColor: '#F8F9FA',
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
   },
   deliveryTypeButtonActive: {
-    borderColor: '#FF6B35',
-    backgroundColor: '#FFF3E0',
+    borderColor: colors.accent,
+    backgroundColor: colors.accentSurface,
   },
   deliveryTypeText: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#6C757D',
-    marginLeft: 8,
+    color: colors.textSecondary,
+    marginLeft: Math.round(8 * scale),
   },
   deliveryTypeTextActive: {
-    color: '#FF6B35',
+    color: colors.accent,
   },
   addressCard: {
     flexDirection: 'row',
-    padding: 16,
-    backgroundColor: '#F8F9FA',
-    borderRadius: 12,
+    padding: Math.round(16 * scale),
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
     borderWidth: 1,
-    borderColor: '#E9ECEF',
+    borderColor: colors.border,
   },
   addressIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#FFF3E0',
+    width: Math.round(48 * scale),
+    height: Math.round(48 * scale),
+    borderRadius: Math.round(24 * scale),
+    backgroundColor: colors.accentSurface,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: Math.round(12 * scale),
   },
   addressInfo: {
     flex: 1,
   },
   addressLabel: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#FF6B35',
-    marginBottom: 4,
+    color: colors.accent,
+    marginBottom: Math.round(4 * scale),
   },
   addressText: {
-    fontSize: 16,
-    color: '#1D3557',
-    marginBottom: 4,
+    fontSize: Math.round(16 * scale),
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   addressDetails: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   instructionsInput: {
-    backgroundColor: '#F8F9FA',
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    color: '#1D3557',
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
+    padding: Math.round(16 * scale),
+    fontSize: Math.round(16 * scale),
+    color: colors.textPrimary,
     textAlignVertical: 'top',
-    minHeight: 100,
+    minHeight: Math.round(100 * scale),
     borderWidth: 1,
-    borderColor: '#E9ECEF',
+    borderColor: colors.border,
   },
   paymentCard: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
-    borderRadius: 12,
+    padding: Math.round(16 * scale),
+    borderRadius: Math.round(12 * scale),
     borderWidth: 2,
-    borderColor: '#E9ECEF',
-    marginBottom: 12,
+    borderColor: colors.border,
+    marginBottom: Math.round(12 * scale),
   },
   paymentCardSelected: {
-    borderColor: '#FF6B35',
-    backgroundColor: '#FFF3E0',
+    borderColor: colors.accent,
+    backgroundColor: colors.accentSurface,
   },
   paymentLeft: {
     flexDirection: 'row',
@@ -536,79 +542,79 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   paymentIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#F8F9FA',
+    width: Math.round(48 * scale),
+    height: Math.round(48 * scale),
+    borderRadius: Math.round(24 * scale),
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: Math.round(12 * scale),
   },
   paymentIconSelected: {
-    backgroundColor: '#FFF3E0',
+    backgroundColor: colors.accentSurface,
   },
   paymentName: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   radioButton: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: Math.round(24 * scale),
+    height: Math.round(24 * scale),
+    borderRadius: Math.round(12 * scale),
     borderWidth: 2,
-    borderColor: '#E9ECEF',
+    borderColor: colors.border,
     justifyContent: 'center',
     alignItems: 'center',
   },
   radioButtonSelected: {
-    borderColor: '#FF6B35',
+    borderColor: colors.accent,
   },
   radioButtonInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: '#FF6B35',
+    width: Math.round(12 * scale),
+    height: Math.round(12 * scale),
+    borderRadius: Math.round(6 * scale),
+    backgroundColor: colors.accent,
   },
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: Math.round(12 * scale),
   },
   summaryLabel: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   summaryValue: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   dividerLine: {
     height: 1,
-    backgroundColor: '#E9ECEF',
-    marginVertical: 12,
+    backgroundColor: colors.border,
+    marginVertical: Math.round(12 * scale),
   },
   summaryTotal: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   summaryTotalValue: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#FF6B35',
+    color: colors.accent,
   },
   bottomBar: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#FFFFFF',
-    padding: 20,
+    backgroundColor: colors.surface,
+    padding: Math.round(20 * scale),
     borderTopWidth: 1,
-    borderTopColor: '#E9ECEF',
-    shadowColor: '#000',
+    borderTopColor: colors.border,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -618,23 +624,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#FF6B35',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderRadius: 12,
+    backgroundColor: colors.accent,
+    paddingVertical: Math.round(16 * scale),
+    paddingHorizontal: Math.round(20 * scale),
+    borderRadius: Math.round(12 * scale),
   },
   placeOrderButtonDisabled: {
     opacity: 0.7,
   },
   placeOrderText: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.textInverse,
   },
   placeOrderPrice: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: colors.textInverse,
   },
 });
 

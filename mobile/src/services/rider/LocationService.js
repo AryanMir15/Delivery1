@@ -1,6 +1,6 @@
 // Rider App - Location Tracking Service
 import * as Location from 'expo-location';
-import socketService from './socketService';
+import socketService from '../socketService';
 
 class LocationService {
   constructor() {

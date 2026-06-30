@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 import { View, Text, StyleSheet } from 'react-native';
+import OrdersIcon from '../components/OrdersIcon';
 
 import RiderHomeScreen from '../screens/rider/RiderHomeScreen';
 import RiderOrdersScreen from '../screens/rider/RiderOrdersScreen';
@@ -12,6 +13,7 @@ import RiderProfileScreen from '../screens/rider/RiderProfileScreen';
 import DeliveryScreen from '../screens/rider/DeliveryScreen';
 import RiderOrderDetailScreen from '../screens/rider/RiderOrderDetailScreen';
 import WalletScreen from '../screens/rider/WalletScreen';
+import { useTheme } from '../theme';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -38,17 +40,19 @@ const ProfileStack = () => (
   </Stack.Navigator>
 );
 
-const ActiveOrderBadge = () => {
+const ActiveOrderBadge = ({ colors }) => {
   const activeOrder = useSelector((state) => state.order.activeOrder);
   if (!activeOrder) return null;
   return (
-    <View style={styles.badge}>
+    <View style={[styles.badge, { backgroundColor: colors.error }]}>
       <Text style={styles.badgeText}>1</Text>
     </View>
   );
 };
 
 const RiderNavigator = () => {
+  const { colors } = useTheme();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -60,8 +64,7 @@ const RiderNavigator = () => {
               iconName = focused ? 'home' : 'home-outline';
               break;
             case 'Orders':
-              iconName = focused ? 'clipboard-list' : 'clipboard-list-outline';
-              break;
+              return <OrdersIcon size={size} color={color} />;
             case 'Earnings':
               iconName = focused ? 'cash-multiple' : 'cash';
               break;
@@ -74,16 +77,16 @@ const RiderNavigator = () => {
           return (
             <View>
               <Icon name={iconName} size={size} color={color} />
-              {route.name === 'Home' && <ActiveOrderBadge />}
+              {route.name === 'Home' && <ActiveOrderBadge colors={colors} />}
             </View>
           );
         },
-        tabBarActiveTintColor: '#2EC4B6',
-        tabBarInactiveTintColor: '#6C757D',
+        tabBarActiveTintColor: colors.tabActive,
+        tabBarInactiveTintColor: colors.tabInactive,
         tabBarStyle: {
-          backgroundColor: '#FFFFFF',
+          backgroundColor: colors.tabBackground,
           borderTopWidth: 1,
-          borderTopColor: '#E9ECEF',
+          borderTopColor: colors.tabBorder,
           paddingBottom: 5,
           paddingTop: 5,
           height: 60,
@@ -107,7 +110,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: -10,
     top: -5,
-    backgroundColor: '#E63946',
     borderRadius: 10,
     minWidth: 20,
     height: 20,

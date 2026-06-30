@@ -10,10 +10,16 @@ import {
   Alert
 } from 'react-native';
 import { useQuery } from '@apollo/client';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '../theme';
+import useResponsive from '../hooks/useResponsive';
+import StatusBadge from '../components/StatusBadge';
 import { GET_ORDERS_BY_USER } from '../api/queries';
 import { formatTimeAgo } from '../utils/dateFormatter';
 
 const MyOrdersScreen = ({ navigation }) => {
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
   const [refreshing, setRefreshing] = useState(false);
 
   // Query orders with real-time updates using existing query
@@ -46,6 +52,8 @@ const MyOrdersScreen = ({ navigation }) => {
     console.log('Data:', data);
   }, [loading, error, data]);
 
+  const s = styles(colors, typography, scale);
+
   const onRefresh = async () => {
     setRefreshing(true);
     await refetch();
@@ -55,42 +63,6 @@ const MyOrdersScreen = ({ navigation }) => {
   // Use imported date formatter
   const formatDateTime = (dateInput) => {
     return formatTimeAgo(dateInput);
-  };
-
-  // Get status color
-  const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'pending':
-        return '#FF9800';
-      case 'accepted':
-        return '#2196F3';
-      case 'picked':
-        return '#9C27B0';
-      case 'delivered':
-        return '#4CAF50';
-      case 'cancelled':
-        return '#f44336';
-      default:
-        return '#666';
-    }
-  };
-
-  // Get status icon
-  const getStatusIcon = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'pending':
-        return '🔍';
-      case 'accepted':
-        return '✅';
-      case 'picked':
-        return '📦';
-      case 'delivered':
-        return '🎉';
-      case 'cancelled':
-        return '❌';
-      default:
-        return '📋';
-    }
   };
 
   // Get status text
@@ -112,8 +84,6 @@ const MyOrdersScreen = ({ navigation }) => {
   };
 
   const renderOrderCard = ({ item: order }) => {
-    const statusColor = getStatusColor(order.orderStatus);
-    const statusIcon = getStatusIcon(order.orderStatus);
     const statusText = getStatusText(order.orderStatus);
 
     // Calculate total amount
@@ -124,7 +94,7 @@ const MyOrdersScreen = ({ navigation }) => {
 
     return (
       <TouchableOpacity
-        style={styles.orderCard}
+        style={s.orderCard}
         onPress={() => navigation.navigate('OrderTracking', {
           orderId: order._id,
           orderNumber: order.orderId
@@ -132,27 +102,23 @@ const MyOrdersScreen = ({ navigation }) => {
         activeOpacity={0.7}
       >
         {/* Order Header */}
-        <View style={styles.orderHeader}>
-          <View style={styles.orderHeaderLeft}>
-            <Text style={styles.orderId}>Order #{order.orderId}</Text>
-            <Text style={styles.orderDate}>
+        <View style={s.orderHeader}>
+          <View style={s.orderHeaderLeft}>
+            <Text style={s.orderId}>Order #{order.orderId}</Text>
+            <Text style={s.orderDate}>
               {formatDateTime(order.orderDate)}
             </Text>
           </View>
-          <View style={[styles.statusBadge, { backgroundColor: statusColor }]}>
-            <Text style={styles.statusIcon}>{statusIcon}</Text>
-            <Text style={styles.statusText}>{statusText}</Text>
-          </View>
+          <StatusBadge status={order.orderStatus} />
         </View>
 
         {/* Restaurant Info */}
         {order.restaurant && (
-          <View style={styles.restaurantSection}>
-            <Text style={styles.restaurantIcon}>🏪</Text>
-            <View style={styles.restaurantInfo}>
-              <Text style={styles.restaurantName}>{order.restaurant.name}</Text>
+          <View style={s.restaurantSection}>
+            <View style={s.restaurantInfo}>
+              <Text style={s.restaurantName}>{order.restaurant.name}</Text>
               {order.restaurant.address && (
-                <Text style={styles.restaurantAddress} numberOfLines={1}>
+                <Text style={s.restaurantAddress} numberOfLines={1}>
                   {order.restaurant.address}
                 </Text>
               )}
@@ -162,17 +128,17 @@ const MyOrdersScreen = ({ navigation }) => {
 
         {/* Order Items */}
         {order.items && order.items.length > 0 && (
-          <View style={styles.itemsSection}>
-            <Text style={styles.itemsLabel}>
+          <View style={s.itemsSection}>
+            <Text style={s.itemsLabel}>
               {order.items.length} {order.items.length === 1 ? 'item' : 'items'}
             </Text>
             {order.items.slice(0, 2).map((item, index) => (
-              <Text key={index} style={styles.itemText} numberOfLines={1}>
+              <Text key={index} style={s.itemText} numberOfLines={1}>
                 • {item.title || item.food?.title || 'Item'} x {item.quantity}
               </Text>
             ))}
             {order.items.length > 2 && (
-              <Text style={styles.moreItems}>
+              <Text style={s.moreItems}>
                 +{order.items.length - 2} more
               </Text>
             )}
@@ -181,14 +147,13 @@ const MyOrdersScreen = ({ navigation }) => {
 
         {/* Delivery Address */}
         {order.deliveryAddress && (
-          <View style={styles.deliverySection}>
-            <Text style={styles.deliveryIcon}>🏠</Text>
-            <View style={styles.deliveryInfo}>
-              <Text style={styles.deliveryAddress} numberOfLines={1}>
+          <View style={s.deliverySection}>
+            <View style={s.deliveryInfo}>
+              <Text style={s.deliveryAddress} numberOfLines={1}>
                 {order.deliveryAddress.deliveryAddress}
               </Text>
               {order.deliveryAddress.details && (
-                <Text style={styles.deliveryDetails} numberOfLines={1}>
+                <Text style={s.deliveryDetails} numberOfLines={1}>
                   {order.deliveryAddress.details}
                 </Text>
               )}
@@ -198,48 +163,47 @@ const MyOrdersScreen = ({ navigation }) => {
 
         {/* Rider Info (if assigned) */}
         {order.rider && (
-          <View style={styles.riderSection}>
-            <Text style={styles.riderIcon}>🏍️</Text>
-            <View style={styles.riderInfo}>
-              <Text style={styles.riderName}>Rider: {order.rider.name}</Text>
+          <View style={s.riderSection}>
+            <View style={s.riderInfo}>
+              <Text style={s.riderName}>Rider: {order.rider.name}</Text>
             </View>
           </View>
         )}
 
         {/* Order Amount */}
-        <View style={styles.amountSection}>
-          <View style={styles.amountRow}>
-            <Text style={styles.amountLabel}>Order Amount:</Text>
-            <Text style={styles.amountValue}>
-              ETB {order.orderAmount?.toFixed(2) || '0.00'}
+        <View style={s.amountSection}>
+          <View style={s.amountRow}>
+            <Text style={s.amountLabel}>Order Amount:</Text>
+            <Text style={s.amountValue}>
+              PKR {order.orderAmount?.toFixed(2) || '0.00'}
             </Text>
           </View>
           {order.deliveryCharges > 0 && (
-            <View style={styles.amountRow}>
-              <Text style={styles.amountLabel}>Delivery:</Text>
-              <Text style={styles.amountValue}>
-                ETB {order.deliveryCharges.toFixed(2)}
+            <View style={s.amountRow}>
+              <Text style={s.amountLabel}>Delivery:</Text>
+              <Text style={s.amountValue}>
+                PKR {order.deliveryCharges.toFixed(2)}
               </Text>
             </View>
           )}
-          <View style={styles.amountRow}>
-            <Text style={styles.amountLabel}>Total:</Text>
-            <Text style={styles.amountValueBold}>
-              ETB {totalAmount.toFixed(2)}
+          <View style={s.amountRow}>
+            <Text style={s.amountLabel}>Total:</Text>
+            <Text style={s.amountValueBold}>
+              PKR {totalAmount.toFixed(2)}
             </Text>
           </View>
-          <View style={styles.amountRow}>
-            <Text style={styles.amountLabel}>Payment:</Text>
-            <Text style={styles.paymentMethod}>
+          <View style={s.amountRow}>
+            <Text style={s.amountLabel}>Payment:</Text>
+            <Text style={s.paymentMethod}>
               {order.paymentMethod?.toUpperCase() || 'N/A'}
             </Text>
           </View>
-          <View style={styles.amountRow}>
-            <Text style={styles.amountLabel}>Status:</Text>
+          <View style={s.amountRow}>
+            <Text style={s.amountLabel}>Status:</Text>
             <Text style={[
-              styles.paymentStatus,
-              { color: order.paymentStatus === 'PAID' ? '#4CAF50' : 
-                       order.paymentStatus === 'FAILED' ? '#F44336' : '#FF9800' }
+              s.paymentStatus,
+              { color: order.paymentStatus === 'PAID' ? colors.statusDelivered : 
+                       order.paymentStatus === 'FAILED' ? colors.statusCancelled : colors.statusPending }
             ]}>
               {order.paymentStatus || 'PENDING'}
             </Text>
@@ -251,7 +215,7 @@ const MyOrdersScreen = ({ navigation }) => {
          order.paymentMethod !== 'cash' && 
          order.orderStatus !== 'cancelled' && (
           <TouchableOpacity
-            style={styles.retryPaymentButton}
+            style={s.retryPaymentButton}
             onPress={() => {
               // Navigate to payment retry
               Alert.alert(
@@ -270,14 +234,14 @@ const MyOrdersScreen = ({ navigation }) => {
               );
             }}
           >
-            <Text style={styles.retryPaymentText}>💳 Retry Payment</Text>
+            <Text style={s.retryPaymentText}>Retry Payment</Text>
           </TouchableOpacity>
         )}
 
         {/* Track Button */}
-        <View style={styles.trackButton}>
-          <Text style={styles.trackButtonText}>
-            {order.orderStatus === 'delivered' ? 'View Details' : 'Track Order'} →
+        <View style={s.trackButton}>
+          <Text style={s.trackButtonText}>
+            {order.orderStatus === 'delivered' ? 'View Details' : 'Track Order'}
           </Text>
         </View>
       </TouchableOpacity>
@@ -286,32 +250,31 @@ const MyOrdersScreen = ({ navigation }) => {
 
   if (loading && !data) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
-        <Text style={styles.loadingText}>Loading your orders...</Text>
-      </View>
+      <SafeAreaView style={s.loadingContainer} edges={['top']}>
+        <ActivityIndicator size="large" color={colors.accent} />
+        <Text style={s.loadingText}>Loading your orders...</Text>
+      </SafeAreaView>
     );
   }
 
   // Show error if query failed
   if (error) {
     return (
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>My Orders</Text>
+      <SafeAreaView style={s.container} edges={['top']}>
+        <View style={s.header}>
+          <Text style={s.headerTitle}>My Orders</Text>
         </View>
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorIcon}>⚠️</Text>
-          <Text style={styles.errorTitle}>Connection Error</Text>
-          <Text style={styles.errorMessage}>{error.message}</Text>
+        <View style={s.errorContainer}>
+          <Text style={s.errorTitle}>Connection Error</Text>
+          <Text style={s.errorMessage}>{error.message}</Text>
           <TouchableOpacity
-            style={styles.retryButton}
+            style={s.retryButton}
             onPress={() => refetch()}
           >
-            <Text style={styles.retryButtonText}>Retry</Text>
+            <Text style={s.retryButtonText}>Retry</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -332,37 +295,36 @@ const MyOrdersScreen = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={s.container} edges={['top']}>
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>My Orders</Text>
-        <Text style={styles.headerSubtitle}>
+      <View style={s.header}>
+        <Text style={s.headerTitle}>My Orders</Text>
+        <Text style={s.headerSubtitle}>
           {orders.length} {orders.length === 1 ? 'order' : 'orders'} total
         </Text>
       </View>
 
       {/* Stats */}
-      <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{activeOrders.length}</Text>
-          <Text style={styles.statLabel}>Active</Text>
+      <View style={s.statsContainer}>
+        <View style={s.statCard}>
+          <Text style={s.statNumber}>{activeOrders.length}</Text>
+          <Text style={s.statLabel}>Active</Text>
         </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{completedOrders.length}</Text>
-          <Text style={styles.statLabel}>Completed</Text>
+        <View style={s.statCard}>
+          <Text style={s.statNumber}>{completedOrders.length}</Text>
+          <Text style={s.statLabel}>Completed</Text>
         </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{cancelledOrders.length}</Text>
-          <Text style={styles.statLabel}>Cancelled</Text>
+        <View style={s.statCard}>
+          <Text style={s.statNumber}>{cancelledOrders.length}</Text>
+          <Text style={s.statLabel}>Cancelled</Text>
         </View>
       </View>
 
       {/* Orders List */}
       {orders.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyIcon}>📦</Text>
-          <Text style={styles.emptyText}>No orders yet</Text>
-          <Text style={styles.emptySubText}>
+        <View style={s.emptyContainer}>
+          <Text style={s.emptyText}>No orders yet</Text>
+          <Text style={s.emptySubText}>
             Start ordering your favorite food!
           </Text>
         </View>
@@ -371,86 +333,86 @@ const MyOrdersScreen = ({ navigation }) => {
           data={orders}
           renderItem={renderOrderCard}
           keyExtractor={item => item._id}
-          contentContainerStyle={styles.listContainer}
+          contentContainerStyle={s.listContainer}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              colors={['#4CAF50']}
+              colors={[colors.accent]}
             />
           }
           showsVerticalScrollIndicator={false}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background,
   },
   loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#666',
+    marginTop: Math.round(10 * scale),
+    fontSize: Math.round(16 * scale),
+    color: colors.textSecondary,
   },
   header: {
-    backgroundColor: '#4CAF50',
-    padding: 20,
-    paddingTop: 50,
+    backgroundColor: colors.accent,
+    padding: Math.round(20 * scale),
+    paddingTop: Math.round(50 * scale),
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: Math.round(28 * scale),
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.textInverse,
   },
   headerSubtitle: {
-    fontSize: 14,
-    color: '#fff',
-    marginTop: 5,
+    fontSize: Math.round(14 * scale),
+    color: colors.textInverse,
+    marginTop: Math.round(5 * scale),
     opacity: 0.9,
   },
   statsContainer: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
-    padding: 15,
-    gap: 10,
+    backgroundColor: colors.surface,
+    padding: Math.round(15 * scale),
+    gap: Math.round(10 * scale),
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#f9f9f9',
-    padding: 15,
-    borderRadius: 8,
+    backgroundColor: colors.surfaceVariant,
+    padding: Math.round(15 * scale),
+    borderRadius: Math.round(8 * scale),
     alignItems: 'center',
   },
   statNumber: {
-    fontSize: 24,
+    fontSize: Math.round(24 * scale),
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: colors.accent,
   },
   statLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 5,
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
+    marginTop: Math.round(5 * scale),
   },
   listContainer: {
-    padding: 15,
+    padding: Math.round(15 * scale),
   },
   orderCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 15,
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
+    padding: Math.round(15 * scale),
+    marginBottom: Math.round(15 * scale),
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -459,248 +421,201 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 15,
-    paddingBottom: 15,
+    marginBottom: Math.round(15 * scale),
+    paddingBottom: Math.round(15 * scale),
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: colors.divider,
   },
   orderHeaderLeft: {
     flex: 1,
   },
   orderId: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 5,
+    color: colors.textPrimary,
+    marginBottom: Math.round(5 * scale),
   },
   orderDate: {
-    fontSize: 12,
-    color: '#999',
+    fontSize: Math.round(12 * scale),
+    color: colors.textTertiary,
   },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    gap: 5,
-  },
-  statusIcon: {
-    fontSize: 14,
-  },
-  statusText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
-  },
+
   restaurantSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
-  },
-  restaurantIcon: {
-    fontSize: 20,
-    marginRight: 10,
+    marginBottom: Math.round(12 * scale),
   },
   restaurantInfo: {
     flex: 1,
   },
   restaurantName: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 3,
+    color: colors.textPrimary,
+    marginBottom: Math.round(3 * scale),
   },
   restaurantAddress: {
-    fontSize: 13,
-    color: '#666',
+    fontSize: Math.round(13 * scale),
+    color: colors.textSecondary,
   },
   itemsSection: {
-    backgroundColor: '#f9f9f9',
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 12,
+    backgroundColor: colors.surfaceVariant,
+    padding: Math.round(10 * scale),
+    borderRadius: Math.round(8 * scale),
+    marginBottom: Math.round(12 * scale),
   },
   itemsLabel: {
-    fontSize: 12,
+    fontSize: Math.round(12 * scale),
     fontWeight: '600',
-    color: '#666',
-    marginBottom: 5,
+    color: colors.textSecondary,
+    marginBottom: Math.round(5 * scale),
   },
   itemText: {
-    fontSize: 13,
-    color: '#333',
-    marginBottom: 2,
+    fontSize: Math.round(13 * scale),
+    color: colors.textPrimary,
+    marginBottom: Math.round(2 * scale),
   },
   moreItems: {
-    fontSize: 12,
-    color: '#999',
+    fontSize: Math.round(12 * scale),
+    color: colors.textTertiary,
     fontStyle: 'italic',
-    marginTop: 3,
+    marginTop: Math.round(3 * scale),
   },
   deliverySection: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
-  },
-  deliveryIcon: {
-    fontSize: 20,
-    marginRight: 10,
+    marginBottom: Math.round(12 * scale),
   },
   deliveryInfo: {
     flex: 1,
   },
   deliveryAddress: {
-    fontSize: 14,
-    color: '#333',
-    marginBottom: 3,
+    fontSize: Math.round(14 * scale),
+    color: colors.textPrimary,
+    marginBottom: Math.round(3 * scale),
   },
   deliveryDetails: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
   },
   riderSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
-    backgroundColor: '#f9f9f9',
-    padding: 10,
-    borderRadius: 8,
-  },
-  riderIcon: {
-    fontSize: 20,
-    marginRight: 10,
+    marginBottom: Math.round(12 * scale),
+    backgroundColor: colors.surfaceVariant,
+    padding: Math.round(10 * scale),
+    borderRadius: Math.round(8 * scale),
   },
   riderInfo: {
     flex: 1,
   },
   riderName: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 3,
-  },
-  riderPhone: {
-    fontSize: 12,
-    color: '#666',
+    color: colors.textPrimary,
+    marginBottom: Math.round(3 * scale),
   },
   amountSection: {
-    backgroundColor: '#f9f9f9',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 12,
+    backgroundColor: colors.surfaceVariant,
+    padding: Math.round(12 * scale),
+    borderRadius: Math.round(8 * scale),
+    marginBottom: Math.round(12 * scale),
   },
   amountRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 5,
+    marginBottom: Math.round(5 * scale),
   },
   amountLabel: {
-    fontSize: 13,
-    color: '#666',
+    fontSize: Math.round(13 * scale),
+    color: colors.textSecondary,
   },
   amountValue: {
-    fontSize: 13,
+    fontSize: Math.round(13 * scale),
     fontWeight: '600',
-    color: '#333',
+    color: colors.textPrimary,
   },
   amountValueBold: {
-    fontSize: 15,
+    fontSize: Math.round(15 * scale),
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: colors.accent,
   },
   paymentMethod: {
-    fontSize: 13,
+    fontSize: Math.round(13 * scale),
     fontWeight: '600',
-    color: '#2196F3',
+    color: colors.info,
   },
   paymentStatus: {
-    fontSize: 13,
+    fontSize: Math.round(13 * scale),
     fontWeight: '600',
   },
   retryPaymentButton: {
-    backgroundColor: '#2196F3',
-    padding: 12,
-    borderRadius: 8,
+    backgroundColor: colors.info,
+    padding: Math.round(12 * scale),
+    borderRadius: Math.round(8 * scale),
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: Math.round(8 * scale),
   },
   retryPaymentText: {
-    color: '#fff',
-    fontSize: 14,
+    color: colors.textInverse,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
   },
-  timestampSection: {
-    marginBottom: 12,
-  },
-  timestamp: {
-    fontSize: 11,
-    color: '#999',
-    marginBottom: 3,
-  },
   trackButton: {
-    backgroundColor: '#4CAF50',
-    padding: 12,
-    borderRadius: 8,
+    backgroundColor: colors.accent,
+    padding: Math.round(12 * scale),
+    borderRadius: Math.round(8 * scale),
     alignItems: 'center',
   },
   trackButtonText: {
-    color: '#fff',
-    fontSize: 14,
+    color: colors.textInverse,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 40,
-  },
-  emptyIcon: {
-    fontSize: 60,
-    marginBottom: 20,
+    padding: Math.round(40 * scale),
   },
   emptyText: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 10,
+    color: colors.textPrimary,
+    marginBottom: Math.round(10 * scale),
   },
   emptySubText: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
     textAlign: 'center',
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 40,
-  },
-  errorIcon: {
-    fontSize: 60,
-    marginBottom: 20,
+    padding: Math.round(40 * scale),
   },
   errorTitle: {
-    fontSize: 20,
+    fontSize: Math.round(20 * scale),
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
+    color: colors.textPrimary,
+    marginBottom: Math.round(10 * scale),
   },
   errorMessage: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: Math.round(20 * scale),
   },
   retryButton: {
-    backgroundColor: '#4CAF50',
-    paddingHorizontal: 30,
-    paddingVertical: 12,
-    borderRadius: 8,
+    backgroundColor: colors.accent,
+    paddingHorizontal: Math.round(30 * scale),
+    paddingVertical: Math.round(12 * scale),
+    borderRadius: Math.round(8 * scale),
   },
   retryButtonText: {
-    color: '#fff',
-    fontSize: 16,
+    color: colors.textInverse,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
   },
 });

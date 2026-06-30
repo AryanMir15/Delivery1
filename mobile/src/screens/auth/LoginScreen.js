@@ -20,8 +20,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LOGIN_USER } from '../../api/mutations';
 import { loginStart, loginSuccess, loginFailure, setAuthToken } from '../../store/authSlice';
 import SessionService from '../../services/SessionService';
+import { useTheme } from '../../theme';
+import ShokLogo from '../../components/ShokLogo';
 
 const LoginScreen = ({ navigation }) => {
+  const { colors, typography } = useTheme();
   const dispatch = useDispatch();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,18 +34,13 @@ const LoginScreen = ({ navigation }) => {
 
   const [loginMutation] = useMutation(LOGIN_USER, {
     onCompleted: async (data) => {
-      console.log('✅ Login completed:', data);
       setIsLoggingIn(false);
-      
+
       if (data.login) {
         const { token, userId, name, email, phone, picture, isActive, userTypeId } = data.login;
-        
+
         try {
-          // Save token first
           await AsyncStorage.setItem('authToken', token);
-          console.log('✅ Token saved');
-          
-          // Update Redux state
           dispatch(setAuthToken(token));
           dispatch(
             loginSuccess({
@@ -59,28 +57,23 @@ const LoginScreen = ({ navigation }) => {
               token,
             })
           );
-          console.log('✅ Redux state updated');
-          
-          // Merge guest session in background (non-blocking)
+
           SessionService.mergeGuestToUserSession(userId)
-            .then(() => console.log('✅ Guest session merged'))
-            .catch(err => console.error('⚠️  Session merge error:', err));
-            
+            .then(() => {})
+            .catch(err => console.error('Session merge error:', err));
+
         } catch (error) {
-          console.error('❌ Error saving login data:', error);
           setIsLoggingIn(false);
           dispatch(loginFailure('Failed to save login data'));
           Alert.alert('Login Error', 'Failed to save login data. Please try again.');
         }
       } else {
-        console.error('❌ No login data returned');
         setIsLoggingIn(false);
         dispatch(loginFailure('Login failed - no data returned'));
         Alert.alert('Login Failed', 'No data returned from server');
       }
     },
     onError: (error) => {
-      console.error('❌ Login error:', error);
       setIsLoggingIn(false);
       dispatch(loginFailure(error.message));
       Alert.alert('Login Failed', error.message || 'Network error. Please check your connection.');
@@ -89,99 +82,89 @@ const LoginScreen = ({ navigation }) => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = 'Email is invalid';
     }
-    
+
     if (!password) {
       newErrors.password = 'Password is required';
     } else if (password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleLogin = async () => {
-    console.log('🔵 Login button clicked');
-    
-    // Clear previous errors
     setErrors({});
-    
+
     if (!validateForm()) {
-      console.log('❌ Validation failed');
       return;
     }
 
-    console.log('🔵 Starting login process...');
-    console.log('   Email:', email.trim().toLowerCase());
-    console.log('   API URL:', 'http://10.0.26.24:4000/graphql');
-    
     setIsLoggingIn(true);
     dispatch(loginStart());
-    
-    // Set timeout to prevent infinite loading
+
     const timeoutId = setTimeout(() => {
-      console.log('⏰ Login timeout reached');
       setIsLoggingIn(false);
       dispatch(loginFailure('Login timeout - please check your connection'));
       Alert.alert('Login Timeout', 'Request took too long. Please check your internet connection and try again.');
-    }, 15000); // 15 second timeout
+    }, 15000);
 
     try {
-      console.log('🔵 Sending login mutation...');
-      const result = await loginMutation({
+      await loginMutation({
         variables: {
           email: email.trim().toLowerCase(),
           password,
           type: 'default',
         },
       });
-      console.log('✅ Mutation completed:', result);
       clearTimeout(timeoutId);
     } catch (error) {
-      console.log('❌ Mutation error:', error);
       clearTimeout(timeoutId);
       setIsLoggingIn(false);
-      console.error('Login mutation error:', error);
       dispatch(loginFailure(error.message || 'Login failed'));
       Alert.alert('Login Error', error.message || 'An error occurred during login');
     }
   };
 
+  const s = styles(colors, typography);
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={s.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
+        style={s.keyboardView}
       >
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={s.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
           <TouchableOpacity
-            style={styles.backButton}
+            style={s.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Icon name="arrow-left" size={24} color="#1D3557" />
+            <Icon name="arrow-left" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
 
-          <View style={styles.header}>
-            <Text style={styles.title}>Welcome Back</Text>
-            <Text style={styles.subtitle}>Sign in to continue ordering</Text>
+          <View style={s.header}>
+            <ShokLogo size={112} />
+            <Text style={s.title}>Welcome Back</Text>
+            <Text style={s.subtitle}>Sign in to continue ordering</Text>
           </View>
 
-          <View style={styles.form}>
-            <View style={styles.inputContainer}>
-              <Icon name="email-outline" size={22} color="#6C757D" style={styles.inputIcon} />
+          <View style={s.form}>
+            <View style={s.inputContainer}>
+              <Icon name="email-outline" size={22} color={colors.textSecondary} style={s.inputIcon} />
               <TextInput
-                style={styles.input}
+                style={s.input}
                 placeholder="Email Address"
-                placeholderTextColor="#A8DADC"
+                placeholderTextColor="#a1a1a6"
+                color={colors.inputText}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -189,73 +172,74 @@ const LoginScreen = ({ navigation }) => {
                 autoCorrect={false}
               />
             </View>
-            {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+            {errors.email && <Text style={s.errorText}>{errors.email}</Text>}
 
-            <View style={styles.inputContainer}>
-              <Icon name="lock-outline" size={22} color="#6C757D" style={styles.inputIcon} />
+            <View style={s.inputContainer}>
+              <Icon name="lock-outline" size={22} color={colors.textSecondary} style={s.inputIcon} />
               <TextInput
-                style={styles.input}
+                style={s.input}
                 placeholder="Password"
-                placeholderTextColor="#A8DADC"
+                placeholderTextColor="#a1a1a6"
+                color={colors.inputText}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
               />
               <TouchableOpacity
                 onPress={() => setShowPassword(!showPassword)}
-                style={styles.eyeIcon}
+                style={s.eyeIcon}
               >
                 <Icon
                   name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                   size={22}
-                  color="#6C757D"
+                  color={colors.textSecondary}
                 />
               </TouchableOpacity>
             </View>
-            {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
+            {errors.password && <Text style={s.errorText}>{errors.password}</Text>}
 
             <TouchableOpacity
-              style={styles.forgotPassword}
+              style={s.forgotPassword}
               onPress={() => navigation.navigate('ForgotPassword')}
             >
-              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+              <Text style={s.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.loginButton, isLoggingIn && styles.loginButtonDisabled]}
+              style={[s.loginButton, isLoggingIn && s.loginButtonDisabled]}
               onPress={handleLogin}
               disabled={isLoggingIn}
             >
               {isLoggingIn ? (
-                <ActivityIndicator color="#FFFFFF" />
+                <ActivityIndicator color={colors.buttonPrimaryText} />
               ) : (
-                <Text style={styles.loginButtonText}>Sign In</Text>
+                <Text style={s.loginButtonText}>Sign In</Text>
               )}
             </TouchableOpacity>
           </View>
 
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>OR</Text>
-            <View style={styles.dividerLine} />
+          <View style={s.divider}>
+            <View style={s.dividerLine} />
+            <Text style={s.dividerText}>OR</Text>
+            <View style={s.dividerLine} />
           </View>
 
-          <View style={styles.socialButtons}>
-            <TouchableOpacity style={styles.socialButton}>
+          <View style={s.socialButtons}>
+            <TouchableOpacity style={s.socialButton}>
               <Icon name="google" size={24} color="#DB4437" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.socialButton}>
+            <TouchableOpacity style={s.socialButton}>
               <Icon name="facebook" size={24} color="#4267B2" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.socialButton}>
-              <Icon name="apple" size={24} color="#000000" />
+            <TouchableOpacity style={s.socialButton}>
+              <Icon name="apple" size={24} color={colors.textPrimary} />
             </TouchableOpacity>
           </View>
 
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Don't have an account? </Text>
+          <View style={s.footer}>
+            <Text style={s.footerText}>Don't have an account? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-              <Text style={styles.footerLink}>Sign Up</Text>
+              <Text style={s.footerLink}>Sign Up</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -264,10 +248,10 @@ const LoginScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
   },
   keyboardView: {
     flex: 1,
@@ -276,29 +260,38 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: 24,
     paddingBottom: 24,
+    justifyContent: 'center',
   },
   backButton: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 12,
+    zIndex: 10,
   },
   header: {
-    marginTop: 32,
+    alignItems: 'center',
+    marginTop: 24,
     marginBottom: 32,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1D3557',
+    ...typography.h1,
+    color: colors.textPrimary,
+    fontSize: 32,
+    marginTop: 16,
     marginBottom: 8,
+    textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
-    color: '#6C757D',
+    ...typography.body,
+    color: colors.textSecondary,
+    fontSize: 14,
+    textAlign: 'center',
   },
   form: {
     marginBottom: 24,
@@ -306,12 +299,12 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.inputBackground,
     borderRadius: 12,
     paddingHorizontal: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#E9ECEF',
+    borderColor: colors.inputBorder,
   },
   inputIcon: {
     marginRight: 12,
@@ -320,13 +313,13 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 56,
     fontSize: 16,
-    color: '#1D3557',
+    color: colors.inputText,
   },
   eyeIcon: {
     padding: 8,
   },
   errorText: {
-    color: '#E63946',
+    color: colors.error,
     fontSize: 12,
     marginTop: -12,
     marginBottom: 12,
@@ -337,12 +330,12 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   forgotPasswordText: {
-    color: '#FF6B35',
+    color: colors.accent,
     fontSize: 14,
     fontWeight: '500',
   },
   loginButton: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: colors.buttonPrimary,
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -351,7 +344,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   loginButtonText: {
-    color: '#FFFFFF',
+    color: colors.buttonPrimaryText,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -363,11 +356,11 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E9ECEF',
+    backgroundColor: colors.divider,
   },
   dividerText: {
     marginHorizontal: 16,
-    color: '#6C757D',
+    color: colors.textSecondary,
     fontSize: 14,
   },
   socialButtons: {
@@ -379,12 +372,12 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: 12,
     borderWidth: 1,
-    borderColor: '#E9ECEF',
+    borderColor: colors.border,
   },
   footer: {
     flexDirection: 'row',
@@ -392,11 +385,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   footerText: {
-    color: '#6C757D',
+    color: colors.textSecondary,
     fontSize: 14,
   },
   footerLink: {
-    color: '#FF6B35',
+    color: colors.accent,
     fontSize: 14,
     fontWeight: '600',
   },

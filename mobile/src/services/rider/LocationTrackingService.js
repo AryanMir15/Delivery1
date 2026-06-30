@@ -1,6 +1,5 @@
 import * as Location from 'expo-location';
-import * as TaskManager from 'expo-task-manager';
-import socketService from './socketService';
+import socketService from '../socketService';
 
 const LOCATION_TASK_NAME = 'background-location-task';
 const LOCATION_UPDATE_INTERVAL = 5000; // 5 seconds

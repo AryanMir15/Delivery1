@@ -2,6 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
+import OrdersIcon from '../components/OrdersIcon';
 
 import VendorDashboardScreen from '../screens/vendor/VendorDashboardScreen';
 import VendorOrdersScreen from '../screens/vendor/VendorOrdersScreen';
@@ -12,6 +13,7 @@ import ProductFormScreen from '../screens/vendor/ProductFormScreen';
 import AnalyticsScreen from '../screens/vendor/AnalyticsScreen';
 import VendorProfileScreen from '../screens/vendor/VendorProfileScreen';
 import ShopProfileScreen from '../screens/vendor/ShopProfileScreen';
+import { useTheme } from '../theme';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -45,6 +47,8 @@ const ProfileStack = () => (
 );
 
 const VendorNavigator = () => {
+  const { colors } = useTheme();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -56,8 +60,7 @@ const VendorNavigator = () => {
               iconName = focused ? 'home' : 'home-outline';
               break;
             case 'Orders':
-              iconName = focused ? 'receipt' : 'receipt';
-              break;
+              return <OrdersIcon size={size} color={color} />;
             case 'Products':
               iconName = focused ? 'food' : 'food-outline';
               break;
@@ -72,12 +75,12 @@ const VendorNavigator = () => {
           }
           return <Icon name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#4CAF50',
-        tabBarInactiveTintColor: '#6C757D',
+        tabBarActiveTintColor: colors.tabActive,
+        tabBarInactiveTintColor: colors.tabInactive,
         tabBarStyle: {
-          backgroundColor: '#FFFFFF',
+          backgroundColor: colors.tabBackground,
           borderTopWidth: 1,
-          borderTopColor: '#E9ECEF',
+          borderTopColor: colors.tabBorder,
           paddingBottom: 5,
           paddingTop: 5,
           height: 60,

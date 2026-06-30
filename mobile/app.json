@@ -1,20 +1,27 @@
 {
   "expo": {
-    "name": "Food Delivery",
-    "slug": "food-delivery-mobile",
+    "name": "shOk",
+    "slug": "shok-delivery",
     "version": "1.0.0",
     "orientation": "default",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
+    "icon": "./assets/icon.png",
     "splash": {
+      "image": "./assets/icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#FF6B35"
+      "backgroundColor": "#000000"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.fooddelivery.mobile"
+      "bundleIdentifier": "com.shok.delivery",
+      "icon": "./assets/icon.png"
     },
     "android": {
-      "package": "com.fooddelivery.mobile",
+      "package": "com.shok.delivery",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon-adaptive.png",
+        "backgroundColor": "#000000"
+      },
       "newArchEnabled": true,
       "permissions": [
         "ACCESS_COARSE_LOCATION",

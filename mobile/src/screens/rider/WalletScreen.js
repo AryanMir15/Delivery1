@@ -7,10 +7,16 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 
+import { useTheme, getStatusColor } from '../../theme';
+import useResponsive from '../../hooks/useResponsive';
+
 const WalletScreen = () => {
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
   const user = useSelector((state) => state.auth.user);
   const [selectedPeriod, setSelectedPeriod] = useState('week'); // 'day', 'week', 'month'
 
@@ -35,14 +41,14 @@ const WalletScreen = () => {
   const handleWithdraw = () => {
     Alert.alert(
       'Withdraw Funds',
-      `Available balance: ETB ${walletData.balance.toFixed(2)}\n\nMinimum withdrawal: ETB 500.00`,
+      `Available balance: PKR ${walletData.balance.toFixed(2)}\n\nMinimum withdrawal: PKR 500.00`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Withdraw',
           onPress: () => {
             if (walletData.balance < 500) {
-              Alert.alert('Insufficient Balance', 'Minimum withdrawal amount is ETB 500.00');
+              Alert.alert('Insufficient Balance', 'Minimum withdrawal amount is PKR 500.00');
             } else {
               Alert.alert('Success', 'Withdrawal request submitted. Funds will be transferred within 24 hours.');
             }
@@ -51,6 +57,8 @@ const WalletScreen = () => {
       ]
     );
   };
+
+  const s = styles(colors, typography, scale);
 
   const getEarningsForPeriod = () => {
     switch (selectedPeriod) {
@@ -66,272 +74,271 @@ const WalletScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Wallet</Text>
+    <SafeAreaView style={s.container}>
+      <View style={s.header}>
+        <Text style={s.title}>Wallet</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={s.content}>
         {/* Balance Card */}
-        <View style={styles.balanceCard}>
-          <View style={styles.balanceHeader}>
-            <Icon name="wallet" size={32} color="#FFFFFF" />
-            <Text style={styles.balanceLabel}>Available Balance</Text>
+        <View style={s.balanceCard}>
+          <View style={s.balanceHeader}>
+            <Icon name="wallet" size={32} color={colors.surface} />
+            <Text style={s.balanceLabel}>Available Balance</Text>
           </View>
-          <Text style={styles.balanceAmount}>ETB {walletData.balance.toFixed(2)}</Text>
-          <View style={styles.pendingContainer}>
-            <Icon name="clock-outline" size={16} color="#FFFFFF" />
-            <Text style={styles.pendingText}>
-              ETB {walletData.pendingBalance.toFixed(2)} pending
+          <Text style={s.balanceAmount}>PKR {walletData.balance.toFixed(2)}</Text>
+          <View style={s.pendingContainer}>
+            <Icon name="clock-outline" size={16} color={colors.surface} />
+            <Text style={s.pendingText}>
+              PKR {walletData.pendingBalance.toFixed(2)} pending
             </Text>
           </View>
           
-          <TouchableOpacity style={styles.withdrawButton} onPress={handleWithdraw}>
-            <Icon name="bank-transfer" size={20} color="#2EC4B6" />
-            <Text style={styles.withdrawButtonText}>Withdraw</Text>
+          <TouchableOpacity style={s.withdrawButton} onPress={handleWithdraw}>
+            <Icon name="bank-transfer" size={20} color={colors.accent} />
+            <Text style={s.withdrawButtonText}>Withdraw</Text>
           </TouchableOpacity>
         </View>
 
         {/* Period Selector */}
-        <View style={styles.periodSelector}>
+        <View style={s.periodSelector}>
           <TouchableOpacity
-            style={[styles.periodButton, selectedPeriod === 'day' && styles.periodButtonActive]}
+            style={[s.periodButton, selectedPeriod === 'day' && s.periodButtonActive]}
             onPress={() => setSelectedPeriod('day')}
           >
-            <Text style={[styles.periodButtonText, selectedPeriod === 'day' && styles.periodButtonTextActive]}>
+            <Text style={[s.periodButtonText, selectedPeriod === 'day' && s.periodButtonTextActive]}>
               Daily
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.periodButton, selectedPeriod === 'week' && styles.periodButtonActive]}
+            style={[s.periodButton, selectedPeriod === 'week' && s.periodButtonActive]}
             onPress={() => setSelectedPeriod('week')}
           >
-            <Text style={[styles.periodButtonText, selectedPeriod === 'week' && styles.periodButtonTextActive]}>
+            <Text style={[s.periodButtonText, selectedPeriod === 'week' && s.periodButtonTextActive]}>
               Weekly
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.periodButton, selectedPeriod === 'month' && styles.periodButtonActive]}
+            style={[s.periodButton, selectedPeriod === 'month' && s.periodButtonActive]}
             onPress={() => setSelectedPeriod('month')}
           >
-            <Text style={[styles.periodButtonText, selectedPeriod === 'month' && styles.periodButtonTextActive]}>
+            <Text style={[s.periodButtonText, selectedPeriod === 'month' && s.periodButtonTextActive]}>
               Monthly
             </Text>
           </TouchableOpacity>
         </View>
 
         {/* Earnings Stats */}
-        <View style={styles.statsCard}>
-          <Text style={styles.statsTitle}>Earnings Overview</Text>
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>ETB {getEarningsForPeriod().toFixed(2)}</Text>
-              <Text style={styles.statLabel}>Total Earnings</Text>
+        <View style={s.statsCard}>
+          <Text style={s.statsTitle}>Earnings Overview</Text>
+          <View style={s.statsRow}>
+            <View style={s.statItem}>
+              <Text style={s.statValue}>PKR {getEarningsForPeriod().toFixed(2)}</Text>
+              <Text style={s.statLabel}>Total Earnings</Text>
             </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{walletData.completedOrders}</Text>
-              <Text style={styles.statLabel}>Completed Orders</Text>
+            <View style={s.statItem}>
+              <Text style={s.statValue}>{walletData.completedOrders}</Text>
+              <Text style={s.statLabel}>Completed Orders</Text>
             </View>
           </View>
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{walletData.totalDistance.toFixed(1)} km</Text>
-              <Text style={styles.statLabel}>Distance Traveled</Text>
+          <View style={s.statsRow}>
+            <View style={s.statItem}>
+              <Text style={s.statValue}>{walletData.totalDistance.toFixed(1)} km</Text>
+              <Text style={s.statLabel}>Distance Traveled</Text>
             </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>
-                ETB {(getEarningsForPeriod() / walletData.completedOrders).toFixed(2)}
+            <View style={s.statItem}>
+              <Text style={s.statValue}>
+                PKR {(getEarningsForPeriod() / walletData.completedOrders).toFixed(2)}
               </Text>
-              <Text style={styles.statLabel}>Avg per Order</Text>
+              <Text style={s.statLabel}>Avg per Order</Text>
             </View>
           </View>
         </View>
 
         {/* Recent Transactions */}
-        <View style={styles.transactionsSection}>
-          <Text style={styles.sectionTitle}>Recent Transactions</Text>
+        <View style={s.transactionsSection}>
+          <Text style={s.sectionTitle}>Recent Transactions</Text>
           {recentTransactions.map((transaction) => (
-            <View key={transaction.id} style={styles.transactionItem}>
-              <View style={styles.transactionLeft}>
+            <View key={transaction.id} style={s.transactionItem}>
+              <View style={s.transactionLeft}>
                 <View
                   style={[
-                    styles.transactionIcon,
-                    { backgroundColor: transaction.type === 'earning' ? '#E8F8F5' : '#FFF3E0' },
+                    s.transactionIcon,
+                    { backgroundColor: transaction.type === 'earning' ? `${colors.success}15` : `${colors.warning}15` },
                   ]}
                 >
                   <Icon
                     name={transaction.type === 'earning' ? 'cash-plus' : 'bank-transfer-out'}
                     size={24}
-                    color={transaction.type === 'earning' ? '#28A745' : '#FF9800'}
+                    color={transaction.type === 'earning' ? colors.accent : colors.warning}
                   />
                 </View>
-                <View style={styles.transactionDetails}>
-                  <Text style={styles.transactionTitle}>
+                <View style={s.transactionDetails}>
+                  <Text style={s.transactionTitle}>
                     {transaction.type === 'earning' ? `Order ${transaction.orderId}` : 'Withdrawal'}
                   </Text>
-                  <Text style={styles.transactionDate}>{transaction.date}</Text>
+                  <Text style={s.transactionDate}>{transaction.date}</Text>
                 </View>
               </View>
               <Text
                 style={[
-                  styles.transactionAmount,
-                  { color: transaction.type === 'earning' ? '#28A745' : '#E63946' },
+                  s.transactionAmount,
+                  { color: transaction.type === 'earning' ? colors.accent : colors.error },
                 ]}
               >
-                {transaction.type === 'earning' ? '+' : ''}ETB {Math.abs(transaction.amount).toFixed(2)}
+                {transaction.type === 'earning' ? '+' : ''}PKR {Math.abs(transaction.amount).toFixed(2)}
               </Text>
             </View>
           ))}
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.background,
   },
   header: {
-    backgroundColor: '#FFFFFF',
-    padding: 20,
-    paddingTop: 50,
+    backgroundColor: colors.surface,
+    padding: Math.round(20 * scale),
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   title: {
-    fontSize: 24,
+    fontSize: Math.round(24 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   content: {
-    padding: 15,
+    padding: Math.round(15 * scale),
   },
   balanceCard: {
-    backgroundColor: '#2EC4B6',
-    borderRadius: 16,
-    padding: 25,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    backgroundColor: colors.accent,
+    borderRadius: Math.round(16 * scale),
+    padding: Math.round(25 * scale),
+    marginBottom: Math.round(20 * scale),
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: Math.round(4 * scale) },
     shadowOpacity: 0.2,
-    shadowRadius: 8,
+    shadowRadius: Math.round(8 * scale),
     elevation: 5,
   },
   balanceHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: Math.round(10 * scale),
   },
   balanceLabel: {
-    fontSize: 16,
-    color: '#FFFFFF',
-    marginLeft: 10,
+    fontSize: Math.round(16 * scale),
+    color: colors.surface,
+    marginLeft: Math.round(10 * scale),
     opacity: 0.9,
   },
   balanceAmount: {
-    fontSize: 42,
+    fontSize: Math.round(42 * scale),
     fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginVertical: 10,
+    color: colors.surface,
+    marginVertical: Math.round(10 * scale),
   },
   pendingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: Math.round(20 * scale),
   },
   pendingText: {
-    fontSize: 14,
-    color: '#FFFFFF',
-    marginLeft: 5,
+    fontSize: Math.round(14 * scale),
+    color: colors.surface,
+    marginLeft: Math.round(5 * scale),
     opacity: 0.8,
   },
   withdrawButton: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 10,
+    paddingVertical: Math.round(12 * scale),
+    borderRadius: Math.round(10 * scale),
   },
   withdrawButtonText: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#2EC4B6',
-    marginLeft: 8,
+    color: colors.accent,
+    marginLeft: Math.round(8 * scale),
   },
   periodSelector: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 4,
-    marginBottom: 20,
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
+    padding: Math.round(4 * scale),
+    marginBottom: Math.round(20 * scale),
   },
   periodButton: {
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: Math.round(10 * scale),
     alignItems: 'center',
-    borderRadius: 8,
+    borderRadius: Math.round(8 * scale),
   },
   periodButtonActive: {
-    backgroundColor: '#2EC4B6',
+    backgroundColor: colors.accent,
   },
   periodButtonText: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#6C757D',
+    color: colors.textSecondary,
   },
   periodButtonTextActive: {
-    color: '#FFFFFF',
+    color: colors.surface,
   },
   statsCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 20,
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
+    padding: Math.round(20 * scale),
+    marginBottom: Math.round(20 * scale),
   },
   statsTitle: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: '600',
-    color: '#1D3557',
-    marginBottom: 15,
+    color: colors.textPrimary,
+    marginBottom: Math.round(15 * scale),
   },
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 15,
+    marginBottom: Math.round(15 * scale),
   },
   statItem: {
     flex: 1,
   },
   statValue: {
-    fontSize: 20,
+    fontSize: Math.round(20 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginBottom: 5,
+    color: colors.textPrimary,
+    marginBottom: Math.round(5 * scale),
   },
   statLabel: {
-    fontSize: 12,
-    color: '#6C757D',
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
   },
   transactionsSection: {
-    marginBottom: 20,
+    marginBottom: Math.round(20 * scale),
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: '600',
-    color: '#1D3557',
-    marginBottom: 15,
+    color: colors.textPrimary,
+    marginBottom: Math.round(15 * scale),
   },
   transactionItem: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 15,
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
+    padding: Math.round(15 * scale),
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: Math.round(10 * scale),
   },
   transactionLeft: {
     flexDirection: 'row',
@@ -339,28 +346,28 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   transactionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: Math.round(48 * scale),
+    height: Math.round(48 * scale),
+    borderRadius: Math.round(24 * scale),
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: Math.round(12 * scale),
   },
   transactionDetails: {
     flex: 1,
   },
   transactionTitle: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#1D3557',
-    marginBottom: 4,
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   transactionDate: {
-    fontSize: 12,
-    color: '#6C757D',
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
   },
   transactionAmount: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
   },
 });

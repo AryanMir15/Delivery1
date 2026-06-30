@@ -112,7 +112,7 @@ class NotificationService {
       await Notifications.scheduleNotificationAsync({
         content: {
           title: '💰 Payment Received',
-          body: `You earned ETB ${amount.toFixed(2)}`,
+          body: `You earned PKR ${amount.toFixed(2)}`,
           data: { type: 'earnings' },
           sound: true,
         },

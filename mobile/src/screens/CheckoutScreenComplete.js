@@ -13,13 +13,18 @@ import {
   PermissionsAndroid,
   Platform
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
 import { useMutation, useQuery } from '@apollo/client';
 import { useSelector } from 'react-redux';
 import { PLACE_ORDER } from '../api/mutations';
 import { GET_RESTAURANTS } from '../api/queries';
+import { useTheme } from '../theme';
+import useResponsive from '../hooks/useResponsive';
 
 const CheckoutScreenComplete = ({ navigation, route }) => {
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
   const { restaurantId, cartItems } = route.params;
   
   // Form state with validation
@@ -546,7 +551,7 @@ const CheckoutScreenComplete = ({ navigation, route }) => {
       // Show success message
       Alert.alert(
         'Order Placed Successfully!',
-        `Order #${order.orderId}\nStatus: ${order.orderStatus}\nTotal: ETB ${order.paidAmount.toFixed(2)}`,
+        `Order #${order.orderId}\nStatus: ${order.orderStatus}\nTotal: PKR ${order.paidAmount.toFixed(2)}`,
         [
           {
             text: 'Track Order',
@@ -568,113 +573,116 @@ const CheckoutScreenComplete = ({ navigation, route }) => {
     }
   };
   
+  const s = styles(colors, typography, scale);
+  
   if (restaurantLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
-        <Text style={styles.loadingText}>Loading restaurant details...</Text>
+      <View style={s.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.success} />
+        <Text style={s.loadingText}>Loading restaurant details...</Text>
       </View>
     );
   }
   
   return (
-    <ScrollView style={styles.container}>
+    <SafeAreaView style={s.container} edges={['top']}>
+    <ScrollView style={s.container}>
       {/* Restaurant Information */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>🏪 Shop Information</Text>
+      <View style={s.section}>
+        <Text style={s.sectionTitle}>Shop Information</Text>
         {restaurant && (
-          <View style={styles.infoCard}>
-            <Text style={styles.restaurantName}>{restaurant.name}</Text>
-            <Text style={styles.restaurantAddress}>{restaurant.address}</Text>
-            <Text style={styles.locationCoords}>
-              📍 Location: [{restaurant.location.coordinates[0].toFixed(4)}, {restaurant.location.coordinates[1].toFixed(4)}]
+          <View style={s.infoCard}>
+            <Text style={s.restaurantName}>{restaurant.name}</Text>
+            <Text style={s.restaurantAddress}>{restaurant.address}</Text>
+            <Text style={s.locationCoords}>
+              Location: [{restaurant.location.coordinates[0].toFixed(4)}, {restaurant.location.coordinates[1].toFixed(4)}]
             </Text>
           </View>
         )}
       </View>
       
       {/* Order Items */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>🛒 Order Items ({cartItems.length})</Text>
+      <View style={s.section}>
+        <Text style={s.sectionTitle}>Order Items ({cartItems.length})</Text>
         {cartItems.map((item, index) => (
-          <View key={index} style={styles.itemCard}>
-            <View style={styles.itemHeader}>
-              <Text style={styles.itemTitle}>{item.food.title}</Text>
-              <Text style={styles.itemPrice}>
-                ETB {(item.variation.price * item.quantity).toFixed(2)}
+          <View key={index} style={s.itemCard}>
+            <View style={s.itemHeader}>
+              <Text style={s.itemTitle}>{item.food.title}</Text>
+              <Text style={s.itemPrice}>
+                PKR {(item.variation.price * item.quantity).toFixed(2)}
               </Text>
             </View>
-            <Text style={styles.itemDetails}>
-              {item.variation.title} × {item.quantity}
+            <Text style={s.itemDetails}>
+              {item.variation.title} x {item.quantity}
             </Text>
-            <Text style={styles.itemPrice}>
-              ETB {item.variation.price.toFixed(2)} each
+            <Text style={s.itemPrice}>
+              PKR {item.variation.price.toFixed(2)} each
             </Text>
           </View>
         ))}
       </View>
       
       {/* Location Selection */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>📍 Delivery Location</Text>
-        <View style={styles.locationDisplay}>
-          <View style={styles.locationInfo}>
-            <Text style={styles.locationName}>{locationName}</Text>
-            <Text style={styles.locationCoords}>
+      <View style={s.section}>
+        <Text style={s.sectionTitle}>Delivery Location</Text>
+        <View style={s.locationDisplay}>
+          <View style={s.locationInfo}>
+            <Text style={s.locationName}>{locationName}</Text>
+            <Text style={s.locationCoords}>
               {latitude.toFixed(4)}, {longitude.toFixed(4)}
             </Text>
           </View>
           <TouchableOpacity
-            style={styles.changeLocationButton}
+            style={s.changeLocationButton}
             onPress={() => setShowLocationPicker(true)}
           >
-            <Text style={styles.changeLocationText}>Change Location</Text>
+            <Text style={s.changeLocationText}>Change Location</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Delivery Address */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>🏠 Delivery Information</Text>
+      <View style={s.section}>
+        <Text style={s.sectionTitle}>Delivery Information</Text>
         
-        <Text style={styles.label}>Delivery Address *</Text>
+        <Text style={s.label}>Delivery Address *</Text>
         <TextInput
-          style={[styles.input, errors.deliveryAddress && styles.inputError]}
+          style={[s.input, errors.deliveryAddress && s.inputError]}
           placeholder="Enter complete delivery address"
           value={deliveryAddress}
           onChangeText={setDeliveryAddress}
           multiline
         />
         {errors.deliveryAddress && (
-          <Text style={styles.errorText}>{errors.deliveryAddress}</Text>
+          <Text style={s.errorText}>{errors.deliveryAddress}</Text>
         )}
         
-        <Text style={styles.label}>Address Details *</Text>
+        <Text style={s.label}>Address Details *</Text>
         <TextInput
-          style={[styles.input, errors.addressDetails && styles.inputError]}
+          style={[s.input, errors.addressDetails && s.inputError]}
           placeholder="Building, Floor, Apartment number"
           value={addressDetails}
           onChangeText={setAddressDetails}
           multiline
         />
         {errors.addressDetails && (
-          <Text style={styles.errorText}>{errors.addressDetails}</Text>
+          <Text style={s.errorText}>{errors.addressDetails}</Text>
         )}
         
-        <Text style={styles.label}>Address Label</Text>
-        <View style={styles.labelButtons}>
+        <Text style={s.label}>Address Label</Text>
+        <View style={s.labelButtons}>
           {['Home', 'Work', 'Other'].map(label => (
             <TouchableOpacity
               key={label}
               style={[
-                styles.labelButton,
-                addressLabel === label && styles.labelButtonActive
+                s.labelButton,
+                addressLabel === label && s.labelButtonActive
               ]}
               onPress={() => setAddressLabel(label)}
             >
               <Text style={[
-                styles.labelButtonText,
-                addressLabel === label && styles.labelButtonTextActive
+                s.labelButtonText,
+                addressLabel === label && s.labelButtonTextActive
               ]}>
                 {label}
               </Text>
@@ -682,33 +690,33 @@ const CheckoutScreenComplete = ({ navigation, route }) => {
           ))}
         </View>
         
-        <Text style={styles.label}>Phone Number *</Text>
+        <Text style={s.label}>Phone Number *</Text>
         <TextInput
-          style={[styles.input, errors.phoneNumber && styles.inputError]}
+          style={[s.input, errors.phoneNumber && s.inputError]}
           placeholder="+1234567890"
           value={phoneNumber}
           onChangeText={setPhoneNumber}
           keyboardType="phone-pad"
         />
         {errors.phoneNumber && (
-          <Text style={styles.errorText}>{errors.phoneNumber}</Text>
+          <Text style={s.errorText}>{errors.phoneNumber}</Text>
         )}
         
-        <Text style={styles.label}>Location Coordinates</Text>
-        <View style={styles.coordsRow}>
-          <View style={styles.coordInput}>
-            <Text style={styles.coordLabel}>Latitude</Text>
+        <Text style={s.label}>Location Coordinates</Text>
+        <View style={s.coordsRow}>
+          <View style={s.coordInput}>
+            <Text style={s.coordLabel}>Latitude</Text>
             <TextInput
-              style={styles.input}
+              style={s.input}
               value={latitude.toString()}
               onChangeText={(text) => setLatitude(parseFloat(text) || 0)}
               keyboardType="numeric"
             />
           </View>
-          <View style={styles.coordInput}>
-            <Text style={styles.coordLabel}>Longitude</Text>
+          <View style={s.coordInput}>
+            <Text style={s.coordLabel}>Longitude</Text>
             <TextInput
-              style={styles.input}
+              style={s.input}
               value={longitude.toString()}
               onChangeText={(text) => setLongitude(parseFloat(text) || 0)}
               keyboardType="numeric"
@@ -716,12 +724,12 @@ const CheckoutScreenComplete = ({ navigation, route }) => {
           </View>
         </View>
         {errors.location && (
-          <Text style={styles.errorText}>{errors.location}</Text>
+          <Text style={s.errorText}>{errors.location}</Text>
         )}
         
-        <Text style={styles.label}>Special Instructions (Optional)</Text>
+        <Text style={s.label}>Special Instructions (Optional)</Text>
         <TextInput
-          style={styles.input}
+          style={s.input}
           placeholder="e.g., Please call when you arrive"
           value={specialInstructions}
           onChangeText={setSpecialInstructions}
@@ -730,48 +738,48 @@ const CheckoutScreenComplete = ({ navigation, route }) => {
       </View>
       
       {/* Order Summary */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>💰 Order Summary</Text>
-        <View style={styles.summaryCard}>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Subtotal</Text>
-            <Text style={styles.summaryValue}>ETB {totals.subtotal}</Text>
+      <View style={s.section}>
+        <Text style={s.sectionTitle}>Order Summary</Text>
+        <View style={s.summaryCard}>
+          <View style={s.summaryRow}>
+            <Text style={s.summaryLabel}>Subtotal</Text>
+            <Text style={s.summaryValue}>PKR {totals.subtotal}</Text>
           </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Delivery Charges</Text>
-            <Text style={styles.summaryValue}>ETB {totals.deliveryCharges}</Text>
+          <View style={s.summaryRow}>
+            <Text style={s.summaryLabel}>Delivery Charges</Text>
+            <Text style={s.summaryValue}>PKR {totals.deliveryCharges}</Text>
           </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Tax (10%)</Text>
-            <Text style={styles.summaryValue}>ETB {totals.tax}</Text>
+          <View style={s.summaryRow}>
+            <Text style={s.summaryLabel}>Tax (10%)</Text>
+            <Text style={s.summaryValue}>PKR {totals.tax}</Text>
           </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Tip</Text>
-            <Text style={styles.summaryValue}>ETB {totals.tip}</Text>
+          <View style={s.summaryRow}>
+            <Text style={s.summaryLabel}>Tip</Text>
+            <Text style={s.summaryValue}>PKR {totals.tip}</Text>
           </View>
-          <View style={[styles.summaryRow, styles.totalRow]}>
-            <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.totalValue}>ETB {totals.total}</Text>
+          <View style={[s.summaryRow, s.totalRow]}>
+            <Text style={s.totalLabel}>Total</Text>
+            <Text style={s.totalValue}>PKR {totals.total}</Text>
           </View>
         </View>
       </View>
       
       {/* Place Order Button */}
       <TouchableOpacity
-        style={[styles.placeOrderButton, orderLoading && styles.buttonDisabled]}
+        style={[s.placeOrderButton, orderLoading && s.buttonDisabled]}
         onPress={handlePlaceOrder}
         disabled={orderLoading}
       >
         {orderLoading ? (
-          <ActivityIndicator color="#fff" />
+          <ActivityIndicator color={colors.textInverse} />
         ) : (
-          <Text style={styles.placeOrderText}>
-            Place Order - ETB {totals.total}
+          <Text style={s.placeOrderText}>
+            Place Order - PKR {totals.total}
           </Text>
         )}
       </TouchableOpacity>
       
-      <View style={styles.bottomSpacer} />
+      <View style={s.bottomSpacer} />
 
       {/* Location Picker Modal */}
       <Modal
@@ -780,61 +788,61 @@ const CheckoutScreenComplete = ({ navigation, route }) => {
         transparent={true}
         onRequestClose={() => setShowLocationPicker(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.locationModal}>
+        <View style={s.modalOverlay}>
+          <View style={s.locationModal}>
             {/* Header */}
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>📍 Choose Delivery Location</Text>
+            <View style={s.modalHeader}>
+              <Text style={s.modalTitle}>Choose Delivery Location</Text>
               <TouchableOpacity
                 onPress={() => setShowLocationPicker(false)}
-                style={styles.closeButton}
+                style={s.closeButton}
               >
-                <Text style={styles.closeButtonText}>✕</Text>
+                <Text style={s.closeButtonText}>X</Text>
               </TouchableOpacity>
             </View>
 
             {/* GPS Location Button */}
             <TouchableOpacity
-              style={[styles.gpsButton, isGettingLocation && styles.gpsButtonDisabled]}
+              style={[s.gpsButton, isGettingLocation && s.gpsButtonDisabled]}
               onPress={getCurrentLocation}
               disabled={isGettingLocation}
             >
               {isGettingLocation ? (
-                <ActivityIndicator color="#fff" size="small" />
+                <ActivityIndicator color={colors.textInverse} size="small" />
               ) : (
-                <Text style={styles.gpsButtonText}>🎯 Use Current Location</Text>
+                <Text style={s.gpsButtonText}>Use Current Location</Text>
               )}
             </TouchableOpacity>
 
             {/* Search Box */}
-            <View style={styles.searchContainer}>
+            <View style={s.searchContainer}>
               <TextInput
-                style={styles.searchInput}
+                style={s.searchInput}
                 placeholder="Search for a location in Addis Ababa..."
                 value={locationSearchText}
                 onChangeText={handleLocationSearch}
               />
               {isSearching && (
-                <ActivityIndicator style={styles.searchLoader} color="#4CAF50" />
+                <ActivityIndicator style={s.searchLoader} color={colors.success} />
               )}
             </View>
 
             {/* Search Results */}
-            <ScrollView style={styles.resultsContainer}>
+            <ScrollView style={s.resultsContainer}>
               {/* Recent Locations */}
               {recentLocations.length > 0 && locationSearchText === '' && (
-                <View style={styles.recentSection}>
-                  <Text style={styles.sectionLabel}>🕐 Recent Locations</Text>
+                <View style={s.recentSection}>
+                  <Text style={s.sectionLabel}>Recent Locations</Text>
                   {recentLocations.map((location, index) => (
                     <TouchableOpacity
                       key={index}
-                      style={styles.locationOption}
+                      style={s.locationOption}
                       onPress={() => handleLocationSelect(location)}
                     >
-                      <View style={styles.locationOptionContent}>
-                        <Text style={styles.locationOptionName}>{location.area}</Text>
-                        <Text style={styles.locationOptionAddress}>{location.name}</Text>
-                        <Text style={styles.locationOptionCoords}>
+                      <View style={s.locationOptionContent}>
+                        <Text style={s.locationOptionName}>{location.area}</Text>
+                        <Text style={s.locationOptionAddress}>{location.name}</Text>
+                        <Text style={s.locationOptionCoords}>
                           {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
                         </Text>
                       </View>
@@ -845,18 +853,18 @@ const CheckoutScreenComplete = ({ navigation, route }) => {
 
               {/* Search Results */}
               {searchResults.length > 0 && (
-                <View style={styles.searchSection}>
-                  <Text style={styles.sectionLabel}>🔍 Search Results</Text>
+                <View style={s.searchSection}>
+                  <Text style={s.sectionLabel}>Search Results</Text>
                   {searchResults.map((location, index) => (
                     <TouchableOpacity
                       key={index}
-                      style={styles.locationOption}
+                      style={s.locationOption}
                       onPress={() => handleLocationSelect(location)}
                     >
-                      <View style={styles.locationOptionContent}>
-                        <Text style={styles.locationOptionName}>{location.area}</Text>
-                        <Text style={styles.locationOptionAddress}>{location.name}</Text>
-                        <Text style={styles.locationOptionCoords}>
+                      <View style={s.locationOptionContent}>
+                        <Text style={s.locationOptionName}>{location.area}</Text>
+                        <Text style={s.locationOptionAddress}>{location.name}</Text>
+                        <Text style={s.locationOptionCoords}>
                           {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
                         </Text>
                       </View>
@@ -867,26 +875,26 @@ const CheckoutScreenComplete = ({ navigation, route }) => {
 
               {/* No Results */}
               {locationSearchText.length >= 3 && searchResults.length === 0 && !isSearching && (
-                <View style={styles.noResults}>
-                  <Text style={styles.noResultsText}>No locations found</Text>
-                  <Text style={styles.noResultsSubtext}>Try different keywords</Text>
+                <View style={s.noResults}>
+                  <Text style={s.noResultsText}>No locations found</Text>
+                  <Text style={s.noResultsSubtext}>Try different keywords</Text>
                 </View>
               )}
 
               {/* Nearby Places */}
               {nearbyPlaces.length > 0 && locationSearchText === '' && (
-                <View style={styles.nearbySection}>
-                  <Text style={styles.sectionLabel}>📍 Nearby Places</Text>
+                <View style={s.nearbySection}>
+                  <Text style={s.sectionLabel}>Nearby Places</Text>
                   {nearbyPlaces.map((place, index) => (
                     <TouchableOpacity
                       key={index}
-                      style={styles.locationOption}
+                      style={s.locationOption}
                       onPress={() => handleLocationSelect(place)}
                     >
-                      <View style={styles.locationOptionContent}>
-                        <Text style={styles.locationOptionName}>{place.area}</Text>
-                        <Text style={styles.locationOptionAddress}>{place.name}</Text>
-                        <Text style={styles.locationOptionDistance}>
+                      <View style={s.locationOptionContent}>
+                        <Text style={s.locationOptionName}>{place.area}</Text>
+                        <Text style={s.locationOptionAddress}>{place.name}</Text>
+                        <Text style={s.locationOptionDistance}>
                           {place.distance?.toFixed(1)} km away
                         </Text>
                       </View>
@@ -899,13 +907,14 @@ const CheckoutScreenComplete = ({ navigation, route }) => {
         </View>
       </Modal>
     </ScrollView>
+    </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
@@ -913,183 +922,333 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#666',
+    marginTop: Math.round(10 * scale),
+    fontSize: Math.round(16 * scale),
+    color: colors.textSecondary,
   },
   section: {
-    backgroundColor: '#fff',
-    marginTop: 10,
-    padding: 15,
+    backgroundColor: colors.surface,
+    marginTop: Math.round(10 * scale),
+    padding: Math.round(15 * scale),
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    marginBottom: 15,
-    color: '#333',
+    marginBottom: Math.round(15 * scale),
+    color: colors.textPrimary,
   },
   infoCard: {
-    backgroundColor: '#f9f9f9',
-    padding: 12,
-    borderRadius: 8,
+    backgroundColor: colors.surfaceVariant,
+    padding: Math.round(12 * scale),
+    borderRadius: Math.round(8 * scale),
     borderLeftWidth: 4,
-    borderLeftColor: '#4CAF50',
+    borderLeftColor: colors.success,
   },
   restaurantName: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 5,
+    color: colors.textPrimary,
+    marginBottom: Math.round(5 * scale),
   },
   restaurantAddress: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 5,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginBottom: Math.round(5 * scale),
   },
   locationCoords: {
-    fontSize: 12,
-    color: '#999',
+    fontSize: Math.round(12 * scale),
+    color: colors.textTertiary,
   },
   itemCard: {
-    backgroundColor: '#f9f9f9',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 10,
+    backgroundColor: colors.surfaceVariant,
+    padding: Math.round(12 * scale),
+    borderRadius: Math.round(8 * scale),
+    marginBottom: Math.round(10 * scale),
   },
   itemHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 5,
+    marginBottom: Math.round(5 * scale),
   },
   itemTitle: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#333',
+    color: colors.textPrimary,
     flex: 1,
   },
   itemDetails: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 3,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginBottom: Math.round(3 * scale),
   },
   itemPrice: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#4CAF50',
+    color: colors.success,
   },
   label: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#333',
-    marginTop: 15,
-    marginBottom: 5,
+    color: colors.textPrimary,
+    marginTop: Math.round(15 * scale),
+    marginBottom: Math.round(5 * scale),
   },
   input: {
-    backgroundColor: '#f9f9f9',
+    backgroundColor: colors.surfaceVariant,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 14,
-    color: '#333',
+    borderColor: colors.divider,
+    borderRadius: Math.round(8 * scale),
+    padding: Math.round(12 * scale),
+    fontSize: Math.round(14 * scale),
+    color: colors.textPrimary,
   },
   inputError: {
-    borderColor: '#f44336',
+    borderColor: colors.error,
   },
   errorText: {
-    color: '#f44336',
-    fontSize: 12,
-    marginTop: 5,
+    color: colors.error,
+    fontSize: Math.round(12 * scale),
+    marginTop: Math.round(5 * scale),
   },
   labelButtons: {
     flexDirection: 'row',
-    gap: 10,
-    marginTop: 5,
+    gap: Math.round(10 * scale),
+    marginTop: Math.round(5 * scale),
   },
   labelButton: {
     flex: 1,
-    padding: 10,
-    borderRadius: 8,
+    padding: Math.round(10 * scale),
+    borderRadius: Math.round(8 * scale),
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.divider,
     alignItems: 'center',
   },
   labelButtonActive: {
-    backgroundColor: '#4CAF50',
-    borderColor: '#4CAF50',
+    backgroundColor: colors.success,
+    borderColor: colors.success,
   },
   labelButtonText: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   labelButtonTextActive: {
-    color: '#fff',
+    color: colors.textInverse,
     fontWeight: '600',
   },
   coordsRow: {
     flexDirection: 'row',
-    gap: 10,
+    gap: Math.round(10 * scale),
   },
   coordInput: {
     flex: 1,
   },
   coordLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 5,
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
+    marginBottom: Math.round(5 * scale),
   },
   summaryCard: {
-    backgroundColor: '#f9f9f9',
-    padding: 15,
-    borderRadius: 8,
+    backgroundColor: colors.surfaceVariant,
+    padding: Math.round(15 * scale),
+    borderRadius: Math.round(8 * scale),
   },
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    marginBottom: Math.round(10 * scale),
   },
   summaryLabel: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   summaryValue: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#333',
+    color: colors.textPrimary,
   },
   totalRow: {
     borderTopWidth: 1,
-    borderTopColor: '#ddd',
-    paddingTop: 10,
-    marginTop: 5,
+    borderTopColor: colors.divider,
+    paddingTop: Math.round(10 * scale),
+    marginTop: Math.round(5 * scale),
   },
   totalLabel: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
   },
   totalValue: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: colors.success,
   },
   placeOrderButton: {
-    backgroundColor: '#4CAF50',
-    margin: 15,
-    padding: 18,
-    borderRadius: 8,
+    backgroundColor: colors.success,
+    margin: Math.round(15 * scale),
+    padding: Math.round(18 * scale),
+    borderRadius: Math.round(8 * scale),
     alignItems: 'center',
   },
   buttonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: colors.surfaceDisabled,
   },
   placeOrderText: {
-    color: '#fff',
-    fontSize: 18,
+    color: colors.textInverse,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
   },
   bottomSpacer: {
-    height: 20,
+    height: Math.round(20 * scale),
+  },
+  locationDisplay: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  locationInfo: {
+    flex: 1,
+  },
+  locationName: {
+    fontSize: Math.round(14 * scale),
+    fontWeight: '600',
+    color: colors.textPrimary,
+  },
+  changeLocationButton: {
+    paddingHorizontal: Math.round(16 * scale),
+    paddingVertical: Math.round(8 * scale),
+    backgroundColor: colors.surfaceVariant,
+    borderRadius: Math.round(8 * scale),
+  },
+  changeLocationText: {
+    fontSize: Math.round(14 * scale),
+    fontWeight: '600',
+    color: colors.accent,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: colors.overlay,
+    justifyContent: 'flex-end',
+  },
+  locationModal: {
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: Math.round(20 * scale),
+    borderTopRightRadius: Math.round(20 * scale),
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: Math.round(16 * scale),
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  modalTitle: {
+    fontSize: Math.round(18 * scale),
+    fontWeight: 'bold',
+    color: colors.textPrimary,
+  },
+  closeButton: {
+    padding: Math.round(8 * scale),
+  },
+  closeButtonText: {
+    fontSize: Math.round(20 * scale),
+    color: colors.textSecondary,
+  },
+  gpsButton: {
+    backgroundColor: colors.accent,
+    margin: Math.round(16 * scale),
+    padding: Math.round(14 * scale),
+    borderRadius: Math.round(8 * scale),
+    alignItems: 'center',
+  },
+  gpsButtonDisabled: {
+    backgroundColor: colors.surfaceDisabled,
+  },
+  gpsButtonText: {
+    color: colors.textInverse,
+    fontSize: Math.round(16 * scale),
+    fontWeight: '600',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: Math.round(16 * scale),
+    marginBottom: Math.round(8 * scale),
+  },
+  searchInput: {
+    flex: 1,
+    backgroundColor: colors.surfaceVariant,
+    borderWidth: 1,
+    borderColor: colors.divider,
+    borderRadius: Math.round(8 * scale),
+    padding: Math.round(12 * scale),
+    fontSize: Math.round(14 * scale),
+    color: colors.textPrimary,
+  },
+  searchLoader: {
+    marginLeft: Math.round(8 * scale),
+  },
+  resultsContainer: {
+    flex: 1,
+    paddingHorizontal: Math.round(16 * scale),
+  },
+  sectionLabel: {
+    fontSize: Math.round(14 * scale),
+    fontWeight: '600',
+    color: colors.textSecondary,
+    marginTop: Math.round(12 * scale),
+    marginBottom: Math.round(8 * scale),
+  },
+  locationOption: {
+    padding: Math.round(12 * scale),
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  locationOptionContent: {
+    flex: 1,
+  },
+  locationOptionName: {
+    fontSize: Math.round(14 * scale),
+    fontWeight: '600',
+    color: colors.textPrimary,
+    marginBottom: Math.round(2 * scale),
+  },
+  locationOptionAddress: {
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
+    marginBottom: Math.round(2 * scale),
+  },
+  locationOptionCoords: {
+    fontSize: Math.round(11 * scale),
+    color: colors.textTertiary,
+  },
+  locationOptionDistance: {
+    fontSize: Math.round(12 * scale),
+    color: colors.accent,
+  },
+  noResults: {
+    alignItems: 'center',
+    paddingVertical: Math.round(20 * scale),
+  },
+  noResultsText: {
+    fontSize: Math.round(16 * scale),
+    fontWeight: '600',
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
+  },
+  noResultsSubtext: {
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+  },
+  recentSection: {
+    marginBottom: Math.round(8 * scale),
+  },
+  searchSection: {
+    marginBottom: Math.round(8 * scale),
+  },
+  nearbySection: {
+    marginBottom: Math.round(16 * scale),
   },
 });
 

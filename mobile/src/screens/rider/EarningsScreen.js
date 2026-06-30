@@ -12,9 +12,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useQuery } from '@apollo/client';
 
+import { useTheme, getStatusColor } from '../../theme';
+import useResponsive from '../../hooks/useResponsive';
 import { GET_RIDER_ORDERS } from '../../api/queries';
 
 const EarningsScreen = () => {
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
   const [selectedPeriod, setSelectedPeriod] = useState('week'); // week, month, all
   const [refreshing, setRefreshing] = useState(false);
 
@@ -71,6 +75,8 @@ const EarningsScreen = () => {
 
   const todayEarnings = todayOrders.reduce((sum, order) => sum + calculateEarnings(order), 0);
 
+  const s = styles(colors, typography, scale);
+
   const getPeriodLabel = () => {
     switch (selectedPeriod) {
       case 'week':
@@ -101,13 +107,13 @@ const EarningsScreen = () => {
 
   const renderPeriodButton = (period, label) => (
     <TouchableOpacity
-      style={[styles.periodButton, selectedPeriod === period && styles.periodButtonActive]}
+      style={[s.periodButton, selectedPeriod === period && s.periodButtonActive]}
       onPress={() => setSelectedPeriod(period)}
     >
       <Text
         style={[
-          styles.periodButtonText,
-          selectedPeriod === period && styles.periodButtonTextActive,
+          s.periodButtonText,
+          selectedPeriod === period && s.periodButtonTextActive,
         ]}
       >
         {label}
@@ -119,46 +125,46 @@ const EarningsScreen = () => {
     const earnings = calculateEarnings(item);
 
     return (
-      <View style={styles.earningCard}>
-        <View style={styles.earningHeader}>
-          <View style={styles.earningInfo}>
-            <Text style={styles.earningOrderId}>Order #{item.orderId}</Text>
-            <Text style={styles.earningDate}>{formatDate(item.deliveredAt || item.orderDate)}</Text>
+      <View style={s.earningCard}>
+        <View style={s.earningHeader}>
+          <View style={s.earningInfo}>
+            <Text style={s.earningOrderId}>Order #{item.orderId}</Text>
+            <Text style={s.earningDate}>{formatDate(item.deliveredAt || item.orderDate)}</Text>
           </View>
-          <View style={styles.earningAmountContainer}>
-            <Text style={styles.earningAmount}>ETB {earnings.toFixed(2)}</Text>
+          <View style={s.earningAmountContainer}>
+            <Text style={s.earningAmount}>PKR {earnings.toFixed(2)}</Text>
             {item.tipping > 0 && (
-              <View style={styles.tipBadge}>
-                <Icon name="cash-plus" size={12} color="#28A745" />
-                <Text style={styles.tipText}>+{item.tipping.toFixed(2)}</Text>
+              <View style={s.tipBadge}>
+                <Icon name="cash-plus" size={12} color={colors.accent} />
+                <Text style={s.tipText}>+{item.tipping.toFixed(2)}</Text>
               </View>
             )}
           </View>
         </View>
 
-        <View style={styles.earningDetails}>
-          <View style={styles.earningDetailRow}>
-            <Icon name="store" size={14} color="#6C757D" />
-            <Text style={styles.earningDetailText}>{item.restaurant?.name}</Text>
+        <View style={s.earningDetails}>
+          <View style={s.earningDetailRow}>
+            <Icon name="store" size={14} color={colors.textSecondary} />
+            <Text style={s.earningDetailText}>{item.restaurant?.name}</Text>
           </View>
-          <View style={styles.earningDetailRow}>
-            <Icon name="map-marker" size={14} color="#6C757D" />
-            <Text style={styles.earningDetailText} numberOfLines={1}>
+          <View style={s.earningDetailRow}>
+            <Icon name="map-marker" size={14} color={colors.textSecondary} />
+            <Text style={s.earningDetailText} numberOfLines={1}>
               {item.deliveryAddress?.deliveryAddress}
             </Text>
           </View>
         </View>
 
-        <View style={styles.earningBreakdown}>
-          <View style={styles.breakdownItem}>
-            <Text style={styles.breakdownLabel}>Delivery Fee</Text>
-            <Text style={styles.breakdownValue}>ETB {item.deliveryCharges?.toFixed(2)}</Text>
+        <View style={s.earningBreakdown}>
+          <View style={s.breakdownItem}>
+            <Text style={s.breakdownLabel}>Delivery Fee</Text>
+            <Text style={s.breakdownValue}>PKR {item.deliveryCharges?.toFixed(2)}</Text>
           </View>
           {item.tipping > 0 && (
-            <View style={styles.breakdownItem}>
-              <Text style={styles.breakdownLabel}>Tip</Text>
-              <Text style={[styles.breakdownValue, styles.tipValue]}>
-                ETB {item.tipping.toFixed(2)}
+            <View style={s.breakdownItem}>
+              <Text style={s.breakdownLabel}>Tip</Text>
+              <Text style={[s.breakdownValue, s.tipValue]}>
+                PKR {item.tipping.toFixed(2)}
               </Text>
             </View>
           )}
@@ -168,108 +174,108 @@ const EarningsScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Earnings</Text>
-        <Text style={styles.subtitle}>Track your delivery income</Text>
+    <SafeAreaView style={s.container}>
+      <View style={s.header}>
+        <Text style={s.title}>Earnings</Text>
+        <Text style={s.subtitle}>Track your delivery income</Text>
       </View>
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#2EC4B6']} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.accent]} />
         }
       >
         {/* Total Earnings Card */}
-        <View style={styles.totalCard}>
-          <Icon name="cash-multiple" size={40} color="#FFFFFF" />
-          <Text style={styles.totalLabel}>Total Earnings</Text>
-          <Text style={styles.totalAmount}>ETB {totalEarnings.toFixed(2)}</Text>
-          <Text style={styles.totalSubtext}>{getPeriodLabel()}</Text>
+        <View style={s.totalCard}>
+          <Icon name="cash-multiple" size={40} color={colors.surface} />
+          <Text style={s.totalLabel}>Total Earnings</Text>
+          <Text style={s.totalAmount}>PKR {totalEarnings.toFixed(2)}</Text>
+          <Text style={s.totalSubtext}>{getPeriodLabel()}</Text>
         </View>
 
         {/* Period Selector */}
-        <View style={styles.periodContainer}>
+        <View style={s.periodContainer}>
           {renderPeriodButton('week', 'Week')}
           {renderPeriodButton('month', 'Month')}
           {renderPeriodButton('all', 'All Time')}
         </View>
 
         {/* Stats Grid */}
-        <View style={styles.statsGrid}>
-          <View style={styles.statCard}>
-            <Icon name="bike-fast" size={28} color="#2EC4B6" />
-            <Text style={styles.statValue}>{totalDeliveries}</Text>
-            <Text style={styles.statLabel}>Deliveries</Text>
+        <View style={s.statsGrid}>
+          <View style={s.statCard}>
+            <Icon name="bike-fast" size={28} color={colors.accent} />
+            <Text style={s.statValue}>{totalDeliveries}</Text>
+            <Text style={s.statLabel}>Deliveries</Text>
           </View>
 
-          <View style={styles.statCard}>
-            <Icon name="cash" size={28} color="#2EC4B6" />
-            <Text style={styles.statValue}>ETB {averageEarning.toFixed(0)}</Text>
-            <Text style={styles.statLabel}>Avg/Order</Text>
+          <View style={s.statCard}>
+            <Icon name="cash" size={28} color={colors.accent} />
+            <Text style={s.statValue}>PKR {averageEarning.toFixed(0)}</Text>
+            <Text style={s.statLabel}>Avg/Order</Text>
           </View>
 
-          <View style={styles.statCard}>
-            <Icon name="cash-plus" size={28} color="#28A745" />
-            <Text style={styles.statValue}>ETB {totalTips.toFixed(0)}</Text>
-            <Text style={styles.statLabel}>Tips</Text>
+          <View style={s.statCard}>
+            <Icon name="cash-plus" size={28} color={colors.accent} />
+            <Text style={s.statValue}>PKR {totalTips.toFixed(0)}</Text>
+            <Text style={s.statLabel}>Tips</Text>
           </View>
 
-          <View style={styles.statCard}>
-            <Icon name="calendar-today" size={28} color="#FF6B35" />
-            <Text style={styles.statValue}>ETB {todayEarnings.toFixed(0)}</Text>
-            <Text style={styles.statLabel}>Today</Text>
+          <View style={s.statCard}>
+            <Icon name="calendar-today" size={28} color={colors.accent} />
+            <Text style={s.statValue}>PKR {todayEarnings.toFixed(0)}</Text>
+            <Text style={s.statLabel}>Today</Text>
           </View>
         </View>
 
         {/* Earnings Breakdown */}
-        <View style={styles.breakdownSection}>
-          <Text style={styles.sectionTitle}>Earnings Breakdown</Text>
-          <View style={styles.breakdownCard}>
-            <View style={styles.breakdownRow}>
-              <View style={styles.breakdownLabelContainer}>
-                <Icon name="truck-delivery" size={20} color="#2EC4B6" />
-                <Text style={styles.breakdownRowLabel}>Delivery Fees</Text>
+        <View style={s.breakdownSection}>
+          <Text style={s.sectionTitle}>Earnings Breakdown</Text>
+          <View style={s.breakdownCard}>
+            <View style={s.breakdownRow}>
+              <View style={s.breakdownLabelContainer}>
+                <Icon name="truck-delivery" size={20} color={colors.accent} />
+                <Text style={s.breakdownRowLabel}>Delivery Fees</Text>
               </View>
-              <Text style={styles.breakdownRowValue}>
-                ETB {(totalEarnings - totalTips).toFixed(2)}
+              <Text style={s.breakdownRowValue}>
+                PKR {(totalEarnings - totalTips).toFixed(2)}
               </Text>
             </View>
 
-            <View style={styles.breakdownDivider} />
+            <View style={s.breakdownDivider} />
 
-            <View style={styles.breakdownRow}>
-              <View style={styles.breakdownLabelContainer}>
-                <Icon name="cash-plus" size={20} color="#28A745" />
-                <Text style={styles.breakdownRowLabel}>Tips</Text>
+            <View style={s.breakdownRow}>
+              <View style={s.breakdownLabelContainer}>
+                <Icon name="cash-plus" size={20} color={colors.accent} />
+                <Text style={s.breakdownRowLabel}>Tips</Text>
               </View>
-              <Text style={[styles.breakdownRowValue, styles.tipValue]}>
-                ETB {totalTips.toFixed(2)}
+              <Text style={[s.breakdownRowValue, s.tipValue]}>
+                PKR {totalTips.toFixed(2)}
               </Text>
             </View>
 
-            <View style={styles.breakdownDivider} />
+            <View style={s.breakdownDivider} />
 
-            <View style={styles.breakdownRow}>
-              <View style={styles.breakdownLabelContainer}>
-                <Icon name="wallet" size={20} color="#1D3557" />
-                <Text style={[styles.breakdownRowLabel, styles.totalLabel]}>Total</Text>
+            <View style={s.breakdownRow}>
+              <View style={s.breakdownLabelContainer}>
+                <Icon name="wallet" size={20} color={colors.textPrimary} />
+                <Text style={[s.breakdownRowLabel, s.totalLabel]}>Total</Text>
               </View>
-              <Text style={[styles.breakdownRowValue, styles.totalValue]}>
-                ETB {totalEarnings.toFixed(2)}
+              <Text style={[s.breakdownRowValue, s.totalValue]}>
+                PKR {totalEarnings.toFixed(2)}
               </Text>
             </View>
           </View>
         </View>
 
         {/* Recent Earnings List */}
-        <View style={styles.recentSection}>
-          <Text style={styles.sectionTitle}>Recent Earnings</Text>
+        <View style={s.recentSection}>
+          <Text style={s.sectionTitle}>Recent Earnings</Text>
           {filteredOrders.length === 0 ? (
-            <View style={styles.emptyContainer}>
-              <Icon name="cash-remove" size={60} color="#A8DADC" />
-              <Text style={styles.emptyText}>No earnings yet</Text>
-              <Text style={styles.emptySubtext}>
+            <View style={s.emptyContainer}>
+              <Icon name="cash-remove" size={60} color={colors.accentLight} />
+              <Text style={s.emptyText}>No earnings yet</Text>
+              <Text style={s.emptySubtext}>
                 Complete deliveries to start earning money
               </Text>
             </View>
@@ -287,275 +293,275 @@ const EarningsScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.background,
   },
   header: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 12,
+    backgroundColor: colors.surface,
+    paddingHorizontal: Math.round(16 * scale),
+    paddingTop: Math.round(16 * scale),
+    paddingBottom: Math.round(12 * scale),
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   title: {
-    fontSize: 28,
+    fontSize: Math.round(28 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   subtitle: {
-    fontSize: 14,
-    color: '#6C757D',
-    marginTop: 4,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginTop: Math.round(4 * scale),
   },
   totalCard: {
-    backgroundColor: '#2EC4B6',
-    marginHorizontal: 16,
-    marginTop: 16,
-    borderRadius: 16,
-    padding: 32,
+    backgroundColor: colors.accent,
+    marginHorizontal: Math.round(16 * scale),
+    marginTop: Math.round(16 * scale),
+    borderRadius: Math.round(16 * scale),
+    padding: Math.round(32 * scale),
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: Math.round(4 * scale) },
     shadowOpacity: 0.2,
-    shadowRadius: 8,
+    shadowRadius: Math.round(8 * scale),
     elevation: 6,
   },
   totalLabel: {
-    fontSize: 16,
-    color: '#FFFFFF',
+    fontSize: Math.round(16 * scale),
+    color: colors.surface,
     opacity: 0.9,
-    marginTop: 12,
+    marginTop: Math.round(12 * scale),
   },
   totalAmount: {
-    fontSize: 48,
+    fontSize: Math.round(48 * scale),
     fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginVertical: 8,
+    color: colors.surface,
+    marginVertical: Math.round(8 * scale),
   },
   totalSubtext: {
-    fontSize: 14,
-    color: '#FFFFFF',
+    fontSize: Math.round(14 * scale),
+    color: colors.surface,
     opacity: 0.8,
   },
   periodContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    gap: 8,
+    paddingHorizontal: Math.round(16 * scale),
+    paddingVertical: Math.round(16 * scale),
+    gap: Math.round(8 * scale),
   },
   periodButton: {
     flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF',
+    paddingVertical: Math.round(10 * scale),
+    paddingHorizontal: Math.round(16 * scale),
+    borderRadius: Math.round(8 * scale),
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#E9ECEF',
+    borderColor: colors.border,
     alignItems: 'center',
   },
   periodButtonActive: {
-    backgroundColor: '#2EC4B6',
-    borderColor: '#2EC4B6',
+    backgroundColor: colors.accent,
+    borderColor: colors.accent,
   },
   periodButtonText: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#6C757D',
+    color: colors.textSecondary,
   },
   periodButtonTextActive: {
-    color: '#FFFFFF',
+    color: colors.surface,
   },
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: 16,
-    gap: 12,
+    paddingHorizontal: Math.round(16 * scale),
+    gap: Math.round(12 * scale),
   },
   statCard: {
     flex: 1,
     minWidth: '45%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
+    padding: Math.round(16 * scale),
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: Math.round(2 * scale) },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: Math.round(4 * scale),
     elevation: 3,
   },
   statValue: {
-    fontSize: 20,
+    fontSize: Math.round(20 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginTop: 8,
+    color: colors.textPrimary,
+    marginTop: Math.round(8 * scale),
   },
   statLabel: {
-    fontSize: 12,
-    color: '#6C757D',
-    marginTop: 4,
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
+    marginTop: Math.round(4 * scale),
   },
   breakdownSection: {
-    paddingHorizontal: 16,
-    paddingTop: 24,
+    paddingHorizontal: Math.round(16 * scale),
+    paddingTop: Math.round(24 * scale),
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginBottom: 12,
+    color: colors.textPrimary,
+    marginBottom: Math.round(12 * scale),
   },
   breakdownCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
+    padding: Math.round(16 * scale),
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: Math.round(2 * scale) },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: Math.round(4 * scale),
     elevation: 3,
   },
   breakdownRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: Math.round(12 * scale),
   },
   breakdownLabelContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   breakdownRowLabel: {
-    fontSize: 15,
-    color: '#495057',
-    marginLeft: 12,
+    fontSize: Math.round(15 * scale),
+    color: colors.textPrimary,
+    marginLeft: Math.round(12 * scale),
   },
   breakdownRowValue: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   breakdownDivider: {
     height: 1,
-    backgroundColor: '#E9ECEF',
+    backgroundColor: colors.border,
   },
   tipValue: {
-    color: '#28A745',
+    color: colors.accent,
   },
   totalValue: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#2EC4B6',
+    color: colors.accent,
   },
   recentSection: {
-    paddingHorizontal: 16,
-    paddingTop: 24,
-    paddingBottom: 24,
+    paddingHorizontal: Math.round(16 * scale),
+    paddingTop: Math.round(24 * scale),
+    paddingBottom: Math.round(24 * scale),
   },
   earningCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
+    padding: Math.round(16 * scale),
+    marginBottom: Math.round(12 * scale),
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: Math.round(2 * scale) },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: Math.round(4 * scale),
     elevation: 3,
   },
   earningHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 12,
+    marginBottom: Math.round(12 * scale),
   },
   earningInfo: {
     flex: 1,
   },
   earningOrderId: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#1D3557',
-    marginBottom: 4,
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   earningDate: {
-    fontSize: 12,
-    color: '#6C757D',
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
   },
   earningAmountContainer: {
     alignItems: 'flex-end',
   },
   earningAmount: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#2EC4B6',
-    marginBottom: 4,
+    color: colors.accent,
+    marginBottom: Math.round(4 * scale),
   },
   tipBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#D4EDDA',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
+    backgroundColor: `${colors.success}20`,
+    paddingHorizontal: Math.round(8 * scale),
+    paddingVertical: Math.round(2 * scale),
+    borderRadius: Math.round(8 * scale),
   },
   tipText: {
-    fontSize: 11,
+    fontSize: Math.round(11 * scale),
     fontWeight: '600',
-    color: '#28A745',
-    marginLeft: 4,
+    color: colors.accent,
+    marginLeft: Math.round(4 * scale),
   },
   earningDetails: {
-    marginBottom: 12,
+    marginBottom: Math.round(12 * scale),
   },
   earningDetailRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: Math.round(6 * scale),
   },
   earningDetailText: {
-    fontSize: 13,
-    color: '#6C757D',
-    marginLeft: 8,
+    fontSize: Math.round(13 * scale),
+    color: colors.textSecondary,
+    marginLeft: Math.round(8 * scale),
     flex: 1,
   },
   earningBreakdown: {
-    paddingTop: 12,
+    paddingTop: Math.round(12 * scale),
     borderTopWidth: 1,
-    borderTopColor: '#E9ECEF',
+    borderTopColor: colors.border,
   },
   breakdownItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 4,
+    marginBottom: Math.round(4 * scale),
   },
   breakdownLabel: {
-    fontSize: 12,
-    color: '#6C757D',
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
   },
   breakdownValue: {
-    fontSize: 12,
+    fontSize: Math.round(12 * scale),
     fontWeight: '600',
-    color: '#495057',
+    color: colors.textPrimary,
   },
   emptyContainer: {
     alignItems: 'center',
-    paddingVertical: 40,
-    paddingHorizontal: 32,
+    paddingVertical: Math.round(40 * scale),
+    paddingHorizontal: Math.round(32 * scale),
   },
   emptyText: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: '600',
-    color: '#495057',
-    marginTop: 16,
+    color: colors.textPrimary,
+    marginTop: Math.round(16 * scale),
   },
   emptySubtext: {
-    fontSize: 14,
-    color: '#6C757D',
-    marginTop: 8,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginTop: Math.round(8 * scale),
     textAlign: 'center',
   },
 });

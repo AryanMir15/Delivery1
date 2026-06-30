@@ -11,8 +11,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTheme } from '../theme';
+import useResponsive from '../hooks/useResponsive';
 
 const NotificationsScreen = ({ navigation }) => {
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
   const [refreshing, setRefreshing] = useState(false);
   const [notifications, setNotifications] = useState([
     {
@@ -73,15 +77,15 @@ const NotificationsScreen = ({ navigation }) => {
     const text = `${title} ${body}`.toLowerCase();
     
     if (text.includes('order') || text.includes('delivery') || text.includes('delivered') || text.includes('booked')) {
-      return { icon: 'package-variant', color: '#2196F3' };
+      return { icon: 'package-variant', color: colors.info };
     }
     if (text.includes('discount') || text.includes('offer') || text.includes('sale')) {
-      return { icon: 'tag', color: '#FF6B35' };
+      return { icon: 'tag', color: colors.accent };
     }
     if (text.includes('confirmed')) {
-      return { icon: 'check-circle', color: '#4CAF50' };
+      return { icon: 'check-circle', color: colors.success };
     }
-    return { icon: 'bell', color: '#9C27B0' };
+    return { icon: 'bell', color: colors.accent };
   };
 
   const getTimeAgo = (timeStr) => {
@@ -93,7 +97,7 @@ const NotificationsScreen = ({ navigation }) => {
     
     return (
       <TouchableOpacity
-        style={[styles.notificationCard, !item.read && styles.unreadCard]}
+        style={[s.notificationCard, !item.read && s.unreadCard]}
         onPress={() => {
           if (item.type === 'order') {
             navigation.navigate('Orders');
@@ -101,42 +105,44 @@ const NotificationsScreen = ({ navigation }) => {
         }}
         activeOpacity={0.7}
       >
-        <View style={[styles.iconContainer, { backgroundColor: `${iconData.color}15` }]}>
+        <View style={[s.iconContainer, { backgroundColor: `${iconData.color}15` }]}>
           <Icon name={iconData.icon} size={24} color={iconData.color} />
         </View>
 
-        <View style={styles.notificationContent}>
-          <View style={styles.notificationHeader}>
-            <Text style={styles.notificationTitle}>{item.title}</Text>
-            {!item.read && <View style={styles.unreadDot} />}
+        <View style={s.notificationContent}>
+          <View style={s.notificationHeader}>
+            <Text style={s.notificationTitle}>{item.title}</Text>
+            {!item.read && <View style={s.unreadDot} />}
           </View>
-          <Text style={styles.notificationMessage} numberOfLines={2}>
+          <Text style={s.notificationMessage} numberOfLines={2}>
             {item.body}
           </Text>
-          <Text style={styles.notificationTime}>{item.time}</Text>
+          <Text style={s.notificationTime}>{item.time}</Text>
         </View>
 
         <TouchableOpacity
-          style={styles.deleteButton}
+          style={s.deleteButton}
           onPress={() => deleteNotification(item.id)}
         >
-          <Icon name="close" size={20} color="#6C757D" />
+          <Icon name="close" size={20} color={colors.textSecondary} />
         </TouchableOpacity>
       </TouchableOpacity>
     );
   };
 
+  const s = styles(colors, typography, scale);
+
   const renderHeader = () => (
-    <View style={styles.header}>
+    <View style={s.header}>
       <TouchableOpacity
-        style={styles.backButton}
+        style={s.backButton}
         onPress={() => navigation.goBack()}
       >
-        <Icon name="arrow-left" size={24} color="#1D3557" />
+        <Icon name="arrow-left" size={24} color={colors.textPrimary} />
       </TouchableOpacity>
 
-      <View style={styles.headerCenter}>
-        <Text style={styles.headerTitle}>Notifications</Text>
+      <View style={s.headerCenter}>
+        <Text style={s.headerTitle}>Notifications</Text>
       </View>
 
       <View style={{ width: 40 }} />
@@ -144,29 +150,29 @@ const NotificationsScreen = ({ navigation }) => {
   );
 
   const renderEmpty = () => (
-    <View style={styles.emptyContainer}>
-      <Icon name="bell-off-outline" size={80} color="#E9ECEF" />
-      <Text style={styles.emptyTitle}>No Notifications</Text>
-      <Text style={styles.emptyMessage}>
+    <View style={s.emptyContainer}>
+      <Icon name="bell-off-outline" size={80} color={colors.border} />
+      <Text style={s.emptyTitle}>No Notifications</Text>
+      <Text style={s.emptyMessage}>
         You're all caught up! Check back later for updates.
       </Text>
     </View>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={s.container}>
       {renderHeader()}
 
       <FlatList
         data={notifications}
         renderItem={renderNotification}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContainer}
+        contentContainerStyle={s.listContainer}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={['#FF6B35']}
+            colors={[colors.accent]}
           />
         }
         ListEmptyComponent={renderEmpty()}
@@ -175,26 +181,26 @@ const NotificationsScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.surface,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    backgroundColor: '#FFFFFF',
+    paddingHorizontal: Math.round(16 * scale),
+    paddingVertical: Math.round(16 * scale),
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F8F9FA',
+    width: Math.round(40 * scale),
+    height: Math.round(40 * scale),
+    borderRadius: Math.round(20 * scale),
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -203,23 +209,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: 16,
+    marginHorizontal: Math.round(16 * scale),
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: Math.round(20 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   listContainer: {
-    padding: 16,
+    padding: Math.round(16 * scale),
   },
   notificationCard: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(16 * scale),
+    padding: Math.round(16 * scale),
+    marginBottom: Math.round(12 * scale),
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -227,16 +233,16 @@ const styles = StyleSheet.create({
   },
   unreadCard: {
     borderLeftWidth: 4,
-    borderLeftColor: '#FF6B35',
-    backgroundColor: '#FFF9F5',
+    borderLeftColor: colors.accent,
+    backgroundColor: colors.surfaceVariant,
   },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: Math.round(48 * scale),
+    height: Math.round(48 * scale),
+    borderRadius: Math.round(24 * scale),
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: Math.round(12 * scale),
   },
   notificationContent: {
     flex: 1,
@@ -244,57 +250,57 @@ const styles = StyleSheet.create({
   notificationHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: Math.round(4 * scale),
   },
   notificationTitle: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#1D3557',
+    color: colors.textPrimary,
     flex: 1,
   },
   unreadDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#FF6B35',
-    marginLeft: 8,
+    width: Math.round(8 * scale),
+    height: Math.round(8 * scale),
+    borderRadius: Math.round(4 * scale),
+    backgroundColor: colors.accent,
+    marginLeft: Math.round(8 * scale),
   },
   notificationMessage: {
-    fontSize: 14,
-    color: '#6C757D',
-    lineHeight: 20,
-    marginBottom: 8,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    lineHeight: Math.round(20 * scale),
+    marginBottom: Math.round(8 * scale),
   },
   notificationTime: {
-    fontSize: 12,
-    color: '#ADB5BD',
+    fontSize: Math.round(12 * scale),
+    color: colors.textTertiary,
   },
   deleteButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: Math.round(32 * scale),
+    height: Math.round(32 * scale),
+    borderRadius: Math.round(16 * scale),
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 8,
+    marginLeft: Math.round(8 * scale),
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 80,
+    paddingVertical: Math.round(80 * scale),
   },
   emptyTitle: {
-    fontSize: 20,
+    fontSize: Math.round(20 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginTop: 16,
-    marginBottom: 8,
+    color: colors.textPrimary,
+    marginTop: Math.round(16 * scale),
+    marginBottom: Math.round(8 * scale),
   },
   emptyMessage: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
     textAlign: 'center',
-    paddingHorizontal: 32,
+    paddingHorizontal: Math.round(32 * scale),
   },
 });
 

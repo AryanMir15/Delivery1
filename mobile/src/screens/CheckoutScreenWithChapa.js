@@ -9,14 +9,19 @@ import {
   Alert,
   Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector, useDispatch } from 'react-redux';
 import { useMutation } from '@apollo/client';
 import { PLACE_ORDER, INITIALIZE_PAYMENT, VERIFY_PAYMENT } from '../api/mutations';
 import { clearCart } from '../store/cartSlice';
 import chapaPaymentService from '../services/chapaPaymentService';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../theme';
+import useResponsive from '../hooks/useResponsive';
 
 const CheckoutScreenWithChapa = ({ navigation, route }) => {
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const { items, totalAmount } = useSelector((state) => state.cart);
@@ -252,235 +257,239 @@ const CheckoutScreenWithChapa = ({ navigation, route }) => {
     }
   };
 
+  const s = styles(colors, typography, scale);
+
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.scrollView}>
+    <SafeAreaView style={s.container} edges={['top']}>
+    <View style={s.container}>
+      <ScrollView style={s.scrollView}>
         {/* Order Summary */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Order Summary</Text>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Subtotal</Text>
-            <Text style={styles.summaryValue}>ETB {totalAmount.toFixed(2)}</Text>
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Order Summary</Text>
+          <View style={s.summaryRow}>
+            <Text style={s.summaryLabel}>Subtotal</Text>
+            <Text style={s.summaryValue}>PKR {totalAmount.toFixed(2)}</Text>
           </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Delivery Charges</Text>
-            <Text style={styles.summaryValue}>ETB {deliveryCharges.toFixed(2)}</Text>
+          <View style={s.summaryRow}>
+            <Text style={s.summaryLabel}>Delivery Charges</Text>
+            <Text style={s.summaryValue}>PKR {deliveryCharges.toFixed(2)}</Text>
           </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Tax (15%)</Text>
-            <Text style={styles.summaryValue}>ETB {taxAmount.toFixed(2)}</Text>
+          <View style={s.summaryRow}>
+            <Text style={s.summaryLabel}>Tax (15%)</Text>
+            <Text style={s.summaryValue}>PKR {taxAmount.toFixed(2)}</Text>
           </View>
-          <View style={[styles.summaryRow, styles.totalRow]}>
-            <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.totalValue}>ETB {finalAmount.toFixed(2)}</Text>
+          <View style={[s.summaryRow, s.totalRow]}>
+            <Text style={s.totalLabel}>Total</Text>
+            <Text style={s.totalValue}>PKR {finalAmount.toFixed(2)}</Text>
           </View>
         </View>
 
         {/* Delivery Address */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Delivery Address</Text>
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Delivery Address</Text>
           {deliveryAddress ? (
-            <View style={styles.addressCard}>
-              <Ionicons name="location" size={20} color="#4CAF50" />
-              <View style={styles.addressInfo}>
-                <Text style={styles.addressLabel}>{deliveryAddress.label}</Text>
-                <Text style={styles.addressText}>
+            <View style={s.addressCard}>
+              <Ionicons name="location" size={20} color={colors.success} />
+              <View style={s.addressInfo}>
+                <Text style={s.addressLabel}>{deliveryAddress.label}</Text>
+                <Text style={s.addressText}>
                   {deliveryAddress.deliveryAddress}
                 </Text>
                 {deliveryAddress.details && (
-                  <Text style={styles.addressDetails}>{deliveryAddress.details}</Text>
+                  <Text style={s.addressDetails}>{deliveryAddress.details}</Text>
                 )}
               </View>
             </View>
           ) : (
             <TouchableOpacity
-              style={styles.addAddressButton}
+              style={s.addAddressButton}
               onPress={() => navigation.navigate('SelectAddress')}
             >
-              <Text style={styles.addAddressText}>+ Add Delivery Address</Text>
+              <Text style={s.addAddressText}>+ Add Delivery Address</Text>
             </TouchableOpacity>
           )}
         </View>
 
         {/* Payment Method */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Payment Method</Text>
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Payment Method</Text>
           {paymentMethods.map((method) => (
             <TouchableOpacity
               key={method.id}
               style={[
-                styles.paymentMethod,
-                paymentMethod === method.id && styles.paymentMethodSelected,
-                !method.enabled && styles.paymentMethodDisabled,
+                s.paymentMethod,
+                paymentMethod === method.id && s.paymentMethodSelected,
+                !method.enabled && s.paymentMethodDisabled,
               ]}
               onPress={() => method.enabled && setPaymentMethod(method.id)}
               disabled={!method.enabled}
             >
-              <View style={styles.paymentMethodLeft}>
+              <View style={s.paymentMethodLeft}>
                 <Ionicons
                   name={method.icon}
                   size={24}
-                  color={paymentMethod === method.id ? '#4CAF50' : '#666'}
+                  color={paymentMethod === method.id ? colors.success : colors.textSecondary}
                 />
-                <View style={styles.paymentMethodInfo}>
+                <View style={s.paymentMethodInfo}>
                   <Text
                     style={[
-                      styles.paymentMethodName,
-                      paymentMethod === method.id && styles.paymentMethodNameSelected,
+                      s.paymentMethodName,
+                      paymentMethod === method.id && s.paymentMethodNameSelected,
                     ]}
                   >
                     {method.name}
                   </Text>
-                  <Text style={styles.paymentMethodDescription}>
+                  <Text style={s.paymentMethodDescription}>
                     {method.description}
                   </Text>
                 </View>
               </View>
               <View
                 style={[
-                  styles.radio,
-                  paymentMethod === method.id && styles.radioSelected,
+                  s.radio,
+                  paymentMethod === method.id && s.radioSelected,
                 ]}
               >
-                {paymentMethod === method.id && <View style={styles.radioDot} />}
+                {paymentMethod === method.id && <View style={s.radioDot} />}
               </View>
             </TouchableOpacity>
           ))}
         </View>
 
         {/* Special Instructions */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Special Instructions (Optional)</Text>
-          <Text style={styles.instructionsInput} onPress={() => {/* Add text input modal */}}>
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Special Instructions (Optional)</Text>
+          <Text style={s.instructionsInput} onPress={() => {/* Add text input modal */}}>
             {instructions || 'Add any special instructions for your order...'}
           </Text>
         </View>
       </ScrollView>
 
       {/* Place Order Button */}
-      <View style={styles.footer}>
+      <View style={s.footer}>
         <TouchableOpacity
-          style={[styles.placeOrderButton, isProcessing && styles.buttonDisabled]}
+          style={[s.placeOrderButton, isProcessing && s.buttonDisabled]}
           onPress={handlePlaceOrder}
           disabled={isProcessing}
         >
           {isProcessing ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color={colors.textInverse} />
           ) : (
             <>
-              <Text style={styles.placeOrderText}>Place Order</Text>
-              <Text style={styles.placeOrderAmount}>ETB {finalAmount.toFixed(2)}</Text>
+              <Text style={s.placeOrderText}>Place Order</Text>
+              <Text style={s.placeOrderAmount}>PKR {finalAmount.toFixed(2)}</Text>
             </>
           )}
         </TouchableOpacity>
       </View>
     </View>
+    </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background,
   },
   scrollView: {
     flex: 1,
   },
   section: {
-    backgroundColor: '#fff',
-    padding: 16,
-    marginBottom: 8,
+    backgroundColor: colors.surface,
+    padding: Math.round(16 * scale),
+    marginBottom: Math.round(8 * scale),
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    marginBottom: 12,
-    color: '#333',
+    marginBottom: Math.round(12 * scale),
+    color: colors.textPrimary,
   },
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: Math.round(8 * scale),
   },
   summaryLabel: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   summaryValue: {
-    fontSize: 14,
-    color: '#333',
+    fontSize: Math.round(14 * scale),
+    color: colors.textPrimary,
   },
   totalRow: {
-    marginTop: 8,
-    paddingTop: 12,
+    marginTop: Math.round(8 * scale),
+    paddingTop: Math.round(12 * scale),
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: colors.divider,
   },
   totalLabel: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
   },
   totalValue: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: colors.success,
   },
   addressCard: {
     flexDirection: 'row',
-    padding: 12,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
+    padding: Math.round(12 * scale),
+    backgroundColor: colors.surfaceVariant,
+    borderRadius: Math.round(8 * scale),
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors.divider,
   },
   addressInfo: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: Math.round(12 * scale),
   },
   addressLabel: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   addressText: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 2,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginBottom: Math.round(2 * scale),
   },
   addressDetails: {
-    fontSize: 12,
-    color: '#999',
+    fontSize: Math.round(12 * scale),
+    color: colors.textTertiary,
   },
   addAddressButton: {
-    padding: 16,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
+    padding: Math.round(16 * scale),
+    backgroundColor: colors.surfaceVariant,
+    borderRadius: Math.round(8 * scale),
     borderWidth: 1,
-    borderColor: '#4CAF50',
+    borderColor: colors.success,
     borderStyle: 'dashed',
     alignItems: 'center',
   },
   addAddressText: {
-    color: '#4CAF50',
-    fontSize: 14,
+    color: colors.success,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
   },
   paymentMethod: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 12,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
+    padding: Math.round(12 * scale),
+    backgroundColor: colors.surfaceVariant,
+    borderRadius: Math.round(8 * scale),
     borderWidth: 1,
-    borderColor: '#e0e0e0',
-    marginBottom: 8,
+    borderColor: colors.divider,
+    marginBottom: Math.round(8 * scale),
   },
   paymentMethodSelected: {
-    borderColor: '#4CAF50',
-    backgroundColor: '#f1f8f4',
+    borderColor: colors.success,
+    backgroundColor: colors.surfaceVariant,
   },
   paymentMethodDisabled: {
     opacity: 0.5,
@@ -491,60 +500,60 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   paymentMethodInfo: {
-    marginLeft: 12,
+    marginLeft: Math.round(12 * scale),
     flex: 1,
   },
   paymentMethodName: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 2,
+    color: colors.textPrimary,
+    marginBottom: Math.round(2 * scale),
   },
   paymentMethodNameSelected: {
-    color: '#4CAF50',
+    color: colors.success,
   },
   paymentMethodDescription: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
   },
   radio: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: Math.round(20 * scale),
+    height: Math.round(20 * scale),
+    borderRadius: Math.round(10 * scale),
     borderWidth: 2,
-    borderColor: '#ccc',
+    borderColor: colors.surfaceDisabled,
     alignItems: 'center',
     justifyContent: 'center',
   },
   radioSelected: {
-    borderColor: '#4CAF50',
+    borderColor: colors.success,
   },
   radioDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#4CAF50',
+    width: Math.round(10 * scale),
+    height: Math.round(10 * scale),
+    borderRadius: Math.round(5 * scale),
+    backgroundColor: colors.success,
   },
   instructionsInput: {
-    padding: 12,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
+    padding: Math.round(12 * scale),
+    backgroundColor: colors.surfaceVariant,
+    borderRadius: Math.round(8 * scale),
     borderWidth: 1,
-    borderColor: '#e0e0e0',
-    minHeight: 60,
-    color: '#666',
-    fontSize: 14,
+    borderColor: colors.divider,
+    minHeight: Math.round(60 * scale),
+    color: colors.textSecondary,
+    fontSize: Math.round(14 * scale),
   },
   footer: {
-    padding: 16,
-    backgroundColor: '#fff',
+    padding: Math.round(16 * scale),
+    backgroundColor: colors.surface,
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: colors.divider,
   },
   placeOrderButton: {
-    backgroundColor: '#4CAF50',
-    padding: 16,
-    borderRadius: 8,
+    backgroundColor: colors.success,
+    padding: Math.round(16 * scale),
+    borderRadius: Math.round(8 * scale),
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -553,13 +562,13 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   placeOrderText: {
-    color: '#fff',
-    fontSize: 16,
+    color: colors.textInverse,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
   },
   placeOrderAmount: {
-    color: '#fff',
-    fontSize: 16,
+    color: colors.textInverse,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
   },
 });

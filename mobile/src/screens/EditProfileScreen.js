@@ -17,8 +17,12 @@ import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 
 import { UPDATE_USER } from '../api/mutations';
 import { updateUser } from '../store/authSlice';
+import { useTheme } from '../theme';
+import useResponsive from '../hooks/useResponsive';
 
 const EditProfileScreen = ({ navigation }) => {
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   
@@ -121,122 +125,122 @@ const EditProfileScreen = ({ navigation }) => {
   };
 
   const renderHeader = () => (
-    <View style={styles.header}>
+    <View style={s.header}>
       <TouchableOpacity
-        style={styles.backButton}
+        style={s.backButton}
         onPress={() => navigation.goBack()}
       >
-        <Icon name="arrow-left" size={24} color="#1D3557" />
+        <Icon name="arrow-left" size={24} color={colors.textPrimary} />
       </TouchableOpacity>
-      <Text style={styles.headerTitle}>Edit Profile</Text>
-      <View style={styles.placeholder} />
+      <Text style={s.headerTitle}>Edit Profile</Text>
+      <View style={s.placeholder} />
     </View>
   );
 
   const renderProfileImage = () => (
-    <View style={styles.imageSection}>
-      <View style={styles.imageContainer}>
+    <View style={s.imageSection}>
+      <View style={s.imageContainer}>
         <Image
           source={{ uri: user?.profileImage || 'https://via.placeholder.com/120' }}
-          style={styles.profileImage}
+          style={s.profileImage}
         />
         <TouchableOpacity
-          style={styles.editImageButton}
+          style={s.editImageButton}
           onPress={handleImagePicker}
         >
-          <Icon name="camera" size={20} color="#FFFFFF" />
+          <Icon name="camera" size={20} color={colors.textInverse} />
         </TouchableOpacity>
       </View>
-      <Text style={styles.imageHint}>Tap to change profile picture</Text>
+      <Text style={s.imageHint}>Tap to change profile picture</Text>
     </View>
   );
 
   const renderForm = () => (
-    <View style={styles.form}>
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Full Name</Text>
-        <View style={styles.inputContainer}>
-          <Icon name="account-outline" size={20} color="#6C757D" style={styles.inputIcon} />
+    <View style={s.form}>
+      <View style={s.inputGroup}>
+        <Text style={s.label}>Full Name</Text>
+        <View style={s.inputContainer}>
+          <Icon name="account-outline" size={20} color={colors.textSecondary} style={s.inputIcon} />
           <TextInput
-            style={styles.input}
+            style={s.input}
             placeholder="Enter your full name"
-            placeholderTextColor="#A8DADC"
+            placeholderTextColor={colors.inputPlaceholder}
             value={formData.name}
             onChangeText={(value) => updateFormData('name', value)}
             autoCapitalize="words"
           />
         </View>
-        {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
+        {errors.name && <Text style={s.errorText}>{errors.name}</Text>}
       </View>
 
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Email Address</Text>
-        <View style={styles.inputContainer}>
-          <Icon name="email-outline" size={20} color="#6C757D" style={styles.inputIcon} />
+      <View style={s.inputGroup}>
+        <Text style={s.label}>Email Address</Text>
+        <View style={s.inputContainer}>
+          <Icon name="email-outline" size={20} color={colors.textSecondary} style={s.inputIcon} />
           <TextInput
-            style={styles.input}
+            style={s.input}
             placeholder="Enter your email"
-            placeholderTextColor="#A8DADC"
+            placeholderTextColor={colors.inputPlaceholder}
             value={formData.email}
             onChangeText={(value) => updateFormData('email', value)}
             keyboardType="email-address"
             autoCapitalize="none"
           />
         </View>
-        {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+        {errors.email && <Text style={s.errorText}>{errors.email}</Text>}
       </View>
 
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Phone Number</Text>
-        <View style={styles.inputContainer}>
-          <Icon name="phone-outline" size={20} color="#6C757D" style={styles.inputIcon} />
+      <View style={s.inputGroup}>
+        <Text style={s.label}>Phone Number</Text>
+        <View style={s.inputContainer}>
+          <Icon name="phone-outline" size={20} color={colors.textSecondary} style={s.inputIcon} />
           <TextInput
-            style={styles.input}
+            style={s.input}
             placeholder="Enter your phone number"
-            placeholderTextColor="#A8DADC"
+            placeholderTextColor={colors.inputPlaceholder}
             value={formData.phone}
             onChangeText={(value) => updateFormData('phone', value)}
             keyboardType="phone-pad"
           />
         </View>
-        {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
+        {errors.phone && <Text style={s.errorText}>{errors.phone}</Text>}
       </View>
 
       <TouchableOpacity
-        style={styles.changePasswordButton}
+        style={s.changePasswordButton}
         onPress={() => Alert.alert('Info', 'Change password feature coming soon!')}
       >
-        <Icon name="lock-outline" size={20} color="#FF6B35" />
-        <Text style={styles.changePasswordText}>Change Password</Text>
-        <Icon name="chevron-right" size={20} color="#6C757D" />
+        <Icon name="lock-outline" size={20} color={colors.accent} />
+        <Text style={s.changePasswordText}>Change Password</Text>
+        <Icon name="chevron-right" size={20} color={colors.textSecondary} />
       </TouchableOpacity>
     </View>
   );
 
   const renderNotificationSettings = () => (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Notification Preferences</Text>
+    <View style={s.section}>
+      <Text style={s.sectionTitle}>Notification Preferences</Text>
       
-      <View style={styles.settingItem}>
-        <View style={styles.settingInfo}>
-          <Icon name="bell-outline" size={20} color="#FF6B35" />
-          <Text style={styles.settingLabel}>Order Updates</Text>
+      <View style={s.settingItem}>
+        <View style={s.settingInfo}>
+          <Icon name="bell-outline" size={20} color={colors.accent} />
+          <Text style={s.settingLabel}>Order Updates</Text>
         </View>
-        <TouchableOpacity style={styles.switch}>
-          <View style={[styles.switchTrack, styles.switchTrackActive]}>
-            <View style={[styles.switchThumb, styles.switchThumbActive]} />
+        <TouchableOpacity style={s.switch}>
+          <View style={[s.switchTrack, s.switchTrackActive]}>
+            <View style={[s.switchThumb, s.switchThumbActive]} />
           </View>
         </TouchableOpacity>
       </View>
 
-      <View style={styles.settingItem}>
-        <View style={styles.settingInfo}>
-          <Icon name="tag-outline" size={20} color="#FF6B35" />
-          <Text style={styles.settingLabel}>Promotions & Offers</Text>
+      <View style={s.settingItem}>
+        <View style={s.settingInfo}>
+          <Icon name="tag-outline" size={20} color={colors.accent} />
+          <Text style={s.settingLabel}>Promotions & Offers</Text>
         </View>
-        <TouchableOpacity style={styles.switch}>
-          <View style={[styles.switchTrack, styles.switchTrackActive]}>
-            <View style={[styles.switchThumb, styles.switchThumbActive]} />
+        <TouchableOpacity style={s.switch}>
+          <View style={[s.switchTrack, s.switchTrackActive]}>
+            <View style={[s.switchThumb, s.switchThumbActive]} />
           </View>
         </TouchableOpacity>
       </View>
@@ -245,26 +249,28 @@ const EditProfileScreen = ({ navigation }) => {
 
   const renderSaveButton = () => (
     <TouchableOpacity
-      style={[styles.saveButton, loading && styles.saveButtonDisabled]}
+      style={[s.saveButton, loading && s.saveButtonDisabled]}
       onPress={handleSave}
       disabled={loading}
     >
       {loading ? (
-        <ActivityIndicator color="#FFFFFF" />
+        <ActivityIndicator color={colors.textInverse} />
       ) : (
-        <Text style={styles.saveButtonText}>Save Changes</Text>
+        <Text style={s.saveButtonText}>Save Changes</Text>
       )}
     </TouchableOpacity>
   );
+  const s = styles(colors, typography, scale);
+
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={s.container}>
       {renderHeader()}
       
       <ScrollView
-        style={styles.content}
+        style={s.content}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={s.scrollContent}
       >
         {renderProfileImage()}
         {renderForm()}
@@ -276,143 +282,143 @@ const EditProfileScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
+    paddingHorizontal: Math.round(16 * scale),
+    paddingVertical: Math.round(12 * scale),
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F8F9FA',
+    width: Math.round(40 * scale),
+    height: Math.round(40 * scale),
+    borderRadius: Math.round(20 * scale),
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   placeholder: {
-    width: 40,
+    width: Math.round(40 * scale),
   },
   content: {
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 100,
+    paddingBottom: Math.round(100 * scale),
   },
   imageSection: {
     alignItems: 'center',
-    paddingVertical: 32,
-    backgroundColor: '#F8F9FA',
+    paddingVertical: Math.round(32 * scale),
+    backgroundColor: colors.surface,
   },
   imageContainer: {
     position: 'relative',
-    marginBottom: 12,
+    marginBottom: Math.round(12 * scale),
   },
   profileImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: Math.round(120 * scale),
+    height: Math.round(120 * scale),
+    borderRadius: Math.round(60 * scale),
     borderWidth: 4,
-    borderColor: '#FFFFFF',
+    borderColor: colors.surface,
   },
   editImageButton: {
     position: 'absolute',
     bottom: 0,
     right: 0,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#FF6B35',
+    width: Math.round(40 * scale),
+    height: Math.round(40 * scale),
+    borderRadius: Math.round(20 * scale),
+    backgroundColor: colors.accent,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
-    borderColor: '#FFFFFF',
+    borderColor: colors.surface,
   },
   imageHint: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   form: {
-    padding: 16,
+    padding: Math.round(16 * scale),
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: Math.round(20 * scale),
   },
   label: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#1D3557',
-    marginBottom: 8,
+    color: colors.textPrimary,
+    marginBottom: Math.round(8 * scale),
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8F9FA',
-    borderRadius: 12,
-    paddingHorizontal: 16,
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
+    paddingHorizontal: Math.round(16 * scale),
     borderWidth: 1,
-    borderColor: '#E9ECEF',
+    borderColor: colors.border,
   },
   inputIcon: {
-    marginRight: 12,
+    marginRight: Math.round(12 * scale),
   },
   input: {
     flex: 1,
-    height: 52,
-    fontSize: 16,
-    color: '#1D3557',
+    height: Math.round(52 * scale),
+    fontSize: Math.round(16 * scale),
+    color: colors.textPrimary,
   },
   errorText: {
-    color: '#E63946',
-    fontSize: 12,
-    marginTop: 4,
-    marginLeft: 4,
+    color: colors.error,
+    fontSize: Math.round(12 * scale),
+    marginTop: Math.round(4 * scale),
+    marginLeft: Math.round(4 * scale),
   },
   changePasswordButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#FFF3E0',
-    borderRadius: 12,
-    marginTop: 8,
+    padding: Math.round(16 * scale),
+    backgroundColor: colors.accentSurface,
+    borderRadius: Math.round(12 * scale),
+    marginTop: Math.round(8 * scale),
   },
   changePasswordText: {
     flex: 1,
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '500',
-    color: '#FF6B35',
-    marginLeft: 12,
+    color: colors.accent,
+    marginLeft: Math.round(12 * scale),
   },
   section: {
-    padding: 16,
+    padding: Math.round(16 * scale),
     borderTopWidth: 8,
-    borderTopColor: '#F8F9FA',
+    borderTopColor: colors.surface,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginBottom: 16,
+    color: colors.textPrimary,
+    marginBottom: Math.round(16 * scale),
   },
   settingItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: Math.round(12 * scale),
   },
   settingInfo: {
     flexDirection: 'row',
@@ -420,30 +426,30 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   settingLabel: {
-    fontSize: 16,
-    color: '#1D3557',
-    marginLeft: 12,
+    fontSize: Math.round(16 * scale),
+    color: colors.textPrimary,
+    marginLeft: Math.round(12 * scale),
   },
   switch: {
-    padding: 4,
+    padding: Math.round(4 * scale),
   },
   switchTrack: {
-    width: 50,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#E9ECEF',
+    width: Math.round(50 * scale),
+    height: Math.round(28 * scale),
+    borderRadius: Math.round(14 * scale),
+    backgroundColor: colors.border,
     justifyContent: 'center',
-    paddingHorizontal: 2,
+    paddingHorizontal: Math.round(2 * scale),
   },
   switchTrackActive: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: colors.accent,
   },
   switchThumb: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
+    width: Math.round(24 * scale),
+    height: Math.round(24 * scale),
+    borderRadius: Math.round(12 * scale),
+    backgroundColor: colors.surface,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
@@ -457,13 +463,13 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#FF6B35',
-    paddingVertical: 16,
+    backgroundColor: colors.accent,
+    paddingVertical: Math.round(16 * scale),
     alignItems: 'center',
-    marginHorizontal: 16,
-    marginBottom: 16,
-    borderRadius: 12,
-    shadowColor: '#000',
+    marginHorizontal: Math.round(16 * scale),
+    marginBottom: Math.round(16 * scale),
+    borderRadius: Math.round(12 * scale),
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -473,8 +479,8 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   saveButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
+    color: colors.textInverse,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
   },
 });

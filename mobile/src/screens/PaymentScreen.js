@@ -12,8 +12,12 @@ import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useMutation } from '@apollo/client';
 import { VERIFY_PAYMENT } from '../api/mutations';
 import chapaService from '../services/chapaService';
+import { useTheme } from '../theme';
+import useResponsive from '../hooks/useResponsive';
 
 const PaymentScreen = ({ route, navigation }) => {
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
   const { txRef, orderId, orderAmount } = route.params;
   const [verifying, setVerifying] = useState(true);
   const [paymentStatus, setPaymentStatus] = useState(null);
@@ -74,10 +78,10 @@ const PaymentScreen = ({ route, navigation }) => {
   const renderContent = () => {
     if (verifying) {
       return (
-        <View style={styles.statusContainer}>
-          <ActivityIndicator size="large" color="#FF6B35" />
-          <Text style={styles.statusTitle}>Verifying Payment...</Text>
-          <Text style={styles.statusMessage}>
+        <View style={s.statusContainer}>
+          <ActivityIndicator size="large" color={colors.accent} />
+          <Text style={s.statusTitle}>Verifying Payment...</Text>
+          <Text style={s.statusMessage}>
             Please wait while we confirm your payment
           </Text>
         </View>
@@ -86,43 +90,43 @@ const PaymentScreen = ({ route, navigation }) => {
 
     if (paymentStatus === 'success') {
       return (
-        <View style={styles.statusContainer}>
-          <View style={styles.successIcon}>
-            <Icon name="check-circle" size={80} color="#4CAF50" />
+        <View style={s.statusContainer}>
+          <View style={s.successIcon}>
+            <Icon name="check-circle" size={80} color={colors.success} />
           </View>
-          <Text style={styles.statusTitle}>Payment Successful!</Text>
-          <Text style={styles.statusMessage}>
+          <Text style={s.statusTitle}>Payment Successful!</Text>
+          <Text style={s.statusMessage}>
             Your order has been placed successfully
           </Text>
-          <Text style={styles.amountText}>ETB {orderAmount.toFixed(2)}</Text>
-          <Text style={styles.refText}>Ref: {txRef}</Text>
+          <Text style={s.amountText}>PKR {orderAmount.toFixed(2)}</Text>
+          <Text style={s.refText}>Ref: {txRef}</Text>
         </View>
       );
     }
 
     if (paymentStatus === 'failed') {
       return (
-        <View style={styles.statusContainer}>
-          <View style={styles.errorIcon}>
-            <Icon name="close-circle" size={80} color="#F44336" />
+        <View style={s.statusContainer}>
+          <View style={s.errorIcon}>
+            <Icon name="close-circle" size={80} color={colors.error} />
           </View>
-          <Text style={styles.statusTitle}>Payment Failed</Text>
-          <Text style={styles.statusMessage}>
+          <Text style={s.statusTitle}>Payment Failed</Text>
+          <Text style={s.statusMessage}>
             We couldn't verify your payment. Please try again.
           </Text>
-          <View style={styles.buttonContainer}>
+          <View style={s.buttonContainer}>
             <TouchableOpacity
-              style={styles.retryButton}
+              style={s.retryButton}
               onPress={handleRetry}
             >
-              <Icon name="refresh" size={20} color="#FFFFFF" />
-              <Text style={styles.retryButtonText}>Retry Verification</Text>
+              <Icon name="refresh" size={20} color={colors.textInverse} />
+              <Text style={s.retryButtonText}>Retry Verification</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.cancelButton}
+              style={s.cancelButton}
               onPress={handleCancel}
             >
-              <Text style={styles.cancelButtonText}>Cancel Order</Text>
+              <Text style={s.cancelButtonText}>Cancel Order</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -132,97 +136,99 @@ const PaymentScreen = ({ route, navigation }) => {
     return null;
   };
 
+  const s = styles(colors, typography, scale);
+
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Payment Status</Text>
+    <SafeAreaView style={s.container}>
+      <View style={s.header}>
+        <Text style={s.headerTitle}>Payment Status</Text>
       </View>
       {renderContent()}
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.surface,
   },
   header: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#FFFFFF',
+    paddingHorizontal: Math.round(20 * scale),
+    paddingVertical: Math.round(16 * scale),
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   statusContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: Math.round(20 * scale),
   },
   successIcon: {
-    marginBottom: 24,
+    marginBottom: Math.round(24 * scale),
   },
   errorIcon: {
-    marginBottom: 24,
+    marginBottom: Math.round(24 * scale),
   },
   statusTitle: {
-    fontSize: 24,
+    fontSize: Math.round(24 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginBottom: 12,
+    color: colors.textPrimary,
+    marginBottom: Math.round(12 * scale),
     textAlign: 'center',
   },
   statusMessage: {
-    fontSize: 16,
-    color: '#6C757D',
+    fontSize: Math.round(16 * scale),
+    color: colors.textSecondary,
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: Math.round(24 * scale),
   },
   amountText: {
-    fontSize: 32,
+    fontSize: Math.round(32 * scale),
     fontWeight: 'bold',
-    color: '#4CAF50',
-    marginBottom: 8,
+    color: colors.success,
+    marginBottom: Math.round(8 * scale),
   },
   refText: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
     fontFamily: 'monospace',
   },
   buttonContainer: {
     width: '100%',
-    marginTop: 24,
+    marginTop: Math.round(24 * scale),
   },
   retryButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FF6B35',
-    paddingVertical: 16,
-    borderRadius: 12,
-    marginBottom: 12,
+    backgroundColor: colors.accent,
+    paddingVertical: Math.round(16 * scale),
+    borderRadius: Math.round(12 * scale),
+    marginBottom: Math.round(12 * scale),
   },
   retryButtonText: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#FFFFFF',
-    marginLeft: 8,
+    color: colors.textInverse,
+    marginLeft: Math.round(8 * scale),
   },
   cancelButton: {
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: Math.round(16 * scale),
   },
   cancelButtonText: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#F44336',
+    color: colors.error,
   },
 });
 

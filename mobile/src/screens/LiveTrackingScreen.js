@@ -16,10 +16,14 @@ import * as Location from 'expo-location';
 import { useQuery } from '@apollo/client';
 import { GET_ORDER } from '../api/queries';
 import socketService from '../services/socketService';
+import { useTheme } from '../theme';
+import useResponsive from '../hooks/useResponsive';
 
 const { width, height } = Dimensions.get('window');
 
 const LiveTrackingScreen = ({ route, navigation }) => {
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
   const { orderId } = route.params;
   
   const [userLocation, setUserLocation] = useState(null);
@@ -127,38 +131,40 @@ const LiveTrackingScreen = ({ route, navigation }) => {
     const status = order?.orderStatus?.toUpperCase();
     switch (status) {
       case 'DELIVERED':
-        return { icon: 'check-circle', color: '#4CAF50', title: 'Delivered!', subtitle: 'Your order has been delivered' };
+        return { icon: 'check-circle', color: colors.success, title: 'Delivered!', subtitle: 'Your order has been delivered' };
       case 'PICKED':
-        return { icon: 'bike-fast', color: '#2196F3', title: 'On the way', subtitle: 'Rider is heading to you' };
+        return { icon: 'bike-fast', color: colors.info, title: 'On the way', subtitle: 'Rider is heading to you' };
       case 'ACCEPTED':
-        return { icon: 'chef-hat', color: '#FF9800', title: 'Preparing', subtitle: 'Restaurant is preparing your order' };
+        return { icon: 'chef-hat', color: colors.warning, title: 'Preparing', subtitle: 'Restaurant is preparing your order' };
       default:
-        return { icon: 'clock-outline', color: '#999', title: 'Order Placed', subtitle: 'Waiting for confirmation' };
+        return { icon: 'clock-outline', color: colors.textTertiary, title: 'Order Placed', subtitle: 'Waiting for confirmation' };
     }
   };
 
   const statusInfo = getStatusInfo();
 
+  const s = styles(colors, typography, scale);
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={s.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Icon name="arrow-left" size={24} color="#FFFFFF" />
+      <View style={s.header}>
+        <TouchableOpacity style={s.backButton} onPress={() => navigation.goBack()}>
+          <Icon name="arrow-left" size={24} color={colors.textInverse} />
         </TouchableOpacity>
-        <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>Live Tracking</Text>
-          <Text style={styles.headerSubtitle}>Order #{order?.orderId}</Text>
+        <View style={s.headerContent}>
+          <Text style={s.headerTitle}>Live Tracking</Text>
+          <Text style={s.headerSubtitle}>Order #{order?.orderId}</Text>
         </View>
-        <TouchableOpacity style={styles.refreshButton} onPress={refetch}>
-          <Icon name="refresh" size={24} color="#FFFFFF" />
+        <TouchableOpacity style={s.refreshButton} onPress={refetch}>
+          <Icon name="refresh" size={24} color={colors.textInverse} />
         </TouchableOpacity>
       </View>
 
       {/* Map */}
       <MapView
         ref={mapRef}
-        style={styles.map}
+        style={s.map}
         initialRegion={{
           latitude: userLocation?.latitude || 9.0320,
           longitude: userLocation?.longitude || 38.7469,
@@ -175,8 +181,8 @@ const LiveTrackingScreen = ({ route, navigation }) => {
             title="Delivery Location"
             description={order?.deliveryAddress?.deliveryAddress}
           >
-            <View style={styles.homeMarker}>
-              <Icon name="home" size={30} color="#4CAF50" />
+            <View style={s.homeMarker}>
+              <Icon name="home" size={30} color={colors.success} />
             </View>
           </Marker>
         )}
@@ -188,8 +194,8 @@ const LiveTrackingScreen = ({ route, navigation }) => {
             title={order?.rider?.name || 'Rider'}
             description="Rider Location"
           >
-            <View style={styles.riderMarker}>
-              <Icon name="bike-fast" size={30} color="#FFFFFF" />
+            <View style={s.riderMarker}>
+              <Icon name="bike-fast" size={30} color={colors.textInverse} />
             </View>
           </Marker>
         )}
@@ -198,7 +204,7 @@ const LiveTrackingScreen = ({ route, navigation }) => {
         {userLocation && riderLocation && (
           <Polyline
             coordinates={[riderLocation, userLocation]}
-            strokeColor="#2196F3"
+            strokeColor={colors.info}
             strokeWidth={4}
             lineDashPattern={[1]}
           />
@@ -206,74 +212,74 @@ const LiveTrackingScreen = ({ route, navigation }) => {
       </MapView>
 
       {/* Tracking Status Indicator */}
-      <View style={styles.trackingIndicator}>
-        <View style={[styles.trackingDot, isTracking && styles.trackingDotActive]} />
-        <Text style={styles.trackingText}>
+      <View style={s.trackingIndicator}>
+        <View style={[s.trackingDot, isTracking && s.trackingDotActive]} />
+        <Text style={s.trackingText}>
           {isTracking ? 'Live Tracking Active' : 'Connecting...'}
         </Text>
       </View>
 
       {/* Order Status Card */}
-      <View style={styles.statusCard}>
+      <View style={s.statusCard}>
         {/* Status Header */}
-        <View style={styles.statusHeader}>
-          <View style={[styles.statusIcon, { backgroundColor: `${statusInfo.color}20` }]}>
+        <View style={s.statusHeader}>
+          <View style={[s.statusIcon, { backgroundColor: `${statusInfo.color}20` }]}>
             <Icon name={statusInfo.icon} size={32} color={statusInfo.color} />
           </View>
-          <View style={styles.statusInfo}>
-            <Text style={styles.statusTitle}>{statusInfo.title}</Text>
-            <Text style={styles.statusSubtitle}>{statusInfo.subtitle}</Text>
+          <View style={s.statusInfo}>
+            <Text style={s.statusTitle}>{statusInfo.title}</Text>
+            <Text style={s.statusSubtitle}>{statusInfo.subtitle}</Text>
           </View>
         </View>
 
         {/* Rider Info */}
         {order?.rider && (
-          <View style={styles.riderInfo}>
-            <View style={styles.riderAvatar}>
-              <Icon name="account" size={32} color="#FFFFFF" />
+          <View style={s.riderInfo}>
+            <View style={s.riderAvatar}>
+              <Icon name="account" size={32} color={colors.textInverse} />
             </View>
-            <View style={styles.riderDetails}>
-              <Text style={styles.riderName}>{order.rider.name}</Text>
-              <Text style={styles.riderPhone}>{order.rider.phone}</Text>
+            <View style={s.riderDetails}>
+              <Text style={s.riderName}>{order.rider.name}</Text>
+              <Text style={s.riderPhone}>{order.rider.phone}</Text>
             </View>
-            <View style={styles.riderActions}>
-              <TouchableOpacity style={styles.actionButton} onPress={handleCallRider}>
-                <Icon name="phone" size={24} color="#4CAF50" />
+            <View style={s.riderActions}>
+              <TouchableOpacity style={s.actionButton} onPress={handleCallRider}>
+                <Icon name="phone" size={24} color={colors.success} />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.actionButton} onPress={handleMessageRider}>
-                <Icon name="message-text" size={24} color="#2196F3" />
+              <TouchableOpacity style={s.actionButton} onPress={handleMessageRider}>
+                <Icon name="message-text" size={24} color={colors.info} />
               </TouchableOpacity>
             </View>
           </View>
         )}
 
         {/* Delivery Address */}
-        <View style={styles.addressContainer}>
-          <Icon name="map-marker" size={24} color="#FF6B35" />
-          <View style={styles.addressInfo}>
-            <Text style={styles.addressLabel}>Delivery Address</Text>
-            <Text style={styles.addressText}>
+        <View style={s.addressContainer}>
+          <Icon name="map-marker" size={24} color={colors.accent} />
+          <View style={s.addressInfo}>
+            <Text style={s.addressLabel}>Delivery Address</Text>
+            <Text style={s.addressText}>
               {order?.deliveryAddress?.deliveryAddress || 'Address not available'}
             </Text>
             {order?.deliveryAddress?.details && (
-              <Text style={styles.addressDetails}>{order.deliveryAddress.details}</Text>
+              <Text style={s.addressDetails}>{order.deliveryAddress.details}</Text>
             )}
           </View>
         </View>
 
         {/* ETA */}
         {order?.orderStatus === 'PICKED' && riderLocation && (
-          <View style={styles.etaContainer}>
-            <Icon name="clock-fast" size={20} color="#2196F3" />
-            <Text style={styles.etaText}>Estimated arrival: 15-20 min</Text>
+          <View style={s.etaContainer}>
+            <Icon name="clock-fast" size={20} color={colors.info} />
+            <Text style={s.etaText}>Estimated arrival: 15-20 min</Text>
           </View>
         )}
 
         {/* No Rider Yet */}
         {!order?.rider && (
-          <View style={styles.noRiderContainer}>
-            <Icon name="information-outline" size={24} color="#FF9800" />
-            <Text style={styles.noRiderText}>Waiting for rider assignment...</Text>
+          <View style={s.noRiderContainer}>
+            <Icon name="information-outline" size={24} color={colors.warning} />
+            <Text style={s.noRiderText}>Waiting for rider assignment...</Text>
           </View>
         )}
       </View>
@@ -281,46 +287,46 @@ const LiveTrackingScreen = ({ route, navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#4CAF50',
+    paddingHorizontal: Math.round(16 * scale),
+    paddingVertical: Math.round(12 * scale),
+    backgroundColor: colors.success,
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    width: Math.round(40 * scale),
+    height: Math.round(40 * scale),
+    borderRadius: Math.round(20 * scale),
+    backgroundColor: colors.overlayLight,
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerContent: {
     flex: 1,
-    marginLeft: 16,
+    marginLeft: Math.round(16 * scale),
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: colors.textInverse,
   },
   headerSubtitle: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     color: 'rgba(255,255,255,0.9)',
-    marginTop: 2,
+    marginTop: Math.round(2 * scale),
   },
   refreshButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    width: Math.round(40 * scale),
+    height: Math.round(40 * scale),
+    borderRadius: Math.round(20 * scale),
+    backgroundColor: colors.overlayLight,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -328,30 +334,30 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   homeMarker: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#FFFFFF',
+    width: Math.round(50 * scale),
+    height: Math.round(50 * scale),
+    borderRadius: Math.round(25 * scale),
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
-    borderColor: '#4CAF50',
-    shadowColor: '#000',
+    borderColor: colors.success,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
   },
   riderMarker: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#2196F3',
+    width: Math.round(50 * scale),
+    height: Math.round(50 * scale),
+    borderRadius: Math.round(25 * scale),
+    backgroundColor: colors.info,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
-    borderColor: '#FFFFFF',
-    shadowColor: '#000',
+    borderColor: colors.surface,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -359,175 +365,175 @@ const styles = StyleSheet.create({
   },
   trackingIndicator: {
     position: 'absolute',
-    top: 80,
+    top: Math.round(80 * scale),
     alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    shadowColor: '#000',
+    backgroundColor: colors.surface,
+    paddingHorizontal: Math.round(16 * scale),
+    paddingVertical: Math.round(8 * scale),
+    borderRadius: Math.round(20 * scale),
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,
   },
   trackingDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#999',
-    marginRight: 8,
+    width: Math.round(10 * scale),
+    height: Math.round(10 * scale),
+    borderRadius: Math.round(5 * scale),
+    backgroundColor: colors.textTertiary,
+    marginRight: Math.round(8 * scale),
   },
   trackingDotActive: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: colors.success,
   },
   trackingText: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#333',
+    color: colors.textPrimary,
   },
   statusCard: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 20,
-    shadowColor: '#000',
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: Math.round(24 * scale),
+    borderTopRightRadius: Math.round(24 * scale),
+    padding: Math.round(20 * scale),
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 10,
-    maxHeight: height * 0.5,
+    maxHeight: Math.round(height * 0.5),
   },
   statusHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: Math.round(16 * scale),
   },
   statusIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: Math.round(60 * scale),
+    height: Math.round(60 * scale),
+    borderRadius: Math.round(30 * scale),
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: Math.round(16 * scale),
   },
   statusInfo: {
     flex: 1,
   },
   statusTitle: {
-    fontSize: 20,
+    fontSize: Math.round(20 * scale),
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   statusSubtitle: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   riderInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F9F9F9',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 16,
+    backgroundColor: colors.surfaceVariant,
+    padding: Math.round(16 * scale),
+    borderRadius: Math.round(12 * scale),
+    marginBottom: Math.round(16 * scale),
   },
   riderAvatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#2196F3',
+    width: Math.round(50 * scale),
+    height: Math.round(50 * scale),
+    borderRadius: Math.round(25 * scale),
+    backgroundColor: colors.info,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: Math.round(12 * scale),
   },
   riderDetails: {
     flex: 1,
   },
   riderName: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   riderPhone: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   riderActions: {
     flexDirection: 'row',
-    gap: 8,
+    gap: Math.round(8 * scale),
   },
   actionButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#FFFFFF',
+    width: Math.round(44 * scale),
+    height: Math.round(44 * scale),
+    borderRadius: Math.round(22 * scale),
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: colors.divider,
   },
   addressContainer: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    padding: 16,
-    backgroundColor: '#FFF3E0',
-    borderRadius: 12,
-    marginBottom: 16,
+    padding: Math.round(16 * scale),
+    backgroundColor: colors.surfaceVariant,
+    borderRadius: Math.round(12 * scale),
+    marginBottom: Math.round(16 * scale),
   },
   addressInfo: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: Math.round(12 * scale),
   },
   addressLabel: {
-    fontSize: 12,
+    fontSize: Math.round(12 * scale),
     fontWeight: '600',
-    color: '#FF6B35',
-    marginBottom: 4,
+    color: colors.accent,
+    marginBottom: Math.round(4 * scale),
   },
   addressText: {
-    fontSize: 14,
-    color: '#333',
-    marginBottom: 4,
+    fontSize: Math.round(14 * scale),
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   addressDetails: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
   },
   etaContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 12,
-    backgroundColor: '#E3F2FD',
-    borderRadius: 8,
+    padding: Math.round(12 * scale),
+    backgroundColor: colors.surfaceVariant,
+    borderRadius: Math.round(8 * scale),
   },
   etaText: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#2196F3',
-    marginLeft: 8,
+    color: colors.info,
+    marginLeft: Math.round(8 * scale),
   },
   noRiderContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
-    backgroundColor: '#FFF3E0',
-    borderRadius: 12,
+    padding: Math.round(16 * scale),
+    backgroundColor: colors.surfaceVariant,
+    borderRadius: Math.round(12 * scale),
   },
   noRiderText: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#FF9800',
-    marginLeft: 8,
+    color: colors.warning,
+    marginLeft: Math.round(8 * scale),
   },
 });
 

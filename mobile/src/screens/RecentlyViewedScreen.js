@@ -14,13 +14,19 @@ import { useSelector } from 'react-redux';
 import { useQuery } from '@apollo/client';
 import SessionService from '../services/SessionService';
 import { GET_FOODS } from '../api/queries';
+import { useTheme } from '../theme';
+import useResponsive from '../hooks/useResponsive';
 
 const RecentlyViewedScreen = ({ navigation }) => {
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
   const user = useSelector(state => state.auth.user);
   const userId = user?._id || null;
 
   const [recentProducts, setRecentProducts] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+
+  const s = styles(colors, typography, scale);
 
   const { data: productsData, loading, refetch } = useQuery(GET_FOODS);
 
@@ -59,27 +65,27 @@ const RecentlyViewedScreen = ({ navigation }) => {
 
   const renderProductItem = ({ item }) => (
     <TouchableOpacity
-      style={styles.productCard}
+      style={s.productCard}
       onPress={() => navigation.navigate('FoodDetail', { food: item })}
     >
       <Image
         source={{ uri: item.image }}
-        style={styles.productImage}
+        style={s.productImage}
         resizeMode="cover"
       />
-      <View style={styles.productInfo}>
-        <Text style={styles.productTitle} numberOfLines={2}>
+      <View style={s.productInfo}>
+        <Text style={s.productTitle} numberOfLines={2}>
           {item.title}
         </Text>
-        <Text style={styles.productRestaurant} numberOfLines={1}>
+        <Text style={s.productRestaurant} numberOfLines={1}>
           {item.restaurant?.name || 'Unknown Shop'}
         </Text>
-        <View style={styles.productFooter}>
-          <Text style={styles.productPrice}>
-            {item.variations?.[0]?.price || 0} ETB
+        <View style={s.productFooter}>
+          <Text style={s.productPrice}>
+            {item.variations?.[0]?.price || 0} PKR
           </Text>
-          <TouchableOpacity style={styles.viewButton}>
-            <Icon name="arrow-right" size={20} color="#FF6B35" />
+          <TouchableOpacity style={s.viewButton}>
+            <Icon name="arrow-right" size={20} color={colors.accent} />
           </TouchableOpacity>
         </View>
       </View>
@@ -87,34 +93,34 @@ const RecentlyViewedScreen = ({ navigation }) => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={s.container}>
+      <View style={s.header}>
         <TouchableOpacity
-          style={styles.backButton}
+          style={s.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Icon name="arrow-left" size={24} color="#1D3557" />
+          <Icon name="arrow-left" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Recently Viewed</Text>
-        <Text style={styles.headerCount}>{recentProducts.length}</Text>
+        <Text style={s.headerTitle}>Recently Viewed</Text>
+        <Text style={s.headerCount}>{recentProducts.length}</Text>
       </View>
 
       {loading ? (
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading...</Text>
+        <View style={s.loadingContainer}>
+          <Text style={s.loadingText}>Loading...</Text>
         </View>
       ) : recentProducts.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Icon name="history" size={80} color="#A8DADC" />
-          <Text style={styles.emptyTitle}>No Recent Views</Text>
-          <Text style={styles.emptyText}>
+        <View style={s.emptyContainer}>
+          <Icon name="history" size={80} color={colors.accentLight} />
+          <Text style={s.emptyTitle}>No Recent Views</Text>
+          <Text style={s.emptyText}>
             Products you view will appear here
           </Text>
           <TouchableOpacity
-            style={styles.browseButton}
+            style={s.browseButton}
             onPress={() => navigation.navigate('Home')}
           >
-            <Text style={styles.browseButtonText}>Browse Products</Text>
+            <Text style={s.browseButtonText}>Browse Products</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -122,12 +128,12 @@ const RecentlyViewedScreen = ({ navigation }) => {
           data={recentProducts}
           renderItem={renderProductItem}
           keyExtractor={(item) => item._id}
-          contentContainerStyle={styles.listContainer}
+          contentContainerStyle={s.listContainer}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              colors={['#FF6B35']}
+              colors={[colors.accent]}
             />
           }
         />
@@ -136,39 +142,39 @@ const RecentlyViewedScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    backgroundColor: '#FFFFFF',
+    paddingHorizontal: Math.round(16 * scale),
+    paddingVertical: Math.round(16 * scale),
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F8F9FA',
+    width: Math.round(40 * scale),
+    height: Math.round(40 * scale),
+    borderRadius: Math.round(20 * scale),
+    backgroundColor: colors.surfaceVariant,
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: Math.round(20 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   headerCount: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#FF6B35',
-    minWidth: 40,
+    color: colors.accent,
+    minWidth: Math.round(40 * scale),
     textAlign: 'right',
   },
   loadingContainer: {
@@ -177,74 +183,74 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    fontSize: 16,
-    color: '#6C757D',
+    fontSize: Math.round(16 * scale),
+    color: colors.textSecondary,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 32,
+    paddingHorizontal: Math.round(32 * scale),
   },
   emptyTitle: {
-    fontSize: 24,
+    fontSize: Math.round(24 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginTop: 24,
-    marginBottom: 12,
+    color: colors.textPrimary,
+    marginTop: Math.round(24 * scale),
+    marginBottom: Math.round(12 * scale),
   },
   emptyText: {
-    fontSize: 16,
-    color: '#6C757D',
+    fontSize: Math.round(16 * scale),
+    color: colors.textSecondary,
     textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: Math.round(24 * scale),
   },
   browseButton: {
-    backgroundColor: '#FF6B35',
-    paddingHorizontal: 32,
-    paddingVertical: 14,
-    borderRadius: 12,
-    marginTop: 24,
+    backgroundColor: colors.accent,
+    paddingHorizontal: Math.round(32 * scale),
+    paddingVertical: Math.round(14 * scale),
+    borderRadius: Math.round(12 * scale),
+    marginTop: Math.round(24 * scale),
   },
   browseButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
+    color: colors.textInverse,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
   },
   listContainer: {
-    padding: 16,
+    padding: Math.round(16 * scale),
   },
   productCard: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    marginBottom: 12,
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
+    marginBottom: Math.round(12 * scale),
     overflow: 'hidden',
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
   productImage: {
-    width: 100,
-    height: 100,
+    width: Math.round(100 * scale),
+    height: Math.round(100 * scale),
   },
   productInfo: {
     flex: 1,
-    padding: 12,
+    padding: Math.round(12 * scale),
     justifyContent: 'space-between',
   },
   productTitle: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#1D3557',
-    marginBottom: 4,
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   productRestaurant: {
-    fontSize: 14,
-    color: '#6C757D',
-    marginBottom: 8,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginBottom: Math.round(8 * scale),
   },
   productFooter: {
     flexDirection: 'row',
@@ -252,15 +258,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   productPrice: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#FF6B35',
+    color: colors.accent,
   },
   viewButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#FFF5F3',
+    width: Math.round(36 * scale),
+    height: Math.round(36 * scale),
+    borderRadius: Math.round(18 * scale),
+    backgroundColor: colors.surfaceVariant,
     justifyContent: 'center',
     alignItems: 'center',
   },

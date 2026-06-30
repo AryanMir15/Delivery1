@@ -2,7 +2,6 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useSelector } from 'react-redux';
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import AuthNavigator from './AuthNavigator';
@@ -11,44 +10,27 @@ import RiderNavigator from './RiderNavigator';
 import VendorNavigator from './VendorNavigator';
 import SplashScreen from '../screens/SplashScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
+import { useTheme } from '../theme';
 
 const Stack = createStackNavigator();
 
 const RootNavigator = () => {
+  const { colors } = useTheme();
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const [isLoading, setIsLoading] = React.useState(true);
   const [showOnboarding, setShowOnboarding] = React.useState(false);
 
   React.useEffect(() => {
     const checkOnboarding = async () => {
-      console.log('RootNavigator checking onboarding status');
       const onboardingComplete = await AsyncStorage.getItem('onboardingComplete');
-      console.log('Onboarding complete:', onboardingComplete);
-      
-      setTimeout(() => {
-        setShowOnboarding(onboardingComplete !== 'true');
-        setIsLoading(false);
-        console.log('isAuthenticated:', isAuthenticated);
-      }, 500);
+      setShowOnboarding(onboardingComplete !== 'true');
     };
 
     checkOnboarding();
-    
-    // Re-check every second to catch onboarding completion
-    const interval = setInterval(async () => {
-      const onboardingComplete = await AsyncStorage.getItem('onboardingComplete');
-      if (onboardingComplete === 'true' && showOnboarding) {
-        setShowOnboarding(false);
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [showOnboarding]);
-
-  console.log('RootNavigator render - isLoading:', isLoading, 'isAuthenticated:', isAuthenticated, 'role:', user?.role);
+  }, []);
 
   if (isLoading) {
-    return <SplashScreen />;
+    return <SplashScreen onReady={() => setIsLoading(false)} />;
   }
 
   const getMainNavigator = () => {
@@ -58,7 +40,6 @@ const RootNavigator = () => {
         return RiderNavigator;
       case 'vendor':
       case 'owner':
-        return VendorNavigator;
       case 'admin':
         return VendorNavigator;
       default:
@@ -80,10 +61,9 @@ const RootNavigator = () => {
       </Stack.Navigator>
     );
   } catch (error) {
-    console.error('RootNavigator error:', error);
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>{`Error loading app: ${error.message}`}</Text>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+        <Text style={{ color: colors.textPrimary }}>{`Error loading app: ${error.message}`}</Text>
       </View>
     );
   }

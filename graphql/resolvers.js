@@ -1073,6 +1073,7 @@ const resolvers = {
         if (userInput.isOrderNotification !== undefined) updateData.isOrderNotification = userInput.isOrderNotification;
         if (userInput.isOfferNotification !== undefined) updateData.isOfferNotification = userInput.isOfferNotification;
         if (userInput.favourite !== undefined) updateData.favourite = userInput.favourite;
+        if (userInput.available !== undefined) updateData.available = userInput.available;
 
         const updatedUser = await User.findByIdAndUpdate(id, updateData, { new: true });
 

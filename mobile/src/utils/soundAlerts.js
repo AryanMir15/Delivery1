@@ -1,32 +1,24 @@
-import { Audio } from 'expo-av';
-
 let sound = null;
 
 export const playOrderSound = async () => {
-  try {
-    // Load and play a notification sound
-    const { sound: newSound } = await Audio.Sound.createAsync(
-      // You can add a custom sound file here
-      require('../../assets/notification.mp3'),
-      { shouldPlay: true }
-    );
-    sound = newSound;
-
-    // Unload sound after playing
-    sound.setOnPlaybackStatusUpdate((status) => {
-      if (status.didJustFinish) {
-        sound.unloadAsync();
-      }
-    });
-  } catch (error) {
-    console.error('Error playing sound:', error);
-  }
+  // TODO: Add notification.mp3 to mobile/assets/ and uncomment
+  // const { Audio } = require('expo-av');
+  // const { sound: newSound } = await Audio.Sound.createAsync(
+  //   require('../../assets/notification.mp3'),
+  //   { shouldPlay: true }
+  // );
+  // sound = newSound;
+  // sound.setOnPlaybackStatusUpdate((status) => {
+  //   if (status.didJustFinish) sound.unloadAsync();
+  // });
 };
 
 export const stopSound = async () => {
   if (sound) {
-    await sound.stopAsync();
-    await sound.unloadAsync();
+    try {
+      await sound.stopAsync();
+      await sound.unloadAsync();
+    } catch (e) {}
     sound = null;
   }
 };

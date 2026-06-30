@@ -15,6 +15,8 @@ import { useQuery } from '@apollo/client';
 import MapView, { Marker, Polyline, PROVIDER_DEFAULT } from 'react-native-maps';
 import { GET_ORDER } from '../api/queries';
 import { formatDate } from '../utils/dateFormatter';
+import { useTheme } from '../theme';
+import useResponsive from '../hooks/useResponsive';
 
 const ORDER_STATUSES = [
   { key: 'pending', label: 'Order Placed', icon: 'check-circle' },
@@ -25,6 +27,8 @@ const ORDER_STATUSES = [
 ];
 
 const OrderTrackingScreen = ({ navigation, route }) => {
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
   const { orderId } = route.params;
   const [riderLocation, setRiderLocation] = useState(null);
 
@@ -50,6 +54,8 @@ const OrderTrackingScreen = ({ navigation, route }) => {
     }
   }, [order]);
 
+  const s = styles(colors, typography, scale);
+
   const getStatusIndex = (status) => {
     return ORDER_STATUSES.findIndex((s) => s.key === status);
   };
@@ -66,43 +72,43 @@ const OrderTrackingScreen = ({ navigation, route }) => {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#FF6B35" />
+      <View style={s.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={s.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={s.header}>
         <TouchableOpacity
-          style={styles.backButton}
+          style={s.backButton}
           onPress={() => navigation.navigate('Home')}
         >
-          <Icon name="arrow-left" size={24} color="#1D3557" />
+          <Icon name="arrow-left" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <View style={styles.headerInfo}>
-          <Text style={styles.headerTitle}>Order #{order?.orderId}</Text>
-          <Text style={styles.headerSubtitle}>
+        <View style={s.headerInfo}>
+          <Text style={s.headerTitle}>Order #{order?.orderId}</Text>
+          <Text style={s.headerSubtitle}>
             {formatDate(order?.orderDate || order?.createdAt)}
           </Text>
         </View>
         <TouchableOpacity
-          style={styles.refreshButton}
+          style={s.refreshButton}
           onPress={() => refetch()}
         >
-          <Icon name="refresh" size={24} color="#1D3557" />
+          <Icon name="refresh" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Map View */}
         {order?.orderStatus !== 'delivered' && order?.orderStatus !== 'cancelled' && (
-          <View style={styles.mapContainer}>
+          <View style={s.mapContainer}>
             <MapView
               provider={PROVIDER_DEFAULT}
-              style={styles.map}
+              style={s.map}
               initialRegion={{
                 latitude: 37.78825,
                 longitude: -122.4324,
@@ -118,8 +124,8 @@ const OrderTrackingScreen = ({ navigation, route }) => {
                 }}
                 title={order?.restaurant?.name}
               >
-                <View style={styles.markerContainer}>
-                  <Icon name="store" size={24} color="#FF6B35" />
+                <View style={s.markerContainer}>
+                  <Icon name="store" size={24} color={colors.accent} />
                 </View>
               </Marker>
 
@@ -129,8 +135,8 @@ const OrderTrackingScreen = ({ navigation, route }) => {
                   coordinate={riderLocation}
                   title="Delivery Rider"
                 >
-                  <View style={styles.markerContainer}>
-                    <Icon name="bike" size={24} color="#4CAF50" />
+                  <View style={s.markerContainer}>
+                    <Icon name="bike" size={24} color={colors.accent} />
                   </View>
                 </Marker>
               )}
@@ -143,8 +149,8 @@ const OrderTrackingScreen = ({ navigation, route }) => {
                 }}
                 title="Your Location"
               >
-                <View style={styles.markerContainer}>
-                  <Icon name="map-marker" size={24} color="#2196F3" />
+                <View style={s.markerContainer}>
+                  <Icon name="map-marker" size={24} color={colors.info} />
                 </View>
               </Marker>
 
@@ -155,18 +161,18 @@ const OrderTrackingScreen = ({ navigation, route }) => {
                     riderLocation,
                     { latitude: 37.79825, longitude: -122.4424 },
                   ]}
-                  strokeColor="#FF6B35"
+                  strokeColor={colors.accent}
                   strokeWidth={3}
                 />
               )}
             </MapView>
 
             {/* ETA Card */}
-            <View style={styles.etaCard}>
-              <Icon name="clock-fast" size={24} color="#FF6B35" />
-              <View style={styles.etaInfo}>
-                <Text style={styles.etaLabel}>Estimated Arrival</Text>
-                <Text style={styles.etaTime}>
+            <View style={s.etaCard}>
+              <Icon name="clock-fast" size={24} color={colors.accent} />
+              <View style={s.etaInfo}>
+                <Text style={s.etaLabel}>Estimated Arrival</Text>
+                <Text style={s.etaTime}>
                   {order?.expectedTime || '25-30 min'}
                 </Text>
               </View>
@@ -175,49 +181,49 @@ const OrderTrackingScreen = ({ navigation, route }) => {
         )}
 
         {/* Order Status Timeline */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Order Status</Text>
-          <View style={styles.timeline}>
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Order Status</Text>
+          <View style={s.timeline}>
             {ORDER_STATUSES.map((status, index) => {
               const isCompleted = index <= currentStatusIndex;
               const isCurrent = index === currentStatusIndex;
 
               return (
-                <View key={status.key} style={styles.timelineItem}>
-                  <View style={styles.timelineLeft}>
+                <View key={status.key} style={s.timelineItem}>
+                  <View style={s.timelineLeft}>
                     <View
                       style={[
-                        styles.timelineIcon,
-                        isCompleted && styles.timelineIconCompleted,
-                        isCurrent && styles.timelineIconCurrent,
+                        s.timelineIcon,
+                        isCompleted && s.timelineIconCompleted,
+                        isCurrent && s.timelineIconCurrent,
                       ]}
                     >
                       <Icon
                         name={status.icon}
                         size={20}
-                        color={isCompleted ? '#FFFFFF' : '#6C757D'}
+                        color={isCompleted ? colors.textInverse : colors.textSecondary}
                       />
                     </View>
                     {index < ORDER_STATUSES.length - 1 && (
                       <View
                         style={[
-                          styles.timelineLine,
-                          isCompleted && styles.timelineLineCompleted,
+                          s.timelineLine,
+                          isCompleted && s.timelineLineCompleted,
                         ]}
                       />
                     )}
                   </View>
-                  <View style={styles.timelineRight}>
+                  <View style={s.timelineRight}>
                     <Text
                       style={[
-                        styles.timelineLabel,
-                        isCompleted && styles.timelineLabelCompleted,
+                        s.timelineLabel,
+                        isCompleted && s.timelineLabelCompleted,
                       ]}
                     >
                       {status.label}
                     </Text>
                     {isCompleted && (
-                      <Text style={styles.timelineTime}>
+                      <Text style={s.timelineTime}>
                         {new Date().toLocaleTimeString([], {
                           hour: '2-digit',
                           minute: '2-digit',
@@ -233,37 +239,37 @@ const OrderTrackingScreen = ({ navigation, route }) => {
 
         {/* Rider Info */}
         {order?.rider && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Delivery Rider</Text>
-            <View style={styles.riderCard}>
+          <View style={s.section}>
+            <Text style={s.sectionTitle}>Delivery Rider</Text>
+            <View style={s.riderCard}>
               <Image
                 source={{
                   uri: order.rider.profileImage || 'https://via.placeholder.com/60',
                 }}
-                style={styles.riderImage}
+                style={s.riderImage}
               />
-              <View style={styles.riderInfo}>
-                <Text style={styles.riderName}>{order.rider.name}</Text>
-                <View style={styles.riderMeta}>
-                  <Icon name="star" size={16} color="#FFC107" />
-                  <Text style={styles.riderRating}>4.8</Text>
-                  <Text style={styles.riderVehicle}>
+              <View style={s.riderInfo}>
+                <Text style={s.riderName}>{order.rider.name}</Text>
+                <View style={s.riderMeta}>
+                  <Icon name="star" size={16} color={colors.warning} />
+                  <Text style={s.riderRating}>4.8</Text>
+                  <Text style={s.riderVehicle}>
                     • {order.rider.vehicleType || 'Bike'}
                   </Text>
                 </View>
               </View>
-              <View style={styles.riderActions}>
+              <View style={s.riderActions}>
                 <TouchableOpacity
-                  style={styles.riderActionButton}
+                  style={s.riderActionButton}
                   onPress={() => handleCall(order.rider.phone)}
                 >
-                  <Icon name="phone" size={20} color="#FF6B35" />
+                  <Icon name="phone" size={20} color={colors.accent} />
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={styles.riderActionButton}
+                  style={s.riderActionButton}
                   onPress={() => handleMessage(order.rider.phone)}
                 >
-                  <Icon name="message" size={20} color="#FF6B35" />
+                  <Icon name="message" size={20} color={colors.accent} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -271,63 +277,63 @@ const OrderTrackingScreen = ({ navigation, route }) => {
         )}
 
         {/* Restaurant Info */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Restaurant</Text>
-          <View style={styles.restaurantCard}>
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Restaurant</Text>
+          <View style={s.restaurantCard}>
             <Image
               source={{
                 uri: order?.restaurant?.image || 'https://via.placeholder.com/60',
               }}
-              style={styles.restaurantImage}
+              style={s.restaurantImage}
             />
-            <View style={styles.restaurantInfo}>
-              <Text style={styles.restaurantName}>{order?.restaurant?.name}</Text>
-              <Text style={styles.restaurantAddress} numberOfLines={1}>
+            <View style={s.restaurantInfo}>
+              <Text style={s.restaurantName}>{order?.restaurant?.name}</Text>
+              <Text style={s.restaurantAddress} numberOfLines={1}>
                 {order?.restaurant?.address}
               </Text>
             </View>
             <TouchableOpacity
-              style={styles.callButton}
+              style={s.callButton}
               onPress={() => handleCall(order?.restaurant?.phone)}
             >
-              <Icon name="phone" size={20} color="#FF6B35" />
+              <Icon name="phone" size={20} color={colors.accent} />
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Order Items */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Order Items</Text>
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Order Items</Text>
           {order?.items?.map((item, index) => (
-            <View key={index} style={styles.orderItem}>
-              <Text style={styles.itemQuantity}>{`${item.quantity}x`}</Text>
-              <View style={styles.itemInfo}>
-                <Text style={styles.itemName}>{item.title}</Text>
+            <View key={index} style={s.orderItem}>
+              <Text style={s.itemQuantity}>{`${item.quantity}x`}</Text>
+              <View style={s.itemInfo}>
+                <Text style={s.itemName}>{item.title}</Text>
                 {item.variation && (
-                  <Text style={styles.itemVariation}>{item.variation.title}</Text>
+                  <Text style={s.itemVariation}>{item.variation.title}</Text>
                 )}
               </View>
-              <Text style={styles.itemPrice}>
-                ETB {(item.variation?.price * item.quantity).toFixed(2)}
+              <Text style={s.itemPrice}>
+                PKR {(item.variation?.price * item.quantity).toFixed(2)}
               </Text>
             </View>
           ))}
         </View>
 
         {/* Delivery Address */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Delivery Address</Text>
-          <View style={styles.addressCard}>
-            <Icon name="map-marker" size={24} color="#FF6B35" />
-            <View style={styles.addressInfo}>
-              <Text style={styles.addressLabel}>
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Delivery Address</Text>
+          <View style={s.addressCard}>
+            <Icon name="map-marker" size={24} color={colors.accent} />
+            <View style={s.addressInfo}>
+              <Text style={s.addressLabel}>
                 {order?.deliveryAddress?.label || 'Home'}
               </Text>
-              <Text style={styles.addressText}>
+              <Text style={s.addressText}>
                 {order?.deliveryAddress?.deliveryAddress}
               </Text>
               {order?.deliveryAddress?.details && (
-                <Text style={styles.addressDetails}>
+                <Text style={s.addressDetails}>
                   {order.deliveryAddress.details}
                 </Text>
               )}
@@ -336,40 +342,40 @@ const OrderTrackingScreen = ({ navigation, route }) => {
         </View>
 
         {/* Bill Summary */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Bill Summary</Text>
-          <View style={styles.billRow}>
-            <Text style={styles.billLabel}>Subtotal</Text>
-            <Text style={styles.billValue}>{'ETB ' + String(order?.orderAmount?.toFixed(2) || '0.00')}</Text>
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Bill Summary</Text>
+          <View style={s.billRow}>
+            <Text style={s.billLabel}>Subtotal</Text>
+            <Text style={s.billValue}>{'PKR ' + String(order?.orderAmount?.toFixed(2) || '0.00')}</Text>
           </View>
-          <View style={styles.billRow}>
-            <Text style={styles.billLabel}>Delivery Fee</Text>
-            <Text style={styles.billValue}>
-              ETB {order?.deliveryCharges?.toFixed(2)}
+          <View style={s.billRow}>
+            <Text style={s.billLabel}>Delivery Fee</Text>
+            <Text style={s.billValue}>
+              PKR {order?.deliveryCharges?.toFixed(2)}
             </Text>
           </View>
-          <View style={styles.billRow}>
-            <Text style={styles.billLabel}>Tax</Text>
-            <Text style={styles.billValue}>
-              ETB {order?.taxationAmount?.toFixed(2)}
+          <View style={s.billRow}>
+            <Text style={s.billLabel}>Tax</Text>
+            <Text style={s.billValue}>
+              PKR {order?.taxationAmount?.toFixed(2)}
             </Text>
           </View>
           {order?.tipping > 0 && (
-            <View style={styles.billRow}>
-              <Text style={styles.billLabel}>Tip</Text>
-              <Text style={styles.billValue}>{'ETB ' + String(order.tipping.toFixed(2))}</Text>
+            <View style={s.billRow}>
+              <Text style={s.billLabel}>Tip</Text>
+              <Text style={s.billValue}>{'PKR ' + String(order.tipping.toFixed(2))}</Text>
             </View>
           )}
-          <View style={styles.dividerLine} />
-          <View style={styles.billRow}>
-            <Text style={styles.billTotal}>Total Paid</Text>
-            <Text style={styles.billTotalValue}>
-              ETB {order?.paidAmount?.toFixed(2) || order?.orderAmount?.toFixed(2)}
+          <View style={s.dividerLine} />
+          <View style={s.billRow}>
+            <Text style={s.billTotal}>Total Paid</Text>
+            <Text style={s.billTotalValue}>
+              PKR {order?.paidAmount?.toFixed(2) || order?.orderAmount?.toFixed(2)}
             </Text>
           </View>
-          <View style={styles.paymentMethod}>
-            <Icon name="cash" size={16} color="#6C757D" />
-            <Text style={styles.paymentMethodText}>
+          <View style={s.paymentMethod}>
+            <Icon name="cash" size={16} color={colors.textSecondary} />
+            <Text style={s.paymentMethodText}>
               {order?.paymentMethod?.toUpperCase()}
             </Text>
           </View>
@@ -377,29 +383,29 @@ const OrderTrackingScreen = ({ navigation, route }) => {
 
         {/* Action Buttons */}
         {order?.orderStatus !== 'delivered' && order?.orderStatus !== 'cancelled' && (
-          <View style={styles.section}>
-            <TouchableOpacity style={styles.helpButton}>
-              <Icon name="help-circle-outline" size={20} color="#FF6B35" />
-              <Text style={styles.helpButtonText}>Need Help?</Text>
+          <View style={s.section}>
+            <TouchableOpacity style={s.helpButton}>
+              <Icon name="help-circle-outline" size={20} color={colors.accent} />
+              <Text style={s.helpButtonText}>Need Help?</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.cancelButton}>
-              <Icon name="close-circle-outline" size={20} color="#E63946" />
-              <Text style={styles.cancelButtonText}>Cancel Order</Text>
+            <TouchableOpacity style={s.cancelButton}>
+              <Icon name="close-circle-outline" size={20} color={colors.error} />
+              <Text style={s.cancelButtonText}>Cancel Order</Text>
             </TouchableOpacity>
           </View>
         )}
 
         {/* Rate Order (if delivered) */}
         {order?.orderStatus === 'delivered' && (
-          <View style={styles.section}>
+          <View style={s.section}>
             <TouchableOpacity
-              style={styles.rateButton}
+              style={s.rateButton}
               onPress={() =>
                 navigation.navigate('RateOrder', { orderId: order._id })
               }
             >
-              <Icon name="star-outline" size={20} color="#FFFFFF" />
-              <Text style={styles.rateButtonText}>Rate Your Order</Text>
+              <Icon name="star-outline" size={20} color={colors.textInverse} />
+              <Text style={s.rateButtonText}>Rate Your Order</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -410,10 +416,10 @@ const OrderTrackingScreen = ({ navigation, route }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.surface,
   },
   loadingContainer: {
     flex: 1,
@@ -423,56 +429,56 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#FFFFFF',
+    paddingHorizontal: Math.round(20 * scale),
+    paddingVertical: Math.round(16 * scale),
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F8F9FA',
+    width: Math.round(40 * scale),
+    height: Math.round(40 * scale),
+    borderRadius: Math.round(20 * scale),
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerInfo: {
     flex: 1,
-    marginLeft: 16,
+    marginLeft: Math.round(16 * scale),
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   headerSubtitle: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   refreshButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F8F9FA',
+    width: Math.round(40 * scale),
+    height: Math.round(40 * scale),
+    borderRadius: Math.round(20 * scale),
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
   },
   mapContainer: {
-    height: 250,
+    height: Math.round(250 * scale),
     position: 'relative',
   },
   map: {
     flex: 1,
   },
   markerContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#FFFFFF',
+    width: Math.round(40 * scale),
+    height: Math.round(40 * scale),
+    borderRadius: Math.round(20 * scale),
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -480,315 +486,315 @@ const styles = StyleSheet.create({
   },
   etaCard: {
     position: 'absolute',
-    top: 16,
-    left: 16,
-    right: 16,
+    top: Math.round(16 * scale),
+    left: Math.round(16 * scale),
+    right: Math.round(16 * scale),
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    padding: 16,
-    borderRadius: 12,
-    shadowColor: '#000',
+    backgroundColor: colors.surface,
+    padding: Math.round(16 * scale),
+    borderRadius: Math.round(12 * scale),
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 4,
   },
   etaInfo: {
-    marginLeft: 12,
+    marginLeft: Math.round(12 * scale),
   },
   etaLabel: {
-    fontSize: 12,
-    color: '#6C757D',
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
   },
   etaTime: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   section: {
-    backgroundColor: '#FFFFFF',
-    padding: 20,
-    marginTop: 12,
+    backgroundColor: colors.surface,
+    padding: Math.round(20 * scale),
+    marginTop: Math.round(12 * scale),
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginBottom: 16,
+    color: colors.textPrimary,
+    marginBottom: Math.round(16 * scale),
   },
   timeline: {
-    paddingLeft: 8,
+    paddingLeft: Math.round(8 * scale),
   },
   timelineItem: {
     flexDirection: 'row',
-    marginBottom: 24,
+    marginBottom: Math.round(24 * scale),
   },
   timelineLeft: {
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: Math.round(16 * scale),
   },
   timelineIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#E9ECEF',
+    width: Math.round(40 * scale),
+    height: Math.round(40 * scale),
+    borderRadius: Math.round(20 * scale),
+    backgroundColor: colors.border,
     justifyContent: 'center',
     alignItems: 'center',
   },
   timelineIconCompleted: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: colors.success,
   },
   timelineIconCurrent: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: colors.accent,
   },
   timelineLine: {
     width: 2,
     flex: 1,
-    backgroundColor: '#E9ECEF',
-    marginTop: 8,
+    backgroundColor: colors.border,
+    marginTop: Math.round(8 * scale),
   },
   timelineLineCompleted: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: colors.success,
   },
   timelineRight: {
     flex: 1,
-    paddingTop: 8,
+    paddingTop: Math.round(8 * scale),
   },
   timelineLabel: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#6C757D',
+    color: colors.textSecondary,
   },
   timelineLabelCompleted: {
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   timelineTime: {
-    fontSize: 14,
-    color: '#6C757D',
-    marginTop: 4,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginTop: Math.round(4 * scale),
   },
   riderCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#F8F9FA',
-    borderRadius: 12,
+    padding: Math.round(16 * scale),
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
   },
   riderImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#E9ECEF',
+    width: Math.round(60 * scale),
+    height: Math.round(60 * scale),
+    borderRadius: Math.round(30 * scale),
+    backgroundColor: colors.border,
   },
   riderInfo: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: Math.round(12 * scale),
   },
   riderName: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#1D3557',
-    marginBottom: 4,
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   riderMeta: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   riderRating: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#1D3557',
-    marginLeft: 4,
+    color: colors.textPrimary,
+    marginLeft: Math.round(4 * scale),
   },
   riderVehicle: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   riderActions: {
     flexDirection: 'row',
   },
   riderActionButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#FFF3E0',
+    width: Math.round(40 * scale),
+    height: Math.round(40 * scale),
+    borderRadius: Math.round(20 * scale),
+    backgroundColor: colors.accentSurface,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 8,
+    marginLeft: Math.round(8 * scale),
   },
   restaurantCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#F8F9FA',
-    borderRadius: 12,
+    padding: Math.round(16 * scale),
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
   },
   restaurantImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 12,
-    backgroundColor: '#E9ECEF',
+    width: Math.round(60 * scale),
+    height: Math.round(60 * scale),
+    borderRadius: Math.round(12 * scale),
+    backgroundColor: colors.border,
   },
   restaurantInfo: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: Math.round(12 * scale),
   },
   restaurantName: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#1D3557',
-    marginBottom: 4,
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   restaurantAddress: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   callButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#FFF3E0',
+    width: Math.round(40 * scale),
+    height: Math.round(40 * scale),
+    borderRadius: Math.round(20 * scale),
+    backgroundColor: colors.accentSurface,
     justifyContent: 'center',
     alignItems: 'center',
   },
   orderItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: Math.round(12 * scale),
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   itemQuantity: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#FF6B35',
-    width: 40,
+    color: colors.accent,
+    width: Math.round(40 * scale),
   },
   itemInfo: {
     flex: 1,
   },
   itemName: {
-    fontSize: 16,
-    color: '#1D3557',
+    fontSize: Math.round(16 * scale),
+    color: colors.textPrimary,
   },
   itemVariation: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   itemPrice: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   addressCard: {
     flexDirection: 'row',
-    padding: 16,
-    backgroundColor: '#F8F9FA',
-    borderRadius: 12,
+    padding: Math.round(16 * scale),
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
   },
   addressInfo: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: Math.round(12 * scale),
   },
   addressLabel: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#FF6B35',
-    marginBottom: 4,
+    color: colors.accent,
+    marginBottom: Math.round(4 * scale),
   },
   addressText: {
-    fontSize: 16,
-    color: '#1D3557',
-    marginBottom: 4,
+    fontSize: Math.round(16 * scale),
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   addressDetails: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   billRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: Math.round(12 * scale),
   },
   billLabel: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   billValue: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   dividerLine: {
     height: 1,
-    backgroundColor: '#E9ECEF',
-    marginVertical: 12,
+    backgroundColor: colors.border,
+    marginVertical: Math.round(12 * scale),
   },
   billTotal: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   billTotalValue: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#FF6B35',
+    color: colors.accent,
   },
   paymentMethod: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: Math.round(8 * scale),
   },
   paymentMethodText: {
-    fontSize: 14,
-    color: '#6C757D',
-    marginLeft: 6,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginLeft: Math.round(6 * scale),
   },
   helpButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 14,
-    borderRadius: 12,
+    paddingVertical: Math.round(14 * scale),
+    borderRadius: Math.round(12 * scale),
     borderWidth: 2,
-    borderColor: '#FF6B35',
-    marginBottom: 12,
+    borderColor: colors.accent,
+    marginBottom: Math.round(12 * scale),
   },
   helpButtonText: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#FF6B35',
-    marginLeft: 8,
+    color: colors.accent,
+    marginLeft: Math.round(8 * scale),
   },
   cancelButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 14,
-    borderRadius: 12,
+    paddingVertical: Math.round(14 * scale),
+    borderRadius: Math.round(12 * scale),
     borderWidth: 2,
-    borderColor: '#E63946',
+    borderColor: colors.error,
   },
   cancelButtonText: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#E63946',
-    marginLeft: 8,
+    color: colors.error,
+    marginLeft: Math.round(8 * scale),
   },
   rateButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FF6B35',
-    paddingVertical: 16,
-    borderRadius: 12,
+    backgroundColor: colors.accent,
+    paddingVertical: Math.round(16 * scale),
+    borderRadius: Math.round(12 * scale),
   },
   rateButtonText: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#FFFFFF',
-    marginLeft: 8,
+    color: colors.textInverse,
+    marginLeft: Math.round(8 * scale),
   },
 });
 

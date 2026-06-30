@@ -22,8 +22,12 @@ import {
   clearCart,
 } from '../store/cartSlice';
 import { APPLY_COUPON } from '../api/mutations';
+import { useTheme } from '../theme';
+import useResponsive from '../hooks/useResponsive';
 
 const CartScreen = ({ navigation }) => {
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
   const dispatch = useDispatch();
   const cart = useSelector((state) => state.cart);
   const [couponCode, setCouponCode] = useState('');
@@ -105,20 +109,21 @@ const CartScreen = ({ navigation }) => {
       totalPrice
     });
 
+
     return (
-      <View key={index} style={styles.cartItem}>
+      <View key={index} style={s.cartItem}>
         <Image
           source={{ uri: item.image || 'https://via.placeholder.com/80' }}
-          style={styles.itemImage}
+          style={s.itemImage}
         />
-        <View style={styles.itemDetails}>
-          <Text style={styles.itemName}>{item.title}</Text>
-          <Text style={styles.itemVariation}>{item.variation?.title}</Text>
+        <View style={s.itemDetails}>
+          <Text style={s.itemName}>{item.title}</Text>
+          <Text style={s.itemVariation}>{item.variation?.title}</Text>
           
           {item.addons && item.addons.length > 0 && (
-            <View style={styles.addonsContainer}>
+            <View style={s.addonsContainer}>
               {item.addons.map((addon, addonIndex) => (
-                <Text key={addonIndex} style={styles.addonText}>
+                <Text key={addonIndex} style={s.addonText}>
                   + {addon.options.map(opt => opt.title).join(', ')}
                 </Text>
               ))}
@@ -126,33 +131,33 @@ const CartScreen = ({ navigation }) => {
           )}
 
           {item.specialInstructions && (
-            <Text style={styles.instructions} numberOfLines={2}>
+            <Text style={s.instructions} numberOfLines={2}>
               Note: {item.specialInstructions}
             </Text>
           )}
 
-          <View style={styles.itemFooter}>
-            <Text style={styles.itemPrice}>{'ETB ' + String(totalPrice)}</Text>
-            <View style={styles.quantityControls}>
+          <View style={s.itemFooter}>
+            <Text style={s.itemPrice}>{'PKR ' + String(totalPrice)}</Text>
+            <View style={s.quantityControls}>
               <TouchableOpacity
-                style={styles.quantityButton}
+                style={s.quantityButton}
                 onPress={() => dispatch(updateQuantity({ index, quantity: item.quantity - 1 }))}
               >
-                <Icon name="minus" size={16} color="#1D3557" />
+                <Icon name="minus" size={16} color={colors.textPrimary} />
               </TouchableOpacity>
-              <Text style={styles.quantityText}>{String(item.quantity)}</Text>
+              <Text style={s.quantityText}>{String(item.quantity)}</Text>
               <TouchableOpacity
-                style={styles.quantityButton}
+                style={s.quantityButton}
                 onPress={() => dispatch(updateQuantity({ index, quantity: item.quantity + 1 }))}
               >
-                <Icon name="plus" size={16} color="#1D3557" />
+                <Icon name="plus" size={16} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
           </View>
         </View>
 
         <TouchableOpacity
-          style={styles.removeButton}
+          style={s.removeButton}
           onPress={() => {
             Alert.alert(
               'Remove Item',
@@ -164,36 +169,38 @@ const CartScreen = ({ navigation }) => {
             );
           }}
         >
-          <Icon name="close" size={20} color="#E63946" />
+          <Icon name="close" size={20} color={colors.error} />
         </TouchableOpacity>
       </View>
     );
   };
 
   // Check if cart exists and has items
+  const s = styles(colors, typography, scale);
+
   if (!cart || !cart.items || cart.items.length === 0) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
+      <SafeAreaView style={s.container}>
+        <View style={s.header}>
           <TouchableOpacity
-            style={styles.backButton}
+            style={s.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Icon name="arrow-left" size={24} color="#1D3557" />
+            <Icon name="arrow-left" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Cart</Text>
+          <Text style={s.headerTitle}>Cart</Text>
           <View style={{ width: 40 }} />
         </View>
 
-        <View style={styles.emptyContainer}>
-          <Icon name="cart-outline" size={100} color="#E9ECEF" />
-          <Text style={styles.emptyTitle}>Your cart is empty</Text>
-          <Text style={styles.emptySubtitle}>Add items to get started</Text>
+        <View style={s.emptyContainer}>
+          <Icon name="cart-outline" size={100} color={colors.border} />
+          <Text style={s.emptyTitle}>Your cart is empty</Text>
+          <Text style={s.emptySubtitle}>Add items to get started</Text>
           <TouchableOpacity
-            style={styles.browseButton}
+            style={s.browseButton}
             onPress={() => navigation.navigate('Home')}
           >
-            <Text style={styles.browseButtonText}>Browse Products</Text>
+            <Text style={s.browseButtonText}>Browse Products</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -201,18 +208,18 @@ const CartScreen = ({ navigation }) => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={s.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={s.header}>
         <TouchableOpacity
-          style={styles.backButton}
+          style={s.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Icon name="arrow-left" size={24} color="#1D3557" />
+          <Icon name="arrow-left" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Cart ({cart.items.length})</Text>
+        <Text style={s.headerTitle}>Cart ({cart.items.length})</Text>
         <TouchableOpacity
-          style={styles.clearButton}
+          style={s.clearButton}
           onPress={() => {
             Alert.alert(
               'Clear Cart',
@@ -224,73 +231,73 @@ const CartScreen = ({ navigation }) => {
             );
           }}
         >
-          <Icon name="delete-outline" size={24} color="#E63946" />
+          <Icon name="delete-outline" size={24} color={colors.error} />
         </TouchableOpacity>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Cart Items */}
-        <View style={styles.section}>
+        <View style={s.section}>
           {cart.items.map((item, index) => renderCartItem(item, index))}
         </View>
 
         {/* Coupon Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Apply Coupon</Text>
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Apply Coupon</Text>
           {cart.coupon ? (
-            <View style={styles.appliedCoupon}>
-              <View style={styles.couponInfo}>
-                <Icon name="ticket-percent" size={24} color="#4CAF50" />
-                <View style={styles.couponDetails}>
-                  <Text style={styles.couponCode}>{cart.coupon.code}</Text>
-                  <Text style={styles.couponDescription}>{cart.coupon.description}</Text>
+            <View style={s.appliedCoupon}>
+              <View style={s.couponInfo}>
+                <Icon name="ticket-percent" size={24} color={colors.success} />
+                <View style={s.couponDetails}>
+                  <Text style={s.couponCode}>{cart.coupon.code}</Text>
+                  <Text style={s.couponDescription}>{cart.coupon.description}</Text>
                 </View>
               </View>
               <TouchableOpacity onPress={() => dispatch(removeCoupon())}>
-                <Icon name="close-circle" size={24} color="#E63946" />
+                <Icon name="close-circle" size={24} color={colors.error} />
               </TouchableOpacity>
             </View>
           ) : (
-            <View style={styles.couponInput}>
+            <View style={s.couponInput}>
               <TextInput
-                style={styles.couponTextInput}
+                style={s.couponTextInput}
                 placeholder="Enter coupon code"
-                placeholderTextColor="#A8DADC"
+                placeholderTextColor={colors.inputPlaceholder}
                 value={couponCode}
                 onChangeText={setCouponCode}
                 autoCapitalize="characters"
               />
               <TouchableOpacity
-                style={styles.applyButton}
+                style={s.applyButton}
                 onPress={handleApplyCoupon}
                 disabled={couponLoading}
               >
-                <Text style={styles.applyButtonText}>Apply</Text>
+                <Text style={s.applyButtonText}>Apply</Text>
               </TouchableOpacity>
             </View>
           )}
         </View>
 
         {/* Tip Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Add Tip for Rider</Text>
-          <View style={styles.tipOptions}>
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Add Tip for Rider</Text>
+          <View style={s.tipOptions}>
             {[0, 20, 50, 100].map((tip) => (
               <TouchableOpacity
                 key={tip}
                 style={[
-                  styles.tipButton,
-                  selectedTip === tip && styles.tipButtonSelected,
+                  s.tipButton,
+                  selectedTip === tip && s.tipButtonSelected,
                 ]}
                 onPress={() => handleTipSelect(tip)}
               >
                 <Text
                   style={[
-                    styles.tipButtonText,
-                    selectedTip === tip && styles.tipButtonTextSelected,
+                    s.tipButtonText,
+                    selectedTip === tip && s.tipButtonTextSelected,
                   ]}
                 >
-                  {tip === 0 ? 'No Tip' : `ETB ${tip}`}
+                  {tip === 0 ? 'No Tip' : `PKR ${tip}`}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -298,38 +305,38 @@ const CartScreen = ({ navigation }) => {
         </View>
 
         {/* Bill Summary */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Bill Summary</Text>
-          <View style={styles.billRow}>
-            <Text style={styles.billLabel}>Subtotal</Text>
-            <Text style={styles.billValue}>{'ETB ' + String((Number(cart.subtotal) || 0).toFixed(2))}</Text>
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Bill Summary</Text>
+          <View style={s.billRow}>
+            <Text style={s.billLabel}>Subtotal</Text>
+            <Text style={s.billValue}>{'PKR ' + String((Number(cart.subtotal) || 0).toFixed(2))}</Text>
           </View>
-          <View style={styles.billRow}>
-            <Text style={styles.billLabel}>Delivery Fee</Text>
-            <Text style={styles.billValue}>{'ETB ' + String((Number(cart.deliveryFee) || 0).toFixed(2))}</Text>
+          <View style={s.billRow}>
+            <Text style={s.billLabel}>Delivery Fee</Text>
+            <Text style={s.billValue}>{'PKR ' + String((Number(cart.deliveryFee) || 0).toFixed(2))}</Text>
           </View>
-          <View style={styles.billRow}>
-            <Text style={styles.billLabel}>Tax</Text>
-            <Text style={styles.billValue}>{'ETB ' + String((Number(cart.tax) || 0).toFixed(2))}</Text>
+          <View style={s.billRow}>
+            <Text style={s.billLabel}>Tax</Text>
+            <Text style={s.billValue}>{'PKR ' + String((Number(cart.tax) || 0).toFixed(2))}</Text>
           </View>
           {cart.tip > 0 && (
-            <View style={styles.billRow}>
-              <Text style={styles.billLabel}>Tip</Text>
-              <Text style={styles.billValue}>{'ETB ' + String((Number(cart.tip) || 0).toFixed(2))}</Text>
+            <View style={s.billRow}>
+              <Text style={s.billLabel}>Tip</Text>
+              <Text style={s.billValue}>{'PKR ' + String((Number(cart.tip) || 0).toFixed(2))}</Text>
             </View>
           )}
           {cart.discount > 0 && (
-            <View style={styles.billRow}>
-              <Text style={[styles.billLabel, { color: '#4CAF50' }]}>Discount</Text>
-              <Text style={[styles.billValue, { color: '#4CAF50' }]}>
-                -ETB {(Number(cart.discount) || 0).toFixed(2)}
+            <View style={s.billRow}>
+              <Text style={[s.billLabel, { color: colors.success }]}>Discount</Text>
+              <Text style={[s.billValue, { color: colors.success }]}>
+                -PKR {(Number(cart.discount) || 0).toFixed(2)}
               </Text>
             </View>
           )}
-          <View style={styles.dividerLine} />
-          <View style={styles.billRow}>
-            <Text style={styles.billTotal}>Total</Text>
-            <Text style={styles.billTotalValue}>{'ETB ' + String((Number(cart.total) || 0).toFixed(2))}</Text>
+          <View style={s.dividerLine} />
+          <View style={s.billRow}>
+            <Text style={s.billTotal}>Total</Text>
+            <Text style={s.billTotalValue}>{'PKR ' + String((Number(cart.total) || 0).toFixed(2))}</Text>
           </View>
         </View>
 
@@ -337,108 +344,108 @@ const CartScreen = ({ navigation }) => {
       </ScrollView>
 
       {/* Checkout Button */}
-      <View style={styles.checkoutContainer}>
+      <View style={s.checkoutContainer}>
         <TouchableOpacity
-          style={styles.checkoutButton}
+          style={s.checkoutButton}
           onPress={handleCheckout}
         >
-          <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
-          <Text style={styles.checkoutButtonPrice}>{'ETB ' + String((Number(cart.total) || 0).toFixed(2))}</Text>
+          <Text style={s.checkoutButtonText}>Proceed to Checkout</Text>
+          <Text style={s.checkoutButtonPrice}>{'PKR ' + String((Number(cart.total) || 0).toFixed(2))}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.surface,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#FFFFFF',
+    paddingHorizontal: Math.round(20 * scale),
+    paddingVertical: Math.round(16 * scale),
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F8F9FA',
+    width: Math.round(40 * scale),
+    height: Math.round(40 * scale),
+    borderRadius: Math.round(20 * scale),
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerTitle: {
     flex: 1,
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginLeft: 16,
+    color: colors.textPrimary,
+    marginLeft: Math.round(16 * scale),
   },
   clearButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#FFE5E5',
+    width: Math.round(40 * scale),
+    height: Math.round(40 * scale),
+    borderRadius: Math.round(20 * scale),
+    backgroundColor: colors.dangerSurface,
     justifyContent: 'center',
     alignItems: 'center',
   },
   section: {
-    backgroundColor: '#FFFFFF',
-    padding: 20,
-    marginBottom: 12,
+    backgroundColor: colors.surface,
+    padding: Math.round(20 * scale),
+    marginBottom: Math.round(12 * scale),
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginBottom: 16,
+    color: colors.textPrimary,
+    marginBottom: Math.round(16 * scale),
   },
   cartItem: {
     flexDirection: 'row',
-    marginBottom: 16,
-    paddingBottom: 16,
+    marginBottom: Math.round(16 * scale),
+    paddingBottom: Math.round(16 * scale),
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   itemImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    backgroundColor: '#E9ECEF',
+    width: Math.round(80 * scale),
+    height: Math.round(80 * scale),
+    borderRadius: Math.round(8 * scale),
+    backgroundColor: colors.border,
   },
   itemDetails: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: Math.round(12 * scale),
   },
   itemName: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#1D3557',
-    marginBottom: 4,
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   itemVariation: {
-    fontSize: 14,
-    color: '#6C757D',
-    marginBottom: 4,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginBottom: Math.round(4 * scale),
   },
   addonsContainer: {
-    marginBottom: 4,
+    marginBottom: Math.round(4 * scale),
   },
   addonText: {
-    fontSize: 12,
-    color: '#6C757D',
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
   },
   instructions: {
-    fontSize: 12,
-    color: '#6C757D',
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
     fontStyle: 'italic',
-    marginBottom: 8,
+    marginBottom: Math.round(8 * scale),
   },
   itemFooter: {
     flexDirection: 'row',
@@ -446,39 +453,39 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   itemPrice: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#FF6B35',
+    color: colors.accent,
   },
   quantityControls: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8F9FA',
-    borderRadius: 8,
-    padding: 4,
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(8 * scale),
+    padding: Math.round(4 * scale),
   },
   quantityButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 6,
-    backgroundColor: '#FFFFFF',
+    width: Math.round(28 * scale),
+    height: Math.round(28 * scale),
+    borderRadius: Math.round(6 * scale),
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
   },
   quantityText: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#1D3557',
-    marginHorizontal: 12,
+    color: colors.textPrimary,
+    marginHorizontal: Math.round(12 * scale),
   },
   removeButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#FFE5E5',
+    width: Math.round(32 * scale),
+    height: Math.round(32 * scale),
+    borderRadius: Math.round(16 * scale),
+    backgroundColor: colors.dangerSurface,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 8,
+    marginLeft: Math.round(8 * scale),
   },
   couponInput: {
     flexDirection: 'row',
@@ -486,32 +493,32 @@ const styles = StyleSheet.create({
   },
   couponTextInput: {
     flex: 1,
-    height: 50,
-    backgroundColor: '#F8F9FA',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    color: '#1D3557',
-    marginRight: 12,
+    height: Math.round(50 * scale),
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(12 * scale),
+    paddingHorizontal: Math.round(16 * scale),
+    fontSize: Math.round(16 * scale),
+    color: colors.textPrimary,
+    marginRight: Math.round(12 * scale),
   },
   applyButton: {
-    backgroundColor: '#FF6B35',
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 12,
+    backgroundColor: colors.accent,
+    paddingHorizontal: Math.round(24 * scale),
+    paddingVertical: Math.round(14 * scale),
+    borderRadius: Math.round(12 * scale),
   },
   applyButtonText: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.textInverse,
   },
   appliedCoupon: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#E8F5E9',
-    padding: 16,
-    borderRadius: 12,
+    backgroundColor: colors.successSurface,
+    padding: Math.round(16 * scale),
+    borderRadius: Math.round(12 * scale),
   },
   couponInfo: {
     flexDirection: 'row',
@@ -519,17 +526,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   couponDetails: {
-    marginLeft: 12,
+    marginLeft: Math.round(12 * scale),
     flex: 1,
   },
   couponCode: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: colors.success,
   },
   couponDescription: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   tipOptions: {
     flexDirection: 'row',
@@ -537,64 +544,64 @@ const styles = StyleSheet.create({
   },
   tipButton: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingVertical: Math.round(12 * scale),
+    borderRadius: Math.round(8 * scale),
     borderWidth: 2,
-    borderColor: '#E9ECEF',
+    borderColor: colors.border,
     alignItems: 'center',
-    marginHorizontal: 4,
+    marginHorizontal: Math.round(4 * scale),
   },
   tipButtonSelected: {
-    borderColor: '#FF6B35',
-    backgroundColor: '#FFF3E0',
+    borderColor: colors.accent,
+    backgroundColor: colors.accentSurface,
   },
   tipButtonText: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#6C757D',
+    color: colors.textSecondary,
   },
   tipButtonTextSelected: {
-    color: '#FF6B35',
+    color: colors.accent,
   },
   billRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: Math.round(12 * scale),
   },
   billLabel: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   billValue: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   dividerLine: {
     height: 1,
-    backgroundColor: '#E9ECEF',
-    marginVertical: 12,
+    backgroundColor: colors.border,
+    marginVertical: Math.round(12 * scale),
   },
   billTotal: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   billTotalValue: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#FF6B35',
+    color: colors.accent,
   },
   checkoutContainer: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#FFFFFF',
-    padding: 20,
+    backgroundColor: colors.surface,
+    padding: Math.round(20 * scale),
     borderTopWidth: 1,
-    borderTopColor: '#E9ECEF',
-    shadowColor: '#000',
+    borderTopColor: colors.border,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -604,49 +611,49 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#FF6B35',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderRadius: 12,
+    backgroundColor: colors.accent,
+    paddingVertical: Math.round(16 * scale),
+    paddingHorizontal: Math.round(20 * scale),
+    borderRadius: Math.round(12 * scale),
   },
   checkoutButtonText: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.textInverse,
   },
   checkoutButtonPrice: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: colors.textInverse,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 40,
+    paddingHorizontal: Math.round(40 * scale),
   },
   emptyTitle: {
-    fontSize: 20,
+    fontSize: Math.round(20 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginTop: 24,
+    color: colors.textPrimary,
+    marginTop: Math.round(24 * scale),
   },
   emptySubtitle: {
-    fontSize: 16,
-    color: '#6C757D',
-    marginTop: 8,
-    marginBottom: 32,
+    fontSize: Math.round(16 * scale),
+    color: colors.textSecondary,
+    marginTop: Math.round(8 * scale),
+    marginBottom: Math.round(32 * scale),
   },
   browseButton: {
-    backgroundColor: '#FF6B35',
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 12,
+    backgroundColor: colors.accent,
+    paddingHorizontal: Math.round(32 * scale),
+    paddingVertical: Math.round(16 * scale),
+    borderRadius: Math.round(12 * scale),
   },
   browseButtonText: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.textInverse,
   },
 });
 

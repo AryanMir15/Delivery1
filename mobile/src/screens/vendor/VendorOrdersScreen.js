@@ -11,6 +11,11 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useQuery } from '@apollo/client';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useTheme } from '../../theme';
+import useResponsive from '../../hooks/useResponsive';
+import StatusBadge from '../../components/StatusBadge';
+import OrdersIcon from '../../components/OrdersIcon';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { GET_ORDERS_BY_RESTAURANT, GET_RESTAURANTS_BY_OWNER } from '../../api/queries';
 import { setOrders } from '../../store/orderSlice';
@@ -25,6 +30,8 @@ const TABS = [
 export default function OrdersScreen() {
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
   const [activeTab, setActiveTab] = useState('pending');
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const orders = useSelector((state) => state.order.orders);
@@ -76,72 +83,67 @@ export default function OrdersScreen() {
     }
   };
 
+  const s = styles(colors, typography, scale);
+
   const renderOrderCard = ({ item: order }) => (
     <TouchableOpacity
-      style={styles.orderCard}
+      style={s.orderCard}
       onPress={() => navigation.navigate('OrderDetail', { orderId: order._id })}
     >
-      <View style={styles.orderHeader}>
+      <View style={s.orderHeader}>
         <View>
-          <Text style={styles.orderId}>#{order.orderId}</Text>
-          <Text style={styles.orderCustomer}>{order.user.name}</Text>
+          <Text style={s.orderId}>#{order.orderId}</Text>
+          <Text style={s.orderCustomer}>{order.user.name}</Text>
         </View>
-        <View
-          style={[
-            styles.statusBadge,
-            { backgroundColor: getStatusColor(order.orderStatus) },
-          ]}
-        >
-          <Text style={styles.statusText}>
-            {order.orderStatus.toUpperCase()}
-          </Text>
-        </View>
+        <StatusBadge status={order.orderStatus} />
       </View>
 
-      <View style={styles.orderItems}>
-        <Text style={styles.itemsLabel}>Items:</Text>
+      <View style={s.orderItems}>
+        <Text style={s.itemsLabel}>Items:</Text>
         {order.items.slice(0, 2).map((item, index) => (
-          <Text key={index} style={styles.itemText}>
+          <Text key={index} style={s.itemText}>
             • {item.quantity}x {item.title}
           </Text>
         ))}
         {order.items.length > 2 && (
-          <Text style={styles.moreItems}>
+          <Text style={s.moreItems}>
             +{order.items.length - 2} more items
           </Text>
         )}
       </View>
 
-      <View style={styles.orderFooter}>
-        <View style={styles.paymentInfo}>
+      <View style={s.orderFooter}>
+        <View style={s.paymentInfo}>
           <Ionicons
             name={order.paymentMethod === 'cash' ? 'cash' : 'card'}
             size={16}
-            color="#666"
+            color={colors.textSecondary}
           />
-          <Text style={styles.paymentText}>
+          <Text style={s.paymentText}>
             {order.paymentMethod.toUpperCase()}
           </Text>
           <View
             style={[
-              styles.paymentStatus,
+              s.paymentStatus,
               {
                 backgroundColor:
-                  order.paymentStatus === 'paid' ? '#4CAF50' : '#FF9800',
+                  order.paymentStatus === 'paid' ? `${colors.statusDelivered}15` : `${colors.statusPending}15`,
               },
             ]}
           >
-            <Text style={styles.paymentStatusText}>
+            <Text style={[s.paymentStatusText, {
+              color: order.paymentStatus === 'paid' ? colors.statusDelivered : colors.statusPending,
+            }]}>
               {order.paymentStatus.toUpperCase()}
             </Text>
           </View>
         </View>
-        <Text style={styles.orderAmount}>ETB {order.orderAmount.toFixed(2)}</Text>
+        <Text style={s.orderAmount}>PKR {order.orderAmount.toFixed(2)}</Text>
       </View>
 
-      <View style={styles.orderTime}>
-        <Ionicons name="time-outline" size={14} color="#999" />
-        <Text style={styles.timeText}>
+      <View style={s.orderTime}>
+        <Ionicons name="time-outline" size={14} color={colors.textTertiary} />
+        <Text style={s.timeText}>
           {new Date(order.orderDate).toLocaleString()}
         </Text>
       </View>
@@ -149,24 +151,25 @@ export default function OrdersScreen() {
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={s.container} edges={['top']}>
+    <View style={s.container}>
       {/* Tabs */}
-      <View style={styles.tabsContainer}>
+      <View style={s.tabsContainer}>
         {TABS.map((tab) => (
           <TouchableOpacity
             key={tab.key}
-            style={[styles.tab, activeTab === tab.key && styles.activeTab]}
+            style={[s.tab, activeTab === tab.key && s.activeTab]}
             onPress={() => setActiveTab(tab.key)}
           >
             <Ionicons
               name={tab.icon}
               size={20}
-              color={activeTab === tab.key ? '#4CAF50' : '#999'}
+              color={activeTab === tab.key ? colors.accent : colors.textTertiary}
             />
             <Text
               style={[
-                styles.tabText,
-                activeTab === tab.key && styles.activeTabText,
+                s.tabText,
+                activeTab === tab.key && s.activeTabText,
               ]}
             >
               {tab.label}
@@ -180,79 +183,67 @@ export default function OrdersScreen() {
         data={getOrdersByTab()}
         renderItem={renderOrderCard}
         keyExtractor={(item) => item._id}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={s.listContent}
         refreshControl={
           <RefreshControl refreshing={loading} onRefresh={refetch} />
         }
         ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Ionicons name="receipt-outline" size={64} color="#ccc" />
-            <Text style={styles.emptyText}>No orders found</Text>
-            <Text style={styles.emptySubtext}>
+          <View style={s.emptyState}>
+            <OrdersIcon size={64} color={colors.textTertiary} />
+            <Text style={s.emptyText}>No orders found</Text>
+            <Text style={s.emptySubtext}>
               Orders will appear here when customers place them
             </Text>
           </View>
         }
       />
     </View>
+    </SafeAreaView>
   );
 }
 
-function getStatusColor(status) {
-  const colors = {
-    pending: '#FF9800',
-    accepted: '#2196F3',
-    preparing: '#9C27B0',
-    ready: '#00BCD4',
-    picked: '#3F51B5',
-    delivered: '#4CAF50',
-    cancelled: '#F44336',
-  };
-  return colors[status] || '#757575';
-}
-
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background,
   },
   tabsContainer: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: colors.border,
   },
   tab: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 15,
-    gap: 5,
+    paddingVertical: Math.round(15 * scale),
+    gap: Math.round(5 * scale),
   },
   activeTab: {
     borderBottomWidth: 3,
-    borderBottomColor: '#4CAF50',
+    borderBottomColor: colors.accent,
   },
   tabText: {
-    fontSize: 12,
-    color: '#999',
+    fontSize: Math.round(12 * scale),
+    color: colors.textTertiary,
     fontWeight: '600',
   },
   activeTabText: {
-    color: '#4CAF50',
+    color: colors.accent,
   },
   listContent: {
-    padding: 15,
+    padding: Math.round(15 * scale),
   },
   orderCard: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
+    backgroundColor: colors.surface,
+    borderRadius: Math.round(10 * scale),
+    padding: Math.round(15 * scale),
+    marginBottom: Math.round(15 * scale),
     elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: Math.round(2 * scale) },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
@@ -260,107 +251,97 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 12,
+    marginBottom: Math.round(12 * scale),
   },
   orderId: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
   },
   orderCustomer: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
-  },
-  statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 15,
-  },
-  statusText: {
-    color: '#fff',
-    fontSize: 11,
-    fontWeight: 'bold',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginTop: Math.round(4 * scale),
   },
   orderItems: {
-    marginBottom: 12,
-    paddingTop: 12,
+    marginBottom: Math.round(12 * scale),
+    paddingTop: Math.round(12 * scale),
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: colors.border,
   },
   itemsLabel: {
-    fontSize: 12,
-    color: '#999',
-    marginBottom: 5,
+    fontSize: Math.round(12 * scale),
+    color: colors.textTertiary,
+    marginBottom: Math.round(5 * scale),
   },
   itemText: {
-    fontSize: 14,
-    color: '#333',
-    marginBottom: 3,
+    fontSize: Math.round(14 * scale),
+    color: colors.textPrimary,
+    marginBottom: Math.round(3 * scale),
   },
   moreItems: {
-    fontSize: 12,
-    color: '#4CAF50',
+    fontSize: Math.round(12 * scale),
+    color: colors.accent,
     fontStyle: 'italic',
-    marginTop: 3,
+    marginTop: Math.round(3 * scale),
   },
   orderFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 12,
+    paddingTop: Math.round(12 * scale),
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: colors.border,
   },
   paymentInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: Math.round(8 * scale),
   },
   paymentText: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
   },
   paymentStatus: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
+    paddingHorizontal: Math.round(8 * scale),
+    paddingVertical: Math.round(2 * scale),
+    borderRadius: Math.round(10 * scale),
   },
   paymentStatusText: {
-    fontSize: 10,
-    color: '#fff',
+    fontSize: Math.round(10 * scale),
+    color: colors.textInverse,
     fontWeight: 'bold',
   },
   orderAmount: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: colors.accent,
   },
   orderTime: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
-    gap: 5,
+    marginTop: Math.round(8 * scale),
+    gap: Math.round(5 * scale),
   },
   timeText: {
-    fontSize: 12,
-    color: '#999',
+    fontSize: Math.round(12 * scale),
+    color: colors.textTertiary,
   },
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 60,
+    paddingVertical: Math.round(60 * scale),
   },
   emptyText: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#999',
-    marginTop: 15,
+    color: colors.textTertiary,
+    marginTop: Math.round(15 * scale),
   },
   emptySubtext: {
-    fontSize: 14,
-    color: '#ccc',
-    marginTop: 8,
+    fontSize: Math.round(14 * scale),
+    color: colors.textTertiary,
+    marginTop: Math.round(8 * scale),
     textAlign: 'center',
   },
 });

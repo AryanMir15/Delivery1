@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.fooddelivery.mobile'
+    namespace 'com.shok.delivery'
     defaultConfig {
-        applicationId 'com.fooddelivery.mobile'
+        applicationId 'com.shok.delivery'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

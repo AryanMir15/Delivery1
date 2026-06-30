@@ -10,6 +10,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTheme } from '../theme';
 
 const { width } = Dimensions.get('window');
 
@@ -38,6 +39,7 @@ const onboardingData = [
 ];
 
 const OnboardingScreen = ({ navigation }) => {
+  const { colors, typography } = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef(null);
 
@@ -59,22 +61,24 @@ const OnboardingScreen = ({ navigation }) => {
     navigation.setParams({ onboardingComplete: true });
   };
 
+  const s = styles(colors, typography);
+
   const renderItem = ({ item }) => (
-    <View style={styles.slide}>
-      <View style={styles.iconContainer}>
-        <Icon name={item.icon} size={100} color="#FF6B35" />
+    <View style={s.slide}>
+      <View style={s.iconContainer}>
+        <Icon name={item.icon} size={100} color={colors.accent} />
       </View>
-      <Text style={styles.title}>{String(item.title)}</Text>
-      <Text style={styles.description}>{String(item.description)}</Text>
+      <Text style={s.title}>{String(item.title)}</Text>
+      <Text style={s.description}>{String(item.description)}</Text>
     </View>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={s.container}>
       {/* Skip Button */}
       {currentIndex < onboardingData.length - 1 && (
-        <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
-          <Text style={styles.skipText}>Skip</Text>
+        <TouchableOpacity style={s.skipButton} onPress={handleSkip}>
+          <Text style={s.skipText}>Skip</Text>
         </TouchableOpacity>
       )}
 
@@ -95,21 +99,21 @@ const OnboardingScreen = ({ navigation }) => {
       />
 
       {/* Pagination Dots */}
-      <View style={styles.pagination}>
+      <View style={s.pagination}>
         {onboardingData.map((_, index) => (
           <View
             key={String(index)}
             style={[
-              styles.dot,
-              currentIndex === index && styles.activeDot,
+              s.dot,
+              currentIndex === index && s.activeDot,
             ]}
           />
         ))}
       </View>
 
       {/* Next Button */}
-      <TouchableOpacity style={styles.button} onPress={handleNext}>
-        <Text style={styles.buttonText}>
+      <TouchableOpacity style={s.button} onPress={handleNext}>
+        <Text style={s.buttonText}>
           {String(onboardingData[currentIndex].buttonText)}
         </Text>
       </TouchableOpacity>
@@ -117,10 +121,10 @@ const OnboardingScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   skipButton: {
     position: 'absolute',
@@ -131,7 +135,7 @@ const styles = StyleSheet.create({
   },
   skipText: {
     fontSize: 16,
-    color: '#6C757D',
+    color: colors.textSecondary,
     fontWeight: '600',
   },
   slide: {
@@ -147,13 +151,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
     textAlign: 'center',
     marginBottom: 16,
   },
   description: {
     fontSize: 16,
-    color: '#6C757D',
+    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -167,28 +171,28 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: colors.divider,
     marginHorizontal: 5,
   },
   activeDot: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: colors.accent,
     width: 30,
   },
   button: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: colors.accent,
     marginHorizontal: 40,
     marginBottom: 40,
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
-    shadowColor: '#FF6B35',
+    shadowColor: colors.accent,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 5,
   },
   buttonText: {
-    color: '#FFFFFF',
+    color: colors.textInverse,
     fontSize: 18,
     fontWeight: 'bold',
   },

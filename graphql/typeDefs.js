@@ -1081,6 +1081,7 @@ const typeDefs = gql`
     isOrderNotification: Boolean
     isOfferNotification: Boolean
     favourite: [String]
+    available: Boolean
   }
 
   input LocationInput {

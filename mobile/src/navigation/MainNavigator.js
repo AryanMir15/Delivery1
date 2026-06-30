@@ -4,10 +4,10 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 import { View, Text, StyleSheet } from 'react-native';
+import OrdersIcon from '../components/OrdersIcon';
 
-// Screens
 import CategoryHomeScreen from '../screens/CategoryHomeScreen';
-import HomeScreen from '../screens/HomeScreenSimple'; // Using simplified version
+import HomeScreen from '../screens/HomeScreenSimple';
 import SearchScreen from '../screens/SearchScreen';
 import OrdersScreen from '../screens/OrdersScreen';
 import ProfileScreen from '../screens/ProfileScreen';
@@ -21,11 +21,11 @@ import EditProfileScreen from '../screens/EditProfileScreen';
 import NotificationsScreen from '../screens/NotificationsScreen';
 import FavoritesScreen from '../screens/FavoritesScreen';
 import RecentlyViewedScreen from '../screens/RecentlyViewedScreen';
+import { useTheme } from '../theme';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-// Home Stack
 const HomeStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="HomeMain" component={HomeScreen} />
@@ -39,7 +39,6 @@ const HomeStack = () => (
   </Stack.Navigator>
 );
 
-// Orders Stack
 const OrdersStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="OrdersMain" component={OrdersScreen} />
@@ -47,7 +46,6 @@ const OrdersStack = () => (
   </Stack.Navigator>
 );
 
-// Profile Stack
 const ProfileStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="ProfileMain" component={ProfileScreen} />
@@ -55,17 +53,17 @@ const ProfileStack = () => (
   </Stack.Navigator>
 );
 
-// Cart Badge Component
-const CartBadge = ({ count }) => {
+const CartBadge = ({ count, colors }) => {
   if (count === 0) return null;
   return (
-    <View style={styles.badge}>
+    <View style={[styles.badge, { backgroundColor: colors.error }]}>
       <Text style={styles.badgeText}>{count > 99 ? '99+' : String(count)}</Text>
     </View>
   );
 };
 
 const MainNavigator = () => {
+  const { colors } = useTheme();
   const cartItems = useSelector((state) => state.cart.items);
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -78,40 +76,37 @@ const MainNavigator = () => {
               headerShown: false,
               tabBarIcon: ({ focused, color, size }) => {
                 let iconName;
-
                 switch (route.name) {
                   case 'Home':
                     iconName = focused ? 'home' : 'home-outline';
                     break;
                   case 'Search':
-                    iconName = focused ? 'magnify' : 'magnify';
+                    iconName = 'magnify';
                     break;
                   case 'Cart':
                     iconName = focused ? 'cart' : 'cart-outline';
                     break;
                   case 'Orders':
-                    iconName = focused ? 'clipboard-list' : 'clipboard-list-outline';
-                    break;
+                    return <OrdersIcon size={size} color={color} />;
                   case 'Profile':
                     iconName = focused ? 'account' : 'account-outline';
                     break;
                   default:
                     iconName = 'circle';
                 }
-
                 return (
                   <View>
                     <Icon name={iconName} size={size} color={color} />
-                    {route.name === 'Cart' && <CartBadge count={cartCount} />}
+                    {route.name === 'Cart' && <CartBadge count={cartCount} colors={colors} />}
                   </View>
                 );
               },
-              tabBarActiveTintColor: '#FF6B35',
-              tabBarInactiveTintColor: '#6C757D',
+              tabBarActiveTintColor: colors.tabActive,
+              tabBarInactiveTintColor: colors.tabInactive,
               tabBarStyle: {
-                backgroundColor: '#FFFFFF',
+                backgroundColor: colors.tabBackground,
                 borderTopWidth: 1,
-                borderTopColor: '#E9ECEF',
+                borderTopColor: colors.tabBorder,
                 paddingBottom: 5,
                 paddingTop: 5,
                 height: 60,
@@ -142,7 +137,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: -10,
     top: -5,
-    backgroundColor: '#E63946',
     borderRadius: 10,
     minWidth: 20,
     height: 20,

@@ -6,15 +6,18 @@ import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import OTPVerificationScreen from '../screens/auth/OTPVerificationScreen';
 import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
+import { useTheme } from '../theme';
 
 const Stack = createStackNavigator();
 
 const AuthNavigator = () => {
+  const { colors } = useTheme();
+
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-        cardStyle: { backgroundColor: '#FFFFFF' },
+        cardStyle: { backgroundColor: colors.background },
       }}
     >
       <Stack.Screen name="Welcome" component={WelcomeScreen} />

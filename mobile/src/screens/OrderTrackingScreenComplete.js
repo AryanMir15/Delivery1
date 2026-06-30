@@ -7,11 +7,16 @@ import {
   ActivityIndicator,
   RefreshControl
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery } from '@apollo/client';
 import { GET_ORDER } from '../api/queries';
 import MapView, { Marker, Polyline } from 'react-native-maps';
+import { useTheme } from '../theme';
+import useResponsive from '../hooks/useResponsive';
 
 const OrderTrackingScreenComplete = ({ route }) => {
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
   const { orderId, orderNumber } = route.params;
   const [refreshing, setRefreshing] = useState(false);
 
@@ -30,17 +35,17 @@ const OrderTrackingScreenComplete = ({ route }) => {
 
   if (loading && !data) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
-        <Text style={styles.loadingText}>Loading order details...</Text>
+      <View style={s.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.success} />
+        <Text style={s.loadingText}>Loading order details...</Text>
       </View>
     );
   }
 
   if (!data?.order) {
     return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Order not found</Text>
+      <View style={s.errorContainer}>
+        <Text style={s.errorText}>Order not found</Text>
       </View>
     );
   }
@@ -89,38 +94,38 @@ const OrderTrackingScreenComplete = ({ route }) => {
     switch (status) {
       case 'pending':
         return {
-          icon: '🔍',
+          icon: 'Searching for Rider',
           title: 'Searching for Rider',
           message: 'We are finding the best rider for your delivery',
-          color: '#FF9800'
+          color: colors.warning
         };
       case 'accepted':
         return {
-          icon: '✅',
+          icon: 'Rider Accepted',
           title: 'Rider Accepted',
           message: 'Rider is heading to the restaurant',
-          color: '#2196F3'
+          color: colors.info
         };
       case 'picked':
         return {
-          icon: '📦',
+          icon: 'Order Picked Up',
           title: 'Order Picked Up',
           message: 'Rider is on the way to you',
-          color: '#9C27B0'
+          color: colors.accent
         };
       case 'delivered':
         return {
-          icon: '🎉',
+          icon: 'Order Delivered',
           title: 'Order Delivered',
           message: 'Enjoy your meal!',
-          color: '#4CAF50'
+          color: colors.success
         };
       default:
         return {
-          icon: '📋',
+          icon: status,
           title: status,
           message: 'Order in progress',
-          color: '#666'
+          color: colors.textSecondary
         };
     }
   };
@@ -149,113 +154,116 @@ const OrderTrackingScreenComplete = ({ route }) => {
       }
     : null;
 
+  const s = styles(colors, typography, scale);
+
   return (
+    <SafeAreaView style={s.container} edges={['top']}>
     <ScrollView
-      style={styles.container}
+      style={s.container}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
       {/* Order Header */}
-      <View style={styles.header}>
-        <Text style={styles.orderNumber}>Order #{order.orderId}</Text>
-        <Text style={styles.orderDate}>
+      <View style={s.header}>
+        <Text style={s.orderNumber}>Order #{order.orderId}</Text>
+        <Text style={s.orderDate}>
           Placed: {formatDateTime(order.createdAt)}
         </Text>
       </View>
 
       {/* Status Progress */}
-      <View style={styles.progressSection}>
-        <View style={styles.progressBar}>
+      <View style={s.progressSection}>
+        <View style={s.progressBar}>
           <View
             style={[
-              styles.progressFill,
+              s.progressFill,
               { width: `${progress.percentage}%`, backgroundColor: statusInfo.color }
             ]}
           />
         </View>
-        <Text style={styles.progressText}>
+        <Text style={s.progressText}>
           Step {progress.current} of {progress.total}
         </Text>
       </View>
 
       {/* Current Status */}
-      <View style={[styles.statusCard, { borderLeftColor: statusInfo.color }]}>
-        <Text style={styles.statusIcon}>{statusInfo.icon}</Text>
-        <View style={styles.statusContent}>
-          <Text style={[styles.statusTitle, { color: statusInfo.color }]}>
+      <View style={[s.statusCard, { borderLeftColor: statusInfo.color }]}>
+        <Text style={s.statusIcon}>{statusInfo.icon}</Text>
+        <View style={s.statusContent}>
+          <Text style={[s.statusTitle, { color: statusInfo.color }]}>
             {statusInfo.title}
           </Text>
-          <Text style={styles.statusMessage}>{statusInfo.message}</Text>
+          <Text style={s.statusMessage}>{statusInfo.message}</Text>
         </View>
       </View>
 
       {/* Progress Timeline */}
-      <View style={styles.timelineSection}>
-        <Text style={styles.sectionTitle}>📊 Order Progress</Text>
+      <View style={s.timelineSection}>
+        <Text style={s.sectionTitle}>Order Progress</Text>
         
-        <View style={styles.timelineItem}>
-          <View style={[styles.timelineDot, status !== 'pending' && styles.timelineDotComplete]} />
-          <View style={styles.timelineContent}>
-            <Text style={styles.timelineTitle}>Order Placed</Text>
-            <Text style={styles.timelineTime}>{formatDateTime(order.createdAt)}</Text>
-            <Text style={styles.timelineStatus}>✅ Completed</Text>
+        <View style={s.timelineItem}>
+          <View style={[s.timelineDot, status !== 'pending' && s.timelineDotComplete]} />
+          <View style={s.timelineContent}>
+            <Text style={s.timelineTitle}>Order Placed</Text>
+            <Text style={s.timelineTime}>{formatDateTime(order.createdAt)}</Text>
+            <Text style={s.timelineStatus}>Completed</Text>
           </View>
         </View>
 
-        <View style={styles.timelineItem}>
+        <View style={s.timelineItem}>
           <View style={[
-            styles.timelineDot,
-            ['accepted', 'picked', 'delivered'].includes(status) && styles.timelineDotComplete
+            s.timelineDot,
+            ['accepted', 'picked', 'delivered'].includes(status) && s.timelineDotComplete
           ]} />
-          <View style={styles.timelineContent}>
-            <Text style={styles.timelineTitle}>Rider Accepted</Text>
-            <Text style={styles.timelineTime}>
+          <View style={s.timelineContent}>
+            <Text style={s.timelineTitle}>Rider Accepted</Text>
+            <Text style={s.timelineTime}>
               {order.acceptedAt ? formatDateTime(order.acceptedAt) : 'Waiting...'}
             </Text>
             <Text style={[
-              styles.timelineStatus,
-              ['accepted', 'picked', 'delivered'].includes(status) && styles.timelineStatusComplete
+              s.timelineStatus,
+              ['accepted', 'picked', 'delivered'].includes(status) && s.timelineStatusComplete
             ]}>
-              {['accepted', 'picked', 'delivered'].includes(status) ? '✅ Completed' : '⏳ Pending'}
+              {['accepted', 'picked', 'delivered'].includes(status) ? 'Completed' : 'Pending'}
             </Text>
           </View>
         </View>
 
-        <View style={styles.timelineItem}>
+        <View style={s.timelineItem}>
           <View style={[
-            styles.timelineDot,
-            ['picked', 'delivered'].includes(status) && styles.timelineDotComplete
+            s.timelineDot,
+            ['picked', 'delivered'].includes(status) && s.timelineDotComplete
           ]} />
-          <View style={styles.timelineContent}>
-            <Text style={styles.timelineTitle}>Order Picked Up</Text>
-            <Text style={styles.timelineTime}>
+          <View style={s.timelineContent}>
+            <Text style={s.timelineTitle}>Order Picked Up</Text>
+            <Text style={s.timelineTime}>
               {order.pickedAt ? formatDateTime(order.pickedAt) : 'Waiting...'}
             </Text>
             <Text style={[
-              styles.timelineStatus,
-              ['picked', 'delivered'].includes(status) && styles.timelineStatusComplete
+              s.timelineStatus,
+              ['picked', 'delivered'].includes(status) && s.timelineStatusComplete
             ]}>
-              {['picked', 'delivered'].includes(status) ? '✅ Completed' : '⏳ Pending'}
+              {['picked', 'delivered'].includes(status) ? 'Completed' : 'Pending'}
             </Text>
           </View>
         </View>
 
-        <View style={styles.timelineItem}>
+        <View style={s.timelineItem}>
           <View style={[
-            styles.timelineDot,
-            status === 'delivered' && styles.timelineDotComplete
+            s.timelineDot,
+            status === 'delivered' && s.timelineDotComplete
           ]} />
-          <View style={styles.timelineContent}>
-            <Text style={styles.timelineTitle}>Order Delivered</Text>
-            <Text style={styles.timelineTime}>
+          <View style={s.timelineContent}>
+            <Text style={s.timelineTitle}>Order Delivered</Text>
+            <Text style={s.timelineTime}>
               {order.deliveredAt ? formatDateTime(order.deliveredAt) : 'Waiting...'}
             </Text>
             <Text style={[
-              styles.timelineStatus,
-              status === 'delivered' && styles.timelineStatusComplete
+              s.timelineStatus,
+              status === 'delivered' && s.timelineStatusComplete
             ]}>
-              {status === 'delivered' ? '✅ Completed' : '⏳ Pending'}
+              {status === 'delivered' ? 'Completed' : 'Pending'}
             </Text>
           </View>
         </View>
@@ -263,19 +271,19 @@ const OrderTrackingScreenComplete = ({ route }) => {
 
       {/* Shop Information */}
       {order.restaurant && (
-        <View style={styles.infoSection}>
-          <Text style={styles.sectionTitle}>🏪 Shop Information</Text>
-          <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>Name:</Text>
-            <Text style={styles.infoValue}>{order.restaurant.name}</Text>
+        <View style={s.infoSection}>
+          <Text style={s.sectionTitle}>Shop Information</Text>
+          <View style={s.infoCard}>
+            <Text style={s.infoLabel}>Name:</Text>
+            <Text style={s.infoValue}>{order.restaurant.name}</Text>
             
-            <Text style={styles.infoLabel}>Address:</Text>
-            <Text style={styles.infoValue}>{order.restaurant.address}</Text>
+            <Text style={s.infoLabel}>Address:</Text>
+            <Text style={s.infoValue}>{order.restaurant.address}</Text>
             
             {shopCoords && (
               <>
-                <Text style={styles.infoLabel}>Location:</Text>
-                <Text style={styles.infoValue}>
+                <Text style={s.infoLabel}>Location:</Text>
+                <Text style={s.infoValue}>
                   [{shopCoords.longitude.toFixed(4)}, {shopCoords.latitude.toFixed(4)}]
                 </Text>
               </>
@@ -286,22 +294,22 @@ const OrderTrackingScreenComplete = ({ route }) => {
 
       {/* Delivery Information */}
       {order.deliveryAddress && (
-        <View style={styles.infoSection}>
-          <Text style={styles.sectionTitle}>🏠 Delivery Information</Text>
-          <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>Address:</Text>
-            <Text style={styles.infoValue}>{order.deliveryAddress.deliveryAddress}</Text>
+        <View style={s.infoSection}>
+          <Text style={s.sectionTitle}>Delivery Information</Text>
+          <View style={s.infoCard}>
+            <Text style={s.infoLabel}>Address:</Text>
+            <Text style={s.infoValue}>{order.deliveryAddress.deliveryAddress}</Text>
             
-            <Text style={styles.infoLabel}>Details:</Text>
-            <Text style={styles.infoValue}>{order.deliveryAddress.details}</Text>
+            <Text style={s.infoLabel}>Details:</Text>
+            <Text style={s.infoValue}>{order.deliveryAddress.details}</Text>
             
-            <Text style={styles.infoLabel}>Label:</Text>
-            <Text style={styles.infoValue}>{order.deliveryAddress.label}</Text>
+            <Text style={s.infoLabel}>Label:</Text>
+            <Text style={s.infoValue}>{order.deliveryAddress.label}</Text>
             
             {customerCoords && (
               <>
-                <Text style={styles.infoLabel}>Location:</Text>
-                <Text style={styles.infoValue}>
+                <Text style={s.infoLabel}>Location:</Text>
+                <Text style={s.infoValue}>
                   [{customerCoords.longitude.toFixed(4)}, {customerCoords.latitude.toFixed(4)}]
                 </Text>
               </>
@@ -312,24 +320,24 @@ const OrderTrackingScreenComplete = ({ route }) => {
 
       {/* Rider Information */}
       {order.rider && (
-        <View style={styles.infoSection}>
-          <Text style={styles.sectionTitle}>🏍️ Rider Information</Text>
-          <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>Name:</Text>
-            <Text style={styles.infoValue}>{order.rider.name}</Text>
+        <View style={s.infoSection}>
+          <Text style={s.sectionTitle}>Rider Information</Text>
+          <View style={s.infoCard}>
+            <Text style={s.infoLabel}>Name:</Text>
+            <Text style={s.infoValue}>{order.rider.name}</Text>
             
-            <Text style={styles.infoLabel}>Phone:</Text>
-            <Text style={styles.infoValue}>{order.rider.phone}</Text>
+            <Text style={s.infoLabel}>Phone:</Text>
+            <Text style={s.infoValue}>{order.rider.phone}</Text>
             
-            <Text style={styles.infoLabel}>Vehicle:</Text>
-            <Text style={styles.infoValue}>
+            <Text style={s.infoLabel}>Vehicle:</Text>
+            <Text style={s.infoValue}>
               {order.rider.vehicleType} - {order.rider.vehicleNumber}
             </Text>
             
             {riderCoords && (
               <>
-                <Text style={styles.infoLabel}>Current Location:</Text>
-                <Text style={styles.infoValue}>
+                <Text style={s.infoLabel}>Current Location:</Text>
+                <Text style={s.infoValue}>
                   [{riderCoords.longitude.toFixed(4)}, {riderCoords.latitude.toFixed(4)}]
                 </Text>
               </>
@@ -340,10 +348,10 @@ const OrderTrackingScreenComplete = ({ route }) => {
 
       {/* Map View */}
       {(shopCoords || customerCoords || riderCoords) && (
-        <View style={styles.mapSection}>
-          <Text style={styles.sectionTitle}>🗺️ Live Tracking</Text>
+        <View style={s.mapSection}>
+          <Text style={s.sectionTitle}>Live Tracking</Text>
           <MapView
-            style={styles.map}
+            style={s.map}
             initialRegion={{
               latitude: customerCoords?.latitude || 0,
               longitude: customerCoords?.longitude || 0,
@@ -378,8 +386,8 @@ const OrderTrackingScreenComplete = ({ route }) => {
                 title="Rider Location"
                 description={order.rider.name}
               >
-                <View style={styles.riderMarker}>
-                  <Text style={styles.riderMarkerText}>🏍️</Text>
+                <View style={s.riderMarker}>
+                  <Text style={s.riderMarkerText}>Rider</Text>
                 </View>
               </Marker>
             )}
@@ -388,7 +396,7 @@ const OrderTrackingScreenComplete = ({ route }) => {
             {riderCoords && customerCoords && (
               <Polyline
                 coordinates={[riderCoords, customerCoords]}
-                strokeColor="#4CAF50"
+                strokeColor={colors.success}
                 strokeWidth={3}
               />
             )}
@@ -397,33 +405,34 @@ const OrderTrackingScreenComplete = ({ route }) => {
       )}
 
       {/* Payment Information */}
-      <View style={styles.infoSection}>
-        <Text style={styles.sectionTitle}>💰 Payment Information</Text>
-        <View style={styles.infoCard}>
-          <View style={styles.paymentRow}>
-            <Text style={styles.paymentLabel}>Order Amount:</Text>
-            <Text style={styles.paymentValue}>ETB {order.orderAmount.toFixed(2)}</Text>
+      <View style={s.infoSection}>
+        <Text style={s.sectionTitle}>Payment Information</Text>
+        <View style={s.infoCard}>
+          <View style={s.paymentRow}>
+            <Text style={s.paymentLabel}>Order Amount:</Text>
+            <Text style={s.paymentValue}>PKR {order.orderAmount.toFixed(2)}</Text>
           </View>
-          <View style={styles.paymentRow}>
-            <Text style={styles.paymentLabel}>Paid Amount:</Text>
-            <Text style={styles.paymentValue}>ETB {order.paidAmount.toFixed(2)}</Text>
+          <View style={s.paymentRow}>
+            <Text style={s.paymentLabel}>Paid Amount:</Text>
+            <Text style={s.paymentValue}>PKR {order.paidAmount.toFixed(2)}</Text>
           </View>
-          <View style={styles.paymentRow}>
-            <Text style={styles.paymentLabel}>Payment Method:</Text>
-            <Text style={styles.paymentValue}>{order.paymentMethod}</Text>
+          <View style={s.paymentRow}>
+            <Text style={s.paymentLabel}>Payment Method:</Text>
+            <Text style={s.paymentValue}>{order.paymentMethod}</Text>
           </View>
         </View>
       </View>
 
-      <View style={styles.bottomSpacer} />
+      <View style={s.bottomSpacer} />
     </ScrollView>
+    </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
@@ -431,9 +440,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#666',
+    marginTop: Math.round(10 * scale),
+    fontSize: Math.round(16 * scale),
+    color: colors.textSecondary,
   },
   errorContainer: {
     flex: 1,
@@ -441,179 +450,179 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   errorText: {
-    fontSize: 16,
-    color: '#f44336',
+    fontSize: Math.round(16 * scale),
+    color: colors.error,
   },
   header: {
-    backgroundColor: '#fff',
-    padding: 20,
+    backgroundColor: colors.surface,
+    padding: Math.round(20 * scale),
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: colors.border,
   },
   orderNumber: {
-    fontSize: 24,
+    fontSize: Math.round(24 * scale),
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
   },
   orderDate: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 5,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginTop: Math.round(5 * scale),
   },
   progressSection: {
-    backgroundColor: '#fff',
-    padding: 20,
-    marginTop: 10,
+    backgroundColor: colors.surface,
+    padding: Math.round(20 * scale),
+    marginTop: Math.round(10 * scale),
   },
   progressBar: {
-    height: 8,
-    backgroundColor: '#eee',
-    borderRadius: 4,
+    height: Math.round(8 * scale),
+    backgroundColor: colors.border,
+    borderRadius: Math.round(4 * scale),
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    borderRadius: 4,
+    borderRadius: Math.round(4 * scale),
   },
   progressText: {
     textAlign: 'center',
-    marginTop: 10,
-    fontSize: 14,
-    color: '#666',
+    marginTop: Math.round(10 * scale),
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   statusCard: {
-    backgroundColor: '#fff',
-    margin: 10,
-    padding: 20,
-    borderRadius: 12,
+    backgroundColor: colors.surface,
+    margin: Math.round(10 * scale),
+    padding: Math.round(20 * scale),
+    borderRadius: Math.round(12 * scale),
     flexDirection: 'row',
     alignItems: 'center',
     borderLeftWidth: 4,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   statusIcon: {
-    fontSize: 40,
-    marginRight: 15,
+    fontSize: Math.round(40 * scale),
+    marginRight: Math.round(15 * scale),
   },
   statusContent: {
     flex: 1,
   },
   statusTitle: {
-    fontSize: 20,
+    fontSize: Math.round(20 * scale),
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: Math.round(5 * scale),
   },
   statusMessage: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   timelineSection: {
-    backgroundColor: '#fff',
-    marginTop: 10,
-    padding: 20,
+    backgroundColor: colors.surface,
+    marginTop: Math.round(10 * scale),
+    padding: Math.round(20 * scale),
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    marginBottom: 15,
-    color: '#333',
+    marginBottom: Math.round(15 * scale),
+    color: colors.textPrimary,
   },
   timelineItem: {
     flexDirection: 'row',
-    marginBottom: 20,
+    marginBottom: Math.round(20 * scale),
   },
   timelineDot: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: '#ddd',
-    marginRight: 15,
-    marginTop: 2,
+    width: Math.round(16 * scale),
+    height: Math.round(16 * scale),
+    borderRadius: Math.round(8 * scale),
+    backgroundColor: colors.divider,
+    marginRight: Math.round(15 * scale),
+    marginTop: Math.round(2 * scale),
   },
   timelineDotComplete: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: colors.success,
   },
   timelineContent: {
     flex: 1,
   },
   timelineTitle: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 3,
+    color: colors.textPrimary,
+    marginBottom: Math.round(3 * scale),
   },
   timelineTime: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 3,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginBottom: Math.round(3 * scale),
   },
   timelineStatus: {
-    fontSize: 12,
-    color: '#999',
+    fontSize: Math.round(12 * scale),
+    color: colors.textTertiary,
   },
   timelineStatusComplete: {
-    color: '#4CAF50',
+    color: colors.success,
   },
   infoSection: {
-    backgroundColor: '#fff',
-    marginTop: 10,
-    padding: 20,
+    backgroundColor: colors.surface,
+    marginTop: Math.round(10 * scale),
+    padding: Math.round(20 * scale),
   },
   infoCard: {
-    backgroundColor: '#f9f9f9',
-    padding: 15,
-    borderRadius: 8,
+    backgroundColor: colors.surfaceVariant,
+    padding: Math.round(15 * scale),
+    borderRadius: Math.round(8 * scale),
   },
   infoLabel: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 10,
-    marginBottom: 3,
+    fontSize: Math.round(12 * scale),
+    color: colors.textTertiary,
+    marginTop: Math.round(10 * scale),
+    marginBottom: Math.round(3 * scale),
   },
   infoValue: {
-    fontSize: 14,
-    color: '#333',
+    fontSize: Math.round(14 * scale),
+    color: colors.textPrimary,
     fontWeight: '500',
   },
   paymentRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    marginBottom: Math.round(10 * scale),
   },
   paymentLabel: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   paymentValue: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#333',
+    color: colors.textPrimary,
   },
   mapSection: {
-    backgroundColor: '#fff',
-    marginTop: 10,
-    padding: 20,
+    backgroundColor: colors.surface,
+    marginTop: Math.round(10 * scale),
+    padding: Math.round(20 * scale),
   },
   map: {
-    height: 300,
-    borderRadius: 8,
-    marginTop: 10,
+    height: Math.round(300 * scale),
+    borderRadius: Math.round(8 * scale),
+    marginTop: Math.round(10 * scale),
   },
   riderMarker: {
-    backgroundColor: '#4CAF50',
-    padding: 8,
-    borderRadius: 20,
+    backgroundColor: colors.success,
+    padding: Math.round(8 * scale),
+    borderRadius: Math.round(20 * scale),
   },
   riderMarkerText: {
-    fontSize: 20,
+    fontSize: Math.round(20 * scale),
   },
   bottomSpacer: {
-    height: 20,
+    height: Math.round(20 * scale),
   },
 });
 

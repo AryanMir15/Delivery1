@@ -19,13 +19,20 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { REGISTER_USER, SEND_OTP_EMAIL } from '../../api/mutations';
 import { loginStart, loginSuccess, loginFailure, setAuthToken } from '../../store/authSlice';
+import { useTheme } from '../../theme';
+import { palette } from '../../theme/colors';
+import ShokLogo from '../../components/ShokLogo';
+import UserIcon from '../../components/UserIcon';
+
+const PLACEHOLDER_COLOR = '#a1a1a6';
 
 const RegisterScreen = ({ navigation }) => {
+  const { colors, typography } = useTheme();
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
     phone: '',
+    email: '',
     password: '',
     confirmPassword: '',
   });
@@ -36,7 +43,6 @@ const RegisterScreen = ({ navigation }) => {
   const [sendOtpEmail] = useMutation(SEND_OTP_EMAIL, {
     onCompleted: (data) => {
       if (data.sendOtpToEmail.result) {
-        // Navigate to OTP verification screen
         navigation.navigate('OTPVerification', {
           email: formData.email.trim().toLowerCase(),
           userData: formData,
@@ -78,64 +84,71 @@ const RegisterScreen = ({ navigation }) => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
     } else if (formData.name.trim().length < 2) {
       newErrors.name = 'Name must be at least 2 characters';
     }
-    
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
-    }
-    
+
     if (!formData.phone.trim()) {
       newErrors.phone = 'Phone number is required';
     } else if (!/^\+?[0-9]{10,15}$/.test(formData.phone.replace(/[\s-()]/g, ''))) {
       newErrors.phone = 'Phone number is invalid';
     }
-    
+
+    if (formData.email.trim() && !/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Email is invalid';
+    }
+
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
-    
+
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = 'Please confirm your password';
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleRegister = () => {
     if (validateForm()) {
-      // First send OTP to email for verification
-      Alert.alert(
-        'Email Verification',
-        'We will send a verification code to your email. Continue?',
-        [
-          {
-            text: 'Cancel',
-            style: 'cancel',
-          },
-          {
-            text: 'Send Code',
-            onPress: () => {
-              sendOtpEmail({
-                variables: {
-                  email: formData.email.trim().toLowerCase(),
-                },
-              });
+      if (formData.email.trim()) {
+        Alert.alert(
+          'Email Verification',
+          'We will send a verification code to your email. Continue?',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            {
+              text: 'Send Code',
+              onPress: () => {
+                sendOtpEmail({
+                  variables: {
+                    email: formData.email.trim().toLowerCase(),
+                  },
+                });
+              },
+            },
+          ]
+        );
+      } else {
+        registerMutation({
+          variables: {
+            input: {
+              name: formData.name.trim(),
+              email: formData.email.trim().toLowerCase() || '',
+              phone: formData.phone.trim(),
+              password: formData.password,
             },
           },
-        ]
-      );
+        });
+      }
     }
   };
 
@@ -146,49 +159,69 @@ const RegisterScreen = ({ navigation }) => {
     }
   };
 
+  const s = styles(colors, typography);
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={s.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
+        style={s.keyboardView}
       >
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={s.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
           <TouchableOpacity
-            style={styles.backButton}
+            style={s.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Icon name="arrow-left" size={24} color="#1D3557" />
+            <Icon name="arrow-left" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
 
-          <View style={styles.header}>
-            <Text style={styles.title}>Create Account</Text>
-            <Text style={styles.subtitle}>Join us and start ordering</Text>
+          <View style={s.header}>
+            <ShokLogo size={112} />
+            <Text style={s.title}>Create Account</Text>
+            <Text style={s.subtitle}>Join us and unlock your city.</Text>
           </View>
 
-          <View style={styles.form}>
-            <View style={styles.inputContainer}>
-              <Icon name="account-outline" size={22} color="#6C757D" style={styles.inputIcon} />
+          <View style={s.form}>
+            <View style={s.inputContainer}>
+              <UserIcon size={22} color={colors.textSecondary} />
+              <View style={{ marginRight: 12 }} />
               <TextInput
-                style={styles.input}
+                style={s.input}
                 placeholder="Full Name"
-                placeholderTextColor="#A8DADC"
+                placeholderTextColor={PLACEHOLDER_COLOR}
+                color={colors.inputText}
                 value={formData.name}
                 onChangeText={(value) => updateFormData('name', value)}
                 autoCapitalize="words"
                 autoCorrect={false}
               />
             </View>
-            {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
+            {errors.name && <Text style={s.errorText}>{errors.name}</Text>}
 
-            <View style={styles.inputContainer}>
-              <Icon name="email-outline" size={22} color="#6C757D" style={styles.inputIcon} />
+            <View style={s.inputContainer}>
+              <Icon name="phone-outline" size={22} color={colors.textSecondary} style={s.inputIcon} />
               <TextInput
-                style={styles.input}
-                placeholder="Email Address"
-                placeholderTextColor="#A8DADC"
+                style={s.input}
+                placeholder="Phone Number"
+                placeholderTextColor={PLACEHOLDER_COLOR}
+                color={colors.inputText}
+                value={formData.phone}
+                onChangeText={(value) => updateFormData('phone', value)}
+                keyboardType="phone-pad"
+              />
+            </View>
+            {errors.phone && <Text style={s.errorText}>{errors.phone}</Text>}
+
+            <View style={s.inputContainer}>
+              <Icon name="email-outline" size={22} color={colors.textSecondary} style={s.inputIcon} />
+              <TextInput
+                style={s.input}
+                placeholder="Email Address (Optional)"
+                placeholderTextColor={PLACEHOLDER_COLOR}
+                color={colors.inputText}
                 value={formData.email}
                 onChangeText={(value) => updateFormData('email', value)}
                 keyboardType="email-address"
@@ -196,92 +229,81 @@ const RegisterScreen = ({ navigation }) => {
                 autoCorrect={false}
               />
             </View>
-            {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+            {errors.email && <Text style={s.errorText}>{errors.email}</Text>}
 
-            <View style={styles.inputContainer}>
-              <Icon name="phone-outline" size={22} color="#6C757D" style={styles.inputIcon} />
+            <View style={s.inputContainer}>
+              <Icon name="lock-outline" size={22} color={colors.textSecondary} style={s.inputIcon} />
               <TextInput
-                style={styles.input}
-                placeholder="Phone Number"
-                placeholderTextColor="#A8DADC"
-                value={formData.phone}
-                onChangeText={(value) => updateFormData('phone', value)}
-                keyboardType="phone-pad"
-              />
-            </View>
-            {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
-
-            <View style={styles.inputContainer}>
-              <Icon name="lock-outline" size={22} color="#6C757D" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
+                style={s.input}
                 placeholder="Password"
-                placeholderTextColor="#A8DADC"
+                placeholderTextColor={PLACEHOLDER_COLOR}
+                color={colors.inputText}
                 value={formData.password}
                 onChangeText={(value) => updateFormData('password', value)}
                 secureTextEntry={!showPassword}
               />
               <TouchableOpacity
                 onPress={() => setShowPassword(!showPassword)}
-                style={styles.eyeIcon}
+                style={s.eyeIcon}
               >
                 <Icon
                   name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                   size={22}
-                  color="#6C757D"
+                  color={colors.textSecondary}
                 />
               </TouchableOpacity>
             </View>
-            {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
+            {errors.password && <Text style={s.errorText}>{errors.password}</Text>}
 
-            <View style={styles.inputContainer}>
-              <Icon name="lock-outline" size={22} color="#6C757D" style={styles.inputIcon} />
+            <View style={s.inputContainer}>
+              <Icon name="lock-outline" size={22} color={colors.textSecondary} style={s.inputIcon} />
               <TextInput
-                style={styles.input}
+                style={s.input}
                 placeholder="Confirm Password"
-                placeholderTextColor="#A8DADC"
+                placeholderTextColor={PLACEHOLDER_COLOR}
+                color={colors.inputText}
                 value={formData.confirmPassword}
                 onChangeText={(value) => updateFormData('confirmPassword', value)}
                 secureTextEntry={!showConfirmPassword}
               />
               <TouchableOpacity
                 onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                style={styles.eyeIcon}
+                style={s.eyeIcon}
               >
                 <Icon
                   name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
                   size={22}
-                  color="#6C757D"
+                  color={colors.textSecondary}
                 />
               </TouchableOpacity>
             </View>
-            {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
+            {errors.confirmPassword && <Text style={s.errorText}>{errors.confirmPassword}</Text>}
 
             <TouchableOpacity
-              style={[styles.registerButton, loading && styles.registerButtonDisabled]}
+              style={[s.registerButton, loading && s.registerButtonDisabled]}
               onPress={handleRegister}
               disabled={loading}
             >
               {loading ? (
-                <ActivityIndicator color="#FFFFFF" />
+                <ActivityIndicator color={colors.buttonPrimaryText} />
               ) : (
-                <Text style={styles.registerButtonText}>Create Account</Text>
+                <Text style={s.registerButtonText}>Create Account</Text>
               )}
             </TouchableOpacity>
           </View>
 
-          <View style={styles.termsContainer}>
-            <Text style={styles.termsText}>
+          <View style={s.termsContainer}>
+            <Text style={s.termsText}>
               By creating an account, you agree to our{' '}
-              <Text style={styles.termsLink}>Terms of Service</Text> and{' '}
-              <Text style={styles.termsLink}>Privacy Policy</Text>
+              <Text style={s.termsLink}>Terms of Service</Text> and{' '}
+              <Text style={s.termsLink}>Privacy Policy</Text>
             </Text>
           </View>
 
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Already have an account? </Text>
+          <View style={s.footer}>
+            <Text style={s.footerText}>Already have an account? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Text style={styles.footerLink}>Sign In</Text>
+              <Text style={s.footerLink}>Sign In</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -290,10 +312,10 @@ const RegisterScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
   },
   keyboardView: {
     flex: 1,
@@ -302,29 +324,38 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: 24,
     paddingBottom: 24,
+    justifyContent: 'center',
   },
   backButton: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 12,
+    zIndex: 10,
   },
   header: {
-    marginTop: 32,
+    alignItems: 'center',
+    marginTop: 24,
     marginBottom: 32,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1D3557',
+    ...typography.h1,
+    color: colors.textPrimary,
+    fontSize: 32,
+    marginTop: 16,
     marginBottom: 8,
+    textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
-    color: '#6C757D',
+    ...typography.body,
+    color: colors.textSecondary,
+    fontSize: 14,
+    textAlign: 'center',
   },
   form: {
     marginBottom: 24,
@@ -332,12 +363,12 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.inputBackground,
     borderRadius: 12,
     paddingHorizontal: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#E9ECEF',
+    borderColor: colors.inputBorder,
   },
   inputIcon: {
     marginRight: 12,
@@ -346,20 +377,20 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 56,
     fontSize: 16,
-    color: '#1D3557',
+    color: colors.inputText,
   },
   eyeIcon: {
     padding: 8,
   },
   errorText: {
-    color: '#E63946',
+    color: colors.error,
     fontSize: 12,
     marginTop: -12,
     marginBottom: 12,
     marginLeft: 4,
   },
   registerButton: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: colors.buttonPrimary,
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -369,7 +400,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   registerButtonText: {
-    color: '#FFFFFF',
+    color: colors.buttonPrimaryText,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -377,13 +408,13 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   termsText: {
-    color: '#6C757D',
+    color: colors.textSecondary,
     fontSize: 14,
     textAlign: 'center',
     lineHeight: 20,
   },
   termsLink: {
-    color: '#FF6B35',
+    color: colors.accent,
     fontWeight: '500',
   },
   footer: {
@@ -392,11 +423,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   footerText: {
-    color: '#6C757D',
+    color: colors.textSecondary,
     fontSize: 14,
   },
   footerLink: {
-    color: '#FF6B35',
+    color: colors.accent,
     fontSize: 14,
     fontWeight: '600',
   },

@@ -186,6 +186,7 @@ export const GET_FOODS = gql`
       title
       description
       image
+      isOutOfStock
       category {
         id
         title
@@ -782,7 +783,7 @@ export const GET_ORDERS_BY_RESTAURANT = gql`
         email
       }
       items {
-        _id
+        id
         title
         description
         image

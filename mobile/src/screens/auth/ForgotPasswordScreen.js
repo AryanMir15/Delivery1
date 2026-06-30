@@ -16,8 +16,10 @@ import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useMutation } from '@apollo/client';
 
 import { SEND_OTP_EMAIL } from '../../api/mutations';
+import { useTheme } from '../../theme';
 
 const ForgotPasswordScreen = ({ navigation }) => {
+  const { colors, typography } = useTheme();
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
 
@@ -64,41 +66,44 @@ const ForgotPasswordScreen = ({ navigation }) => {
     }
   };
 
+  const s = styles(colors, typography);
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={s.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
+        style={s.keyboardView}
       >
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={s.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
           <TouchableOpacity
-            style={styles.backButton}
+            style={s.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Icon name="arrow-left" size={24} color="#1D3557" />
+            <Icon name="arrow-left" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
 
-          <View style={styles.iconContainer}>
-            <Icon name="lock-reset" size={80} color="#FF6B35" />
+          <View style={s.iconContainer}>
+            <Icon name="lock-reset" size={80} color={colors.accent} />
           </View>
 
-          <View style={styles.header}>
-            <Text style={styles.title}>Forgot Password?</Text>
-            <Text style={styles.subtitle}>
+          <View style={s.header}>
+            <Text style={s.title}>Forgot Password?</Text>
+            <Text style={s.subtitle}>
               Don't worry! Enter your email address and we'll send you instructions to reset your password.
             </Text>
           </View>
 
-          <View style={styles.form}>
-            <View style={styles.inputContainer}>
-              <Icon name="email-outline" size={22} color="#6C757D" style={styles.inputIcon} />
+          <View style={s.form}>
+            <View style={s.inputContainer}>
+              <Icon name="email-outline" size={22} color={colors.textSecondary} style={s.inputIcon} />
               <TextInput
-                style={styles.input}
+                style={s.input}
                 placeholder="Email Address"
-                placeholderTextColor="#A8DADC"
+                placeholderTextColor="#a1a1a6"
+                color={colors.inputText}
                 value={email}
                 onChangeText={(text) => {
                   setEmail(text);
@@ -109,25 +114,25 @@ const ForgotPasswordScreen = ({ navigation }) => {
                 autoCorrect={false}
               />
             </View>
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            {error ? <Text style={s.errorText}>{error}</Text> : null}
 
             <TouchableOpacity
-              style={[styles.resetButton, loading && styles.resetButtonDisabled]}
+              style={[s.resetButton, loading && s.resetButtonDisabled]}
               onPress={handleResetPassword}
               disabled={loading}
             >
               {loading ? (
-                <ActivityIndicator color="#FFFFFF" />
+                <ActivityIndicator color={colors.buttonPrimaryText} />
               ) : (
-                <Text style={styles.resetButtonText}>Send Reset Link</Text>
+                <Text style={s.resetButtonText}>Send Reset Link</Text>
               )}
             </TouchableOpacity>
           </View>
 
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Remember your password? </Text>
+          <View style={s.footer}>
+            <Text style={s.footerText}>Remember your password? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Text style={styles.footerLink}>Sign In</Text>
+              <Text style={s.footerLink}>Sign In</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -136,10 +141,10 @@ const ForgotPasswordScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
   },
   keyboardView: {
     flex: 1,
@@ -153,7 +158,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 12,
@@ -167,15 +172,14 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1D3557',
+    ...typography.h1,
+    color: colors.textPrimary,
     marginBottom: 12,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
-    color: '#6C757D',
+    ...typography.body,
+    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -185,12 +189,12 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.inputBackground,
     borderRadius: 12,
     paddingHorizontal: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#E9ECEF',
+    borderColor: colors.inputBorder,
   },
   inputIcon: {
     marginRight: 12,
@@ -199,17 +203,17 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 56,
     fontSize: 16,
-    color: '#1D3557',
+    color: colors.inputText,
   },
   errorText: {
-    color: '#E63946',
+    color: colors.error,
     fontSize: 12,
     marginTop: -12,
     marginBottom: 12,
     marginLeft: 4,
   },
   resetButton: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: colors.buttonPrimary,
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -218,7 +222,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   resetButtonText: {
-    color: '#FFFFFF',
+    color: colors.buttonPrimaryText,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -229,11 +233,11 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   footerText: {
-    color: '#6C757D',
+    color: colors.textSecondary,
     fontSize: 14,
   },
   footerLink: {
-    color: '#FF6B35',
+    color: colors.accent,
     fontSize: 14,
     fontWeight: '600',
   },

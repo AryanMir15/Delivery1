@@ -3,8 +3,10 @@ import { View, StyleSheet, Text, ActivityIndicator } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_DEFAULT } from 'react-native-maps';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import socketService from '../services/socketService';
+import { useTheme } from '../theme';
 
 const LiveTrackingMap = ({ orderId, driverId, deliveryLocation, restaurantLocation }) => {
+  const { colors, typography } = useTheme();
   const [driverLocation, setDriverLocation] = useState(null);
   const [driverStatus, setDriverStatus] = useState('unknown');
   const [isLoading, setIsLoading] = useState(true);
@@ -113,11 +115,13 @@ const LiveTrackingMap = ({ orderId, driverId, deliveryLocation, restaurantLocati
     }
   }, [driverLocation, deliveryLocation]);
 
+  const s = styles(colors, typography);
+
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <MapView
         ref={mapRef}
-        style={styles.map}
+        style={s.map}
         provider={PROVIDER_DEFAULT}
         initialRegion={getInitialRegion()}
         showsUserLocation={false}
@@ -132,8 +136,8 @@ const LiveTrackingMap = ({ orderId, driverId, deliveryLocation, restaurantLocati
             title="Restaurant"
             description="Pickup Location"
           >
-            <View style={styles.markerContainer}>
-              <Icon name="store" size={30} color="#FF6B6B" />
+            <View style={s.markerContainer}>
+              <Icon name="store" size={30} color={colors.error} />
             </View>
           </Marker>
         )}
@@ -146,8 +150,8 @@ const LiveTrackingMap = ({ orderId, driverId, deliveryLocation, restaurantLocati
             description={`Status: ${driverStatus}`}
             rotation={driverLocation.heading || 0}
           >
-            <View style={styles.driverMarkerContainer}>
-              <Icon name="bike-fast" size={35} color="#2EC4B6" />
+            <View style={s.driverMarkerContainer}>
+              <Icon name="bike-fast" size={35} color={colors.accent} />
             </View>
           </Marker>
         )}
@@ -159,8 +163,8 @@ const LiveTrackingMap = ({ orderId, driverId, deliveryLocation, restaurantLocati
             title="Delivery Location"
             description="Your Address"
           >
-            <View style={styles.markerContainer}>
-              <Icon name="map-marker" size={35} color="#4ECDC4" />
+            <View style={s.markerContainer}>
+              <Icon name="map-marker" size={35} color={colors.accent} />
             </View>
           </Marker>
         )}
@@ -169,7 +173,7 @@ const LiveTrackingMap = ({ orderId, driverId, deliveryLocation, restaurantLocati
         {driverLocation && deliveryLocation && (
           <Polyline
             coordinates={[driverLocation, deliveryLocation]}
-            strokeColor="#2EC4B6"
+            strokeColor={colors.accent}
             strokeWidth={3}
             lineDashPattern={[5, 5]}
           />
@@ -178,17 +182,17 @@ const LiveTrackingMap = ({ orderId, driverId, deliveryLocation, restaurantLocati
 
       {/* Loading Overlay */}
       {isLoading && (
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#2EC4B6" />
-          <Text style={styles.loadingText}>Connecting to driver...</Text>
+        <View style={s.loadingOverlay}>
+          <ActivityIndicator size="large" color={colors.accent} />
+          <Text style={s.loadingText}>Connecting to driver...</Text>
         </View>
       )}
 
       {/* Driver Status Badge */}
       {driverLocation && (
-        <View style={styles.statusBadge}>
-          <View style={[styles.statusDot, { backgroundColor: driverStatus === 'online' ? '#4CAF50' : '#FF9800' }]} />
-          <Text style={styles.statusText}>
+        <View style={s.statusBadge}>
+          <View style={[s.statusDot, { backgroundColor: driverStatus === 'online' ? colors.success : colors.warning }]} />
+          <Text style={s.statusText}>
             {driverStatus === 'online' ? 'Driver Active' : 'Driver Offline'}
           </Text>
         </View>
@@ -197,7 +201,7 @@ const LiveTrackingMap = ({ orderId, driverId, deliveryLocation, restaurantLocati
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography) => StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -205,26 +209,26 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   markerContainer: {
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     padding: 5,
     borderRadius: 20,
     elevation: 5,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
   driverMarkerContainer: {
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     padding: 8,
     borderRadius: 25,
     elevation: 5,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     borderWidth: 2,
-    borderColor: '#2EC4B6',
+    borderColor: colors.accent,
   },
   loadingOverlay: {
     position: 'absolute',
@@ -239,20 +243,20 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    color: '#666',
+    color: colors.textTertiary,
   },
   statusBadge: {
     position: 'absolute',
     top: 10,
     right: 10,
-    backgroundColor: 'white',
+    backgroundColor: colors.surface,
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 20,
     flexDirection: 'row',
     alignItems: 'center',
     elevation: 5,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -266,7 +270,7 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
+    color: colors.textPrimary,
   },
 });
 

@@ -1,7 +1,7 @@
 import * as Location from 'expo-location';
 import { Platform } from 'react-native';
-import { apolloClient } from '../api/apolloClient';
-import { UPDATE_RIDER_LOCATION } from '../api/mutations';
+import { apolloClient } from '../../api/apolloClient';
+import { UPDATE_RIDER_LOCATION } from '../../api/mutations';
 
 class SmoothLocationService {
   constructor() {

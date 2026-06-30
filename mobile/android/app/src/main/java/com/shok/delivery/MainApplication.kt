@@ -1,4 +1,4 @@
-package com.fooddelivery.mobile
+package com.shok.delivery
 
 import android.app.Application
 import android.content.res.Configuration

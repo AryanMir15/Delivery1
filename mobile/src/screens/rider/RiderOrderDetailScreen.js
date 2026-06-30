@@ -14,6 +14,9 @@ import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useQuery, useMutation } from '@apollo/client';
 import { useDispatch } from 'react-redux';
 
+import { useTheme } from '../../theme';
+import useResponsive from '../../hooks/useResponsive';
+import StatusBadge from '../../components/StatusBadge';
 import { GET_ORDER } from '../../api/queries';
 import { UPDATE_RIDER_ORDER_STATUS } from '../../api/mutations';
 import { updateOrderStatus } from '../../store/orderSlice';
@@ -21,6 +24,8 @@ import { updateOrderStatus } from '../../store/orderSlice';
 const OrderDetailScreen = ({ route, navigation }) => {
   const { orderId } = route.params || {};
   const dispatch = useDispatch();
+  const { colors, typography } = useTheme();
+  const { scale } = useResponsive();
 
   const { data, loading, error } = useQuery(GET_ORDER, {
     variables: { id: orderId },
@@ -46,10 +51,10 @@ const OrderDetailScreen = ({ route, navigation }) => {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#2EC4B6" />
-          <Text style={styles.loadingText}>Loading order details...</Text>
+      <SafeAreaView style={s.container}>
+        <View style={s.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.accent} />
+          <Text style={s.loadingText}>Loading order details...</Text>
         </View>
       </SafeAreaView>
     );
@@ -57,38 +62,21 @@ const OrderDetailScreen = ({ route, navigation }) => {
 
   if (error || !data?.order) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.errorContainer}>
-          <Icon name="alert-circle" size={60} color="#E63946" />
-          <Text style={styles.errorText}>Failed to load order</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={() => navigation.goBack()}>
-            <Text style={styles.retryButtonText}>Go Back</Text>
+      <SafeAreaView style={s.container}>
+        <View style={s.errorContainer}>
+          <Icon name="alert-circle" size={60} color={colors.error} />
+          <Text style={s.errorText}>Failed to load order</Text>
+          <TouchableOpacity style={s.retryButton} onPress={() => navigation.goBack()}>
+            <Text style={s.retryButtonText}>Go Back</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
   }
 
-  const order = data.order;
+  const s = styles(colors, typography, scale);
 
-  const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'pending':
-        return '#FFC107';
-      case 'accepted':
-      case 'preparing':
-        return '#2EC4B6';
-      case 'ready':
-      case 'picked':
-        return '#17A2B8';
-      case 'delivered':
-        return '#28A745';
-      case 'cancelled':
-        return '#E63946';
-      default:
-        return '#6C757D';
-    }
-  };
+  const order = data.order;
 
   const getStatusIcon = (status) => {
     switch (status?.toLowerCase()) {
@@ -140,61 +128,57 @@ const OrderDetailScreen = ({ route, navigation }) => {
     navigation.navigate('Delivery', { order });
   };
 
-  const statusColor = getStatusColor(order.orderStatus);
   const statusIcon = getStatusIcon(order.orderStatus);
   const earnings = (order.deliveryCharges || 0) + (order.tipping || 0);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-left" size={24} color="#1D3557" />
+    <SafeAreaView style={s.container}>
+      <View style={s.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={s.backButton}>
+          <Icon name="arrow-left" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={styles.title}>Order Details</Text>
+        <Text style={s.title}>Order Details</Text>
         <View style={{ width: 24 }} />
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Order Header Card */}
-        <View style={styles.card}>
-          <View style={styles.orderHeader}>
+        <View style={s.card}>
+          <View style={s.orderHeader}>
             <View>
-              <Text style={styles.orderId}>#{order.orderId}</Text>
-              <Text style={styles.orderDate}>{formatDate(order.orderDate)}</Text>
+              <Text style={s.orderId}>#{order.orderId}</Text>
+              <Text style={s.orderDate}>{formatDate(order.orderDate)}</Text>
             </View>
-            <View style={[styles.statusBadge, { backgroundColor: statusColor }]}>
-              <Icon name={statusIcon} size={16} color="#FFFFFF" />
-              <Text style={styles.statusText}>{order.orderStatus}</Text>
-            </View>
+            <StatusBadge status={order.orderStatus} />
           </View>
 
           {/* Timeline */}
           {order.orderStatus !== 'pending' && (
-            <View style={styles.timeline}>
+            <View style={s.timeline}>
               {order.acceptedAt && (
-                <View style={styles.timelineItem}>
-                  <Icon name="check-circle" size={20} color="#2EC4B6" />
-                  <View style={styles.timelineContent}>
-                    <Text style={styles.timelineLabel}>Accepted</Text>
-                    <Text style={styles.timelineTime}>{formatDate(order.acceptedAt)}</Text>
+                <View style={s.timelineItem}>
+                  <Icon name="check-circle" size={20} color={colors.accent} />
+                  <View style={s.timelineContent}>
+                    <Text style={s.timelineLabel}>Accepted</Text>
+                    <Text style={s.timelineTime}>{formatDate(order.acceptedAt)}</Text>
                   </View>
                 </View>
               )}
               {order.pickedAt && (
-                <View style={styles.timelineItem}>
-                  <Icon name="package-variant" size={20} color="#2EC4B6" />
-                  <View style={styles.timelineContent}>
-                    <Text style={styles.timelineLabel}>Picked Up</Text>
-                    <Text style={styles.timelineTime}>{formatDate(order.pickedAt)}</Text>
+                <View style={s.timelineItem}>
+                  <Icon name="package-variant" size={20} color={colors.accent} />
+                  <View style={s.timelineContent}>
+                    <Text style={s.timelineLabel}>Picked Up</Text>
+                    <Text style={s.timelineTime}>{formatDate(order.pickedAt)}</Text>
                   </View>
                 </View>
               )}
               {order.deliveredAt && (
-                <View style={styles.timelineItem}>
-                  <Icon name="check-all" size={20} color="#28A745" />
-                  <View style={styles.timelineContent}>
-                    <Text style={styles.timelineLabel}>Delivered</Text>
-                    <Text style={styles.timelineTime}>{formatDate(order.deliveredAt)}</Text>
+                <View style={s.timelineItem}>
+                  <Icon name="check-all" size={20} color={colors.success} />
+                  <View style={s.timelineContent}>
+                    <Text style={s.timelineLabel}>Delivered</Text>
+                    <Text style={s.timelineTime}>{formatDate(order.deliveredAt)}</Text>
                   </View>
                 </View>
               )}
@@ -203,63 +187,63 @@ const OrderDetailScreen = ({ route, navigation }) => {
         </View>
 
         {/* Restaurant Info */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Icon name="store" size={24} color="#FF6B35" />
-            <Text style={styles.cardTitle}>Restaurant</Text>
+        <View style={s.card}>
+          <View style={s.cardHeader}>
+              <Icon name="store" size={24} color={colors.warning} />
+            <Text style={s.cardTitle}>Restaurant</Text>
           </View>
-          <View style={styles.infoContent}>
-            <Text style={styles.infoTitle}>{order.restaurant?.name}</Text>
-            <Text style={styles.infoSubtitle}>{order.restaurant?.address}</Text>
+          <View style={s.infoContent}>
+            <Text style={s.infoTitle}>{order.restaurant?.name}</Text>
+            <Text style={s.infoSubtitle}>{order.restaurant?.address}</Text>
             {order.restaurant?.phone && (
               <TouchableOpacity
-                style={styles.callButton}
+                style={s.callButton}
                 onPress={() => handleCall(order.restaurant.phone)}
               >
-                <Icon name="phone" size={16} color="#2EC4B6" />
-                <Text style={styles.callButtonText}>{order.restaurant.phone}</Text>
+                <Icon name="phone" size={16} color={colors.accent} />
+                <Text style={s.callButtonText}>{order.restaurant.phone}</Text>
               </TouchableOpacity>
             )}
           </View>
         </View>
 
         {/* Customer Info */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Icon name="account" size={24} color="#2EC4B6" />
-            <Text style={styles.cardTitle}>Customer</Text>
+        <View style={s.card}>
+          <View style={s.cardHeader}>
+            <Icon name="account" size={24} color={colors.accent} />
+            <Text style={s.cardTitle}>Customer</Text>
           </View>
-          <View style={styles.infoContent}>
-            <Text style={styles.infoTitle}>{order.user?.name || 'Customer'}</Text>
-            <Text style={styles.infoSubtitle}>{order.deliveryAddress?.deliveryAddress}</Text>
+          <View style={s.infoContent}>
+            <Text style={s.infoTitle}>{order.user?.name || 'Customer'}</Text>
+            <Text style={s.infoSubtitle}>{order.deliveryAddress?.deliveryAddress}</Text>
             {order.deliveryAddress?.details && (
-              <Text style={styles.infoDetails}>{order.deliveryAddress.details}</Text>
+              <Text style={s.infoDetails}>{order.deliveryAddress.details}</Text>
             )}
             {order.user?.phone && (
               <TouchableOpacity
-                style={styles.callButton}
+                style={s.callButton}
                 onPress={() => handleCall(order.user.phone)}
               >
-                <Icon name="phone" size={16} color="#2EC4B6" />
-                <Text style={styles.callButtonText}>{order.user.phone}</Text>
+                <Icon name="phone" size={16} color={colors.accent} />
+                <Text style={s.callButtonText}>{order.user.phone}</Text>
               </TouchableOpacity>
             )}
           </View>
         </View>
 
         {/* Order Items */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Icon name="package-variant" size={24} color="#2EC4B6" />
-            <Text style={styles.cardTitle}>Order Items ({order.items?.length || 0})</Text>
+        <View style={s.card}>
+          <View style={s.cardHeader}>
+            <Icon name="package-variant" size={24} color={colors.accent} />
+            <Text style={s.cardTitle}>Order Items ({order.items?.length || 0})</Text>
           </View>
           {order.items?.map((item, index) => (
-            <View key={index} style={styles.itemRow}>
-              <Text style={styles.itemQuantity}>{item.quantity}x</Text>
-              <View style={styles.itemInfo}>
-                <Text style={styles.itemName}>{item.food?.title}</Text>
+            <View key={index} style={s.itemRow}>
+              <Text style={s.itemQuantity}>{item.quantity}x</Text>
+              <View style={s.itemInfo}>
+                <Text style={s.itemName}>{item.food?.title}</Text>
                 {item.variation && (
-                  <Text style={styles.itemVariation}>{item.variation.title}</Text>
+                  <Text style={s.itemVariation}>{item.variation.title}</Text>
                 )}
               </View>
             </View>
@@ -268,54 +252,54 @@ const OrderDetailScreen = ({ route, navigation }) => {
 
         {/* Special Instructions */}
         {order.instructions && (
-          <View style={styles.card}>
-            <View style={styles.cardHeader}>
-              <Icon name="note-text" size={24} color="#FFC107" />
-              <Text style={styles.cardTitle}>Special Instructions</Text>
+          <View style={s.card}>
+            <View style={s.cardHeader}>
+              <Icon name="note-text" size={24} color={colors.warning} />
+              <Text style={s.cardTitle}>Special Instructions</Text>
             </View>
-            <Text style={styles.instructions}>{order.instructions}</Text>
+            <Text style={s.instructions}>{order.instructions}</Text>
           </View>
         )}
 
         {/* Payment Summary */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Icon name="cash" size={24} color="#2EC4B6" />
-            <Text style={styles.cardTitle}>Payment Summary</Text>
+        <View style={s.card}>
+          <View style={s.cardHeader}>
+            <Icon name="cash" size={24} color={colors.accent} />
+            <Text style={s.cardTitle}>Payment Summary</Text>
           </View>
 
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Order Amount</Text>
-            <Text style={styles.summaryValue}>ETB {order.orderAmount?.toFixed(2)}</Text>
+          <View style={s.summaryRow}>
+            <Text style={s.summaryLabel}>Order Amount</Text>
+            <Text style={s.summaryValue}>PKR {order.orderAmount?.toFixed(2)}</Text>
           </View>
 
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Delivery Fee</Text>
-            <Text style={styles.summaryValue}>ETB {order.deliveryCharges?.toFixed(2)}</Text>
+          <View style={s.summaryRow}>
+            <Text style={s.summaryLabel}>Delivery Fee</Text>
+            <Text style={s.summaryValue}>PKR {order.deliveryCharges?.toFixed(2)}</Text>
           </View>
 
           {order.tipping > 0 && (
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Tip</Text>
-              <Text style={[styles.summaryValue, styles.tipValue]}>
-                ETB {order.tipping.toFixed(2)}
+            <View style={s.summaryRow}>
+              <Text style={s.summaryLabel}>Tip</Text>
+              <Text style={[s.summaryValue, s.tipValue]}>
+                PKR {order.tipping.toFixed(2)}
               </Text>
             </View>
           )}
 
           {order.taxationAmount > 0 && (
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Tax</Text>
-              <Text style={styles.summaryValue}>ETB {order.taxationAmount.toFixed(2)}</Text>
+            <View style={s.summaryRow}>
+              <Text style={s.summaryLabel}>Tax</Text>
+              <Text style={s.summaryValue}>PKR {order.taxationAmount.toFixed(2)}</Text>
             </View>
           )}
 
-          <View style={styles.divider} />
+          <View style={s.divider} />
 
-          <View style={styles.summaryRow}>
-            <Text style={styles.totalLabel}>Total Amount</Text>
-            <Text style={styles.totalValue}>
-              ETB{' '}
+          <View style={s.summaryRow}>
+            <Text style={s.totalLabel}>Total Amount</Text>
+            <Text style={s.totalValue}>
+              PKR{' '}
               {(
                 (order.orderAmount || 0) +
                 (order.deliveryCharges || 0) +
@@ -325,23 +309,23 @@ const OrderDetailScreen = ({ route, navigation }) => {
             </Text>
           </View>
 
-          <View style={styles.earningsBox}>
-            <Icon name="wallet" size={20} color="#28A745" />
-            <Text style={styles.earningsLabel}>Your Earnings:</Text>
-            <Text style={styles.earningsValue}>ETB {earnings.toFixed(2)}</Text>
+          <View style={s.earningsBox}>
+            <Icon name="wallet" size={20} color={colors.accent} />
+            <Text style={s.earningsLabel}>Your Earnings:</Text>
+            <Text style={s.earningsValue}>PKR {earnings.toFixed(2)}</Text>
           </View>
         </View>
 
         {/* Action Buttons */}
         {order.orderStatus !== 'delivered' && order.orderStatus !== 'cancelled' && (
-          <View style={styles.actionsContainer}>
+          <View style={s.actionsContainer}>
             <TouchableOpacity
-              style={styles.navigateButton}
+              style={s.navigateButton}
               onPress={handleNavigate}
               disabled={updating}
             >
-              <Icon name="navigation" size={20} color="#FFFFFF" />
-              <Text style={styles.navigateButtonText}>Start Navigation</Text>
+              <Icon name="navigation" size={20} color={colors.surface} />
+              <Text style={s.navigateButtonText}>Start Navigation</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -350,28 +334,28 @@ const OrderDetailScreen = ({ route, navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = (colors, typography, scale = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.background,
   },
   header: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: Math.round(16 * scale),
+    paddingVertical: Math.round(12 * scale),
     borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
+    borderBottomColor: colors.border,
   },
   backButton: {
-    padding: 8,
+    padding: Math.round(8 * scale),
   },
   title: {
-    fontSize: 20,
+    fontSize: Math.round(20 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   loadingContainer: {
     flex: 1,
@@ -379,248 +363,235 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    fontSize: 16,
-    color: '#6C757D',
-    marginTop: 16,
+    fontSize: Math.round(16 * scale),
+    color: colors.textSecondary,
+    marginTop: Math.round(16 * scale),
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 32,
+    padding: Math.round(32 * scale),
   },
   errorText: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: '600',
-    color: '#E63946',
-    marginTop: 16,
-    marginBottom: 24,
+    color: colors.error,
+    marginTop: Math.round(16 * scale),
+    marginBottom: Math.round(24 * scale),
   },
   retryButton: {
-    backgroundColor: '#2EC4B6',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
+    backgroundColor: colors.accent,
+    paddingHorizontal: Math.round(24 * scale),
+    paddingVertical: Math.round(12 * scale),
+    borderRadius: Math.round(8 * scale),
   },
   retryButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
+    color: colors.surface,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
   },
   card: {
-    backgroundColor: '#FFFFFF',
-    marginHorizontal: 16,
-    marginTop: 12,
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    backgroundColor: colors.surface,
+    marginHorizontal: Math.round(16 * scale),
+    marginTop: Math.round(12 * scale),
+    borderRadius: Math.round(12 * scale),
+    padding: Math.round(16 * scale),
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: Math.round(2 * scale) },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: Math.round(4 * scale),
     elevation: 3,
   },
   orderHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 16,
+    marginBottom: Math.round(16 * scale),
   },
   orderId: {
-    fontSize: 24,
+    fontSize: Math.round(24 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
-    marginBottom: 4,
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   orderDate: {
-    fontSize: 13,
-    color: '#6C757D',
+    fontSize: Math.round(13 * scale),
+    color: colors.textSecondary,
   },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-  statusText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '600',
-    marginLeft: 6,
-    textTransform: 'capitalize',
-  },
+
   timeline: {
-    paddingTop: 16,
+    paddingTop: Math.round(16 * scale),
     borderTopWidth: 1,
-    borderTopColor: '#E9ECEF',
+    borderTopColor: colors.border,
   },
   timelineItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: Math.round(12 * scale),
   },
   timelineContent: {
-    marginLeft: 12,
+    marginLeft: Math.round(12 * scale),
   },
   timelineLabel: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   timelineTime: {
-    fontSize: 12,
-    color: '#6C757D',
-    marginTop: 2,
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
+    marginTop: Math.round(2 * scale),
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: Math.round(12 * scale),
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#1D3557',
-    marginLeft: 12,
+    color: colors.textPrimary,
+    marginLeft: Math.round(12 * scale),
   },
   infoContent: {
-    paddingLeft: 36,
+    paddingLeft: Math.round(36 * scale),
   },
   infoTitle: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    color: '#1D3557',
-    marginBottom: 4,
+    color: colors.textPrimary,
+    marginBottom: Math.round(4 * scale),
   },
   infoSubtitle: {
-    fontSize: 14,
-    color: '#6C757D',
-    marginBottom: 4,
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
+    marginBottom: Math.round(4 * scale),
   },
   infoDetails: {
-    fontSize: 13,
-    color: '#6C757D',
+    fontSize: Math.round(13 * scale),
+    color: colors.textSecondary,
     fontStyle: 'italic',
-    marginBottom: 8,
+    marginBottom: Math.round(8 * scale),
   },
   callButton: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: '#E0F7F5',
-    borderRadius: 8,
-    marginTop: 8,
+    paddingVertical: Math.round(8 * scale),
+    paddingHorizontal: Math.round(12 * scale),
+    backgroundColor: colors.surfaceVariant,
+    borderRadius: Math.round(8 * scale),
+    marginTop: Math.round(8 * scale),
   },
   callButtonText: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#2EC4B6',
-    marginLeft: 6,
+    color: colors.accent,
+    marginLeft: Math.round(6 * scale),
   },
   itemRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    paddingVertical: 8,
-    paddingLeft: 36,
+    paddingVertical: Math.round(8 * scale),
+    paddingLeft: Math.round(36 * scale),
   },
   itemQuantity: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '600',
-    color: '#495057',
-    width: 40,
+    color: colors.textPrimary,
+    width: Math.round(40 * scale),
   },
   itemInfo: {
     flex: 1,
   },
   itemName: {
-    fontSize: 14,
-    color: '#1D3557',
+    fontSize: Math.round(14 * scale),
+    color: colors.textPrimary,
     fontWeight: '500',
   },
   itemVariation: {
-    fontSize: 12,
-    color: '#6C757D',
-    marginTop: 2,
+    fontSize: Math.round(12 * scale),
+    color: colors.textSecondary,
+    marginTop: Math.round(2 * scale),
   },
   instructions: {
-    fontSize: 14,
-    color: '#495057',
+    fontSize: Math.round(14 * scale),
+    color: colors.textPrimary,
     lineHeight: 20,
-    paddingLeft: 36,
+    paddingLeft: Math.round(36 * scale),
   },
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 8,
-    paddingLeft: 36,
+    paddingVertical: Math.round(8 * scale),
+    paddingLeft: Math.round(36 * scale),
   },
   summaryLabel: {
-    fontSize: 14,
-    color: '#6C757D',
+    fontSize: Math.round(14 * scale),
+    color: colors.textSecondary,
   },
   summaryValue: {
-    fontSize: 14,
+    fontSize: Math.round(14 * scale),
     fontWeight: '500',
-    color: '#495057',
+    color: colors.textPrimary,
   },
   tipValue: {
-    color: '#28A745',
+    color: colors.accent,
   },
   divider: {
     height: 1,
-    backgroundColor: '#E9ECEF',
-    marginVertical: 8,
-    marginLeft: 36,
+    backgroundColor: colors.border,
+    marginVertical: Math.round(8 * scale),
+    marginLeft: Math.round(36 * scale),
   },
   totalLabel: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
-    color: '#1D3557',
+    color: colors.textPrimary,
   },
   totalValue: {
-    fontSize: 18,
+    fontSize: Math.round(18 * scale),
     fontWeight: 'bold',
-    color: '#2EC4B6',
+    color: colors.accent,
   },
   earningsBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#D4EDDA',
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 12,
-    marginLeft: 36,
+    backgroundColor: `${colors.success}20`,
+    padding: Math.round(12 * scale),
+    borderRadius: Math.round(8 * scale),
+    marginTop: Math.round(12 * scale),
+    marginLeft: Math.round(36 * scale),
   },
   earningsLabel: {
-    fontSize: 14,
-    color: '#155724',
-    marginLeft: 8,
+    fontSize: Math.round(14 * scale),
+    color: colors.success,
+    marginLeft: Math.round(8 * scale),
     flex: 1,
   },
   earningsValue: {
-    fontSize: 16,
+    fontSize: Math.round(16 * scale),
     fontWeight: 'bold',
-    color: '#28A745',
+    color: colors.accent,
   },
   actionsContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: Math.round(16 * scale),
+    paddingVertical: Math.round(16 * scale),
   },
   navigateButton: {
     flexDirection: 'row',
-    backgroundColor: '#2EC4B6',
-    paddingVertical: 16,
-    borderRadius: 12,
+    backgroundColor: colors.accent,
+    paddingVertical: Math.round(16 * scale),
+    borderRadius: Math.round(12 * scale),
     alignItems: 'center',
     justifyContent: 'center',
   },
   navigateButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
+    color: colors.surface,
+    fontSize: Math.round(16 * scale),
     fontWeight: '600',
-    marginLeft: 8,
+    marginLeft: Math.round(8 * scale),
   },
 });
 

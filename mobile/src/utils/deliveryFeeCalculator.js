@@ -3,26 +3,26 @@
 
 const DELIVERY_CONFIG = {
   // Base delivery fee
-  baseFee: 20, // ETB
+  baseFee: 20, // PKR
   
   // Free delivery threshold
-  freeDeliveryMinimum: 500, // ETB - orders above this get free delivery
+  freeDeliveryMinimum: 500, // PKR - orders above this get free delivery
   
   // Distance-based fees (per km)
   distanceRates: [
     { maxKm: 2, feePerKm: 0 },      // First 2km free
-    { maxKm: 5, feePerKm: 5 },      // 2-5km: 5 ETB/km
-    { maxKm: 10, feePerKm: 8 },     // 5-10km: 8 ETB/km
-    { maxKm: 20, feePerKm: 12 },    // 10-20km: 12 ETB/km
-    { maxKm: Infinity, feePerKm: 15 } // 20km+: 15 ETB/km
+    { maxKm: 5, feePerKm: 5 },      // 2-5km: 5 PKR/km
+    { maxKm: 10, feePerKm: 8 },     // 5-10km: 8 PKR/km
+    { maxKm: 20, feePerKm: 12 },    // 10-20km: 12 PKR/km
+    { maxKm: Infinity, feePerKm: 15 } // 20km+: 15 PKR/km
   ],
   
   // Weight-based fees (per kg)
   weightRates: [
     { maxKg: 5, fee: 0 },           // Up to 5kg free
-    { maxKg: 10, fee: 10 },         // 5-10kg: 10 ETB
-    { maxKg: 20, fee: 25 },         // 10-20kg: 25 ETB
-    { maxKg: Infinity, fee: 50 }    // 20kg+: 50 ETB
+    { maxKg: 10, fee: 10 },         // 5-10kg: 10 PKR
+    { maxKg: 20, fee: 25 },         // 10-20kg: 25 PKR
+    { maxKg: Infinity, fee: 50 }    // 20kg+: 50 PKR
   ],
   
   // Peak hour multiplier
@@ -33,13 +33,13 @@ const DELIVERY_CONFIG = {
   },
   
   // Minimum delivery fee
-  minimumFee: 15, // ETB
+  minimumFee: 15, // PKR
 };
 
 /**
  * Calculate delivery fee based on distance
  * @param {number} distanceKm - Distance in kilometers
- * @returns {number} - Delivery fee in ETB
+ * @returns {number} - Delivery fee in PKR
  */
 export const calculateDistanceFee = (distanceKm) => {
   if (!distanceKm || distanceKm <= 0) return DELIVERY_CONFIG.baseFee;
@@ -65,7 +65,7 @@ export const calculateDistanceFee = (distanceKm) => {
 /**
  * Calculate weight-based fee
  * @param {number} weightKg - Total weight in kilograms
- * @returns {number} - Weight fee in ETB
+ * @returns {number} - Weight fee in PKR
  */
 export const calculateWeightFee = (weightKg) => {
   if (!weightKg || weightKg <= 0) return 0;
@@ -95,7 +95,7 @@ export const isPeakHour = () => {
  * @param {Object} params
  * @param {number} params.distanceKm - Distance in km
  * @param {number} params.weightKg - Weight in kg
- * @param {number} params.orderValue - Order value in ETB
+ * @param {number} params.orderValue - Order value in PKR
  * @param {boolean} params.applyPeakHour - Apply peak hour multiplier
  * @returns {Object} - Breakdown of delivery fee
  */
@@ -114,7 +114,7 @@ export const calculateDeliveryFee = ({
         distanceFee: 0,
         weightFee: 0,
         peakHourFee: 0,
-        discount: 'Free delivery for orders over ETB ' + DELIVERY_CONFIG.freeDeliveryMinimum
+        discount: 'Free delivery for orders over PKR ' + DELIVERY_CONFIG.freeDeliveryMinimum
       },
       isFree: true
     };
@@ -212,15 +212,15 @@ export const getDeliveryFeeMessage = (feeData) => {
   const messages = [];
   
   if (feeData.breakdown.distanceFee > 0) {
-    messages.push(`Distance: ETB ${feeData.breakdown.distanceFee.toFixed(2)}`);
+    messages.push(`Distance: PKR ${feeData.breakdown.distanceFee.toFixed(2)}`);
   }
   
   if (feeData.breakdown.weightFee > 0) {
-    messages.push(`Weight: ETB ${feeData.breakdown.weightFee.toFixed(2)}`);
+    messages.push(`Weight: PKR ${feeData.breakdown.weightFee.toFixed(2)}`);
   }
   
   if (feeData.breakdown.peakHourFee > 0) {
-    messages.push(`Peak hour: +ETB ${feeData.breakdown.peakHourFee.toFixed(2)}`);
+    messages.push(`Peak hour: +PKR ${feeData.breakdown.peakHourFee.toFixed(2)}`);
   }
   
   return messages.join(' • ');
