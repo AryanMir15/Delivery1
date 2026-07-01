@@ -297,6 +297,22 @@ const resolvers = {
       return [];
     },
 
+    userFavorites: async (parent, args, context) => {
+      if (!context.user) {
+        throw new Error('Not authenticated');
+      }
+
+      const user = await User.findById(context.user._id);
+      if (!user.favourite || user.favourite.length === 0) {
+        return [];
+      }
+
+      return await Food.find({ _id: { $in: user.favourite } })
+        .populate('category')
+        .populate('restaurant')
+        .populate('variations');
+    },
+
     // Review queries
     reviews: async (parent, { restaurant, page = 1, limit = 10, rating }) => {
       const query = { restaurant, isActive: true };
@@ -2696,6 +2712,24 @@ const resolvers = {
         console.error('Upload error:', error);
         throw new Error('Failed to upload image');
       }
+    },
+
+    toggleFavorite: async (parent, { foodId }, context) => {
+      if (!context.user) {
+        throw new Error('Not authenticated');
+      }
+
+      const user = await User.findById(context.user._id);
+      const favIndex = user.favourite.indexOf(foodId);
+
+      if (favIndex > -1) {
+        user.favourite.splice(favIndex, 1);
+      } else {
+        user.favourite.push(foodId);
+      }
+
+      await user.save();
+      return user;
     },
   },
 

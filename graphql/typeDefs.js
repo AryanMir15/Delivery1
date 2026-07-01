@@ -624,6 +624,7 @@ const typeDefs = gql`
 
     # User favourite
     userFavourite(latitude: Float, longitude: Float): [Restaurant!]!
+    userFavorites: [Food!]!
 
     # Vendors
     vendors: [VendorListItem!]!
@@ -1030,6 +1031,8 @@ const typeDefs = gql`
     deactivateCoupon(id: ID!): Coupon!
 
     duplicateCoupon(id: ID!, newCode: String): Coupon!
+
+    toggleFavorite(foodId: ID!): User!
   }
 
   input OpeningTimeInput {

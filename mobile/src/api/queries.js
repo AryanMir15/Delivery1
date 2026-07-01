@@ -843,3 +843,26 @@ export const GET_ADDONS = gql`
     }
   }
 `;
+
+export const USER_FAVORITES = gql`
+  query UserFavorites {
+    userFavorites {
+      id
+      _id
+      title
+      image
+      isOutOfStock
+      restaurant {
+        id
+        name
+        rating
+        deliveryTime
+      }
+      variations {
+        id
+        title
+        price
+      }
+    }
+  }
+`;

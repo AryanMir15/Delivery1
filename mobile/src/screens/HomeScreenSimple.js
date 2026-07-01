@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,11 +12,13 @@ import {
   Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useQuery } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client';
 import { useDispatch, useSelector } from 'react-redux';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 
 import { GET_CATEGORIES, GET_RESTAURANTS, GET_FOODS } from '../api/queries';
+import { TOGGLE_FAVORITE } from '../api/mutations';
+import { addToCart } from '../store/cartSlice';
 import { setRestaurants, setCategories } from '../store/restaurantSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import useResponsive from '../hooks/useResponsive';
@@ -117,6 +119,69 @@ const HomeScreenSimple = ({ navigation }) => {
   const { data: categoriesData, refetch: refetchCategories } = useQuery(GET_CATEGORIES);
   const { data: restaurantsData, refetch: refetchRestaurants } = useQuery(GET_RESTAURANTS);
   const { data: foodsData, refetch: refetchFoods } = useQuery(GET_FOODS);
+
+  const [toggleFavorite] = useMutation(TOGGLE_FAVORITE);
+
+  const [addedItems, setAddedItems] = useState({});
+  const [favItems, setFavItems] = useState({});
+  const addAnims = useRef({});
+  const favAnims = useRef({});
+
+  const handleAddToCart = useCallback((item) => {
+    const variation = item.variations?.[0];
+    if (!variation) return;
+
+    dispatch(addToCart({
+      food: item._id || item.id,
+      title: item.title,
+      image: item.image,
+      restaurant: item.restaurant?._id || item.restaurant?.id,
+      restaurantName: item.restaurant?.name,
+      variation: {
+        id: variation._id || variation.id,
+        title: variation.title,
+        price: variation.price,
+      },
+      quantity: 1,
+      addons: [],
+      specialInstructions: '',
+    }));
+
+    const id = item._id || item.id;
+    setAddedItems(prev => ({ ...prev, [id]: true }));
+
+    if (!addAnims.current[id]) {
+      addAnims.current[id] = new Animated.Value(1);
+    }
+    Animated.sequence([
+      Animated.timing(addAnims.current[id], { toValue: 1.3, duration: 150, useNativeDriver: true }),
+      Animated.timing(addAnims.current[id], { toValue: 1, duration: 150, useNativeDriver: true }),
+    ]).start();
+
+    setTimeout(() => {
+      setAddedItems(prev => ({ ...prev, [id]: false }));
+    }, 1200);
+  }, [dispatch]);
+
+  const handleToggleFav = useCallback(async (item) => {
+    const id = item._id || item.id;
+
+    if (!favAnims.current[id]) {
+      favAnims.current[id] = new Animated.Value(1);
+    }
+    Animated.sequence([
+      Animated.timing(favAnims.current[id], { toValue: 1.4, duration: 150, useNativeDriver: true }),
+      Animated.timing(favAnims.current[id], { toValue: 1, duration: 150, useNativeDriver: true }),
+    ]).start();
+
+    setFavItems(prev => ({ ...prev, [id]: !prev[id] }));
+
+    try {
+      await toggleFavorite({ variables: { foodId: id } });
+    } catch (e) {
+      setFavItems(prev => ({ ...prev, [id]: !prev[id] }));
+    }
+  }, [toggleFavorite]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -313,9 +378,12 @@ const HomeScreenSimple = ({ navigation }) => {
               </View>
               <View style={s.productList}>
                 {foods.filter(item => item.isOutOfStock !== true).map((item) => {
+                  const id = item._id || item.id;
+                  const isFav = favItems[id];
+                  const isAdded = addedItems[id];
                   return (
                     <TouchableOpacity
-                      key={String(item._id || item.id)}
+                      key={String(id)}
                       style={s.productRow}
                       onPress={() => navigation.navigate('FoodDetail', { food: item })}
                       activeOpacity={0.7}
@@ -342,12 +410,16 @@ const HomeScreenSimple = ({ navigation }) => {
                         <Text style={s.productPrice}>{item.variations?.[0]?.price || '0'} PKR</Text>
                       </View>
                       <View style={s.productActions}>
-                        <TouchableOpacity style={s.productHeartBtn} activeOpacity={0.7}>
-                          <Icon name="heart-outline" size={20} color={palette.gray500} />
+                        <TouchableOpacity style={s.productHeartBtn} activeOpacity={0.7} onPress={() => handleToggleFav(item)}>
+                          <Animated.View style={favAnims[id] ? { transform: [{ scale: favAnims[id] }] } : {}}>
+                            <Icon name={isFav ? 'heart' : 'heart-outline'} size={20} color={isFav ? '#E85D3A' : palette.gray500} />
+                          </Animated.View>
                         </TouchableOpacity>
-                        <View style={s.productAddBtn}>
-                          <Icon name="plus" size={20} color="#000" />
-                        </View>
+                        <TouchableOpacity style={s.productAddBtn} activeOpacity={0.7} onPress={() => handleAddToCart(item)}>
+                          <Animated.View style={addAnims[id] ? { transform: [{ scale: addAnims[id] }] } : {}}>
+                            <Icon name={isAdded ? 'check' : 'plus'} size={20} color="#000" />
+                          </Animated.View>
+                        </TouchableOpacity>
                       </View>
                     </TouchableOpacity>
                   );

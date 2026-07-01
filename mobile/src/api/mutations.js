@@ -586,3 +586,13 @@ export const REGISTER_AS_VENDOR = gql`
   }
 `;
 
+export const TOGGLE_FAVORITE = gql`
+  mutation ToggleFavorite($foodId: ID!) {
+    toggleFavorite(foodId: $foodId) {
+      id
+      _id
+      favourite
+    }
+  }
+`;
+
