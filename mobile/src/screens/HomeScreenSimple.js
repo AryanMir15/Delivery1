@@ -291,7 +291,7 @@ const HomeScreenSimple = ({ navigation }) => {
                             <Text style={s.shopRating}>{item.rating?.toFixed(1) || '0.0'}</Text>
                             <Text style={s.shopDot}>·</Text>
                             <Icon name="clock-outline" size={11} color={palette.gray400} />
-                            <Text style={s.shopTime}>{item.deliveryTime || 30} min</Text>
+                            <Text style={s.shopTime}>{item.deliveryTime || 30}-{(item.deliveryTime || 30) + 5} min</Text>
                           </View>
                         </View>
                       </View>
@@ -337,7 +337,7 @@ const HomeScreenSimple = ({ navigation }) => {
                           <Text style={s.productRating}>{item.restaurant?.rating?.toFixed(1)}</Text>
                           <Text style={s.productDot}>·</Text>
                           <Icon name="clock-outline" size={11} color={palette.gray500} />
-                          <Text style={s.productTime}>{item.restaurant?.deliveryTime || 30} min</Text>
+                          <Text style={s.productTime}>{item.restaurant?.deliveryTime || 30}-{(item.restaurant?.deliveryTime || 30) + 5} min</Text>
                         </View>
                         <Text style={s.productPrice}>{item.variations?.[0]?.price || '0'} PKR</Text>
                       </View>
