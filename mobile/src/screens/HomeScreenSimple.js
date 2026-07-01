@@ -171,12 +171,8 @@ const HomeScreenSimple = ({ navigation }) => {
         <AnimatedSection delay={60}>
           <View style={s.header}>
             <View style={s.headerLeft}>
-              <Text style={s.greeting}>Hello, {userName}!</Text>
-              <View style={s.locationRow}>
-                <Icon name="map-marker" size={14} color={palette.silver} />
-                <Text style={s.locationText} numberOfLines={1}>{address}</Text>
-                <Icon name="chevron-down" size={14} color={palette.gray500} />
-              </View>
+              <Text style={s.locationText} numberOfLines={1}>{address}</Text>
+              <Text style={s.greeting}>Hello, {userName}</Text>
             </View>
             <View style={s.headerActions}>
               <TouchableOpacity style={s.iconBtn} onPress={() => navigation.navigate('Cart')} activeOpacity={0.7}>
@@ -381,22 +377,16 @@ const styles = (scale = 1) => StyleSheet.create({
     paddingBottom: 4,
   },
   headerLeft: { flex: 1 },
-  greeting: {
-    fontSize: 22,
-    fontWeight: '700',
+  locationText: {
+    fontSize: 20,
+    fontWeight: '900',
     color: palette.silver,
     letterSpacing: -0.3,
   },
-  locationRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 2,
-    gap: 4,
-  },
-  locationText: {
+  greeting: {
     fontSize: 13,
     color: palette.gray500,
-    flex: 1,
+    marginTop: 2,
   },
   headerActions: {
     flexDirection: 'row',
