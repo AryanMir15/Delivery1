@@ -54,6 +54,13 @@ export const GET_RESTAURANTS = gql`
       reviewCount
       isActive
       isAvailable
+      openingTimes {
+        day
+        times {
+          startTime
+          endTime
+        }
+      }
     }
   }
 `;
@@ -196,6 +203,8 @@ export const GET_FOODS = gql`
         name
         image
         shopType
+        rating
+        deliveryTime
       }
       variations {
         id
