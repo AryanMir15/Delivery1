@@ -332,9 +332,6 @@ const HomeScreenSimple = ({ navigation }) => {
                             <Icon name="food" size={22} color={palette.gray600} />
                           </View>
                         )}
-                        <View style={s.productLogoBadge}>
-                          <ShokLogo size={28} />
-                        </View>
                       </View>
                       <View style={s.productInfo}>
                         <Text style={s.productName} numberOfLines={1}>{item.title}</Text>
@@ -651,7 +648,7 @@ const styles = (scale = 1) => StyleSheet.create({
   },
   productImageWrap: {
     position: 'relative',
-    width: 110,
+    width: 90,
     height: 90,
     borderRadius: 14,
     overflow: 'hidden',
@@ -667,20 +664,6 @@ const styles = (scale = 1) => StyleSheet.create({
     backgroundColor: '#1A1A1A',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  productLogoBadge: {
-    position: 'absolute',
-    bottom: 4,
-    left: 4,
-    width: 28,
-    height: 28,
-    borderRadius: 7,
-    backgroundColor: '#000',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#2A2A2A',
-    overflow: 'hidden',
   },
   productInfo: {
     flex: 1,
