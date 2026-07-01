@@ -334,10 +334,10 @@ const HomeScreenSimple = ({ navigation }) => {
                         <Text style={s.productShop} numberOfLines={1}>{item.restaurant?.name || ''}</Text>
                         <View style={s.productMeta}>
                           <Icon name="star" size={12} color="#E5A100" />
-                          <Text style={s.productRating}>{item.restaurant?.rating?.toFixed(1) || '4.0'}</Text>
+                          <Text style={s.productRating}>{item.restaurant?.rating?.toFixed(1)}</Text>
                           <Text style={s.productDot}>·</Text>
                           <Icon name="clock-outline" size={11} color={palette.gray500} />
-                          <Text style={s.productTime}>25-30 min</Text>
+                          <Text style={s.productTime}>{item.restaurant?.deliveryTime || 30} min</Text>
                         </View>
                         <Text style={s.productPrice}>{item.variations?.[0]?.price || '0'} PKR</Text>
                       </View>
