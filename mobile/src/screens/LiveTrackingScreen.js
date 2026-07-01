@@ -166,8 +166,8 @@ const LiveTrackingScreen = ({ route, navigation }) => {
         ref={mapRef}
         style={s.map}
         initialRegion={{
-          latitude: userLocation?.latitude || 9.0320,
-          longitude: userLocation?.longitude || 38.7469,
+          latitude: userLocation?.latitude || 25.78,
+          longitude: userLocation?.longitude || 68.66,
           latitudeDelta: 0.05,
           longitudeDelta: 0.05,
         }}

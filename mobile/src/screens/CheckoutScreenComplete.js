@@ -35,9 +35,9 @@ const CheckoutScreenComplete = ({ navigation, route }) => {
   const [specialInstructions, setSpecialInstructions] = useState('');
   
   // Location selection
-  const [latitude, setLatitude] = useState(9.0320);
-  const [longitude, setLongitude] = useState(38.7469);
-  const [locationName, setLocationName] = useState('Bole, Addis Ababa');
+  const [latitude, setLatitude] = useState(25.78);
+  const [longitude, setLongitude] = useState(68.66);
+  const [locationName, setLocationName] = useState('Tando Allahyar, Sindh');
   const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [locationSearchText, setLocationSearchText] = useState('');
   const [isGettingLocation, setIsGettingLocation] = useState(false);
@@ -83,7 +83,7 @@ const CheckoutScreenComplete = ({ navigation, route }) => {
     if (itemCount > 5) totalMinutes += 5; // Large orders take longer
     if (itemCount > 10) totalMinutes += 5; // Very large orders
 
-    // 3. Distance-based delivery time (3 minutes per km in Addis Ababa traffic)
+    // 3. Distance-based delivery time (3 minutes per km in Tando Allahyar traffic)
     const distance = calculateDistance(restaurantLocation, deliveryLocation);
     const deliveryTime = Math.ceil(distance * 3);
     totalMinutes += deliveryTime;
@@ -141,7 +141,7 @@ const CheckoutScreenComplete = ({ navigation, route }) => {
     try {
       // Use Nominatim API for real-time location search
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}, Addis Ababa, Ethiopia&limit=10&addressdetails=1`
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}, Tando Allahyar, Sindh, Pakistan&limit=10&addressdetails=1`
       );
       
       const data = await response.json();
@@ -150,13 +150,13 @@ const CheckoutScreenComplete = ({ navigation, route }) => {
         name: item.display_name,
         lat: parseFloat(item.lat),
         lng: parseFloat(item.lon),
-        area: item.address?.suburb || item.address?.neighbourhood || item.address?.city_district || 'Addis Ababa',
+        area: item.address?.suburb || item.address?.neighbourhood || item.address?.city_district || 'Tando Allahyar',
         type: item.type,
         importance: item.importance,
         address: {
           road: item.address?.road,
           suburb: item.address?.suburb,
-          city: item.address?.city || 'Addis Ababa',
+          city: item.address?.city || 'Tando Allahyar',
           country: item.address?.country
         }
       }));
@@ -276,7 +276,7 @@ const CheckoutScreenComplete = ({ navigation, route }) => {
         let locationName = 'Current Location';
         if (data && data.display_name) {
           const address = data.address || {};
-          locationName = `${address.road || ''} ${address.suburb || address.neighbourhood || ''}, ${address.city || 'Addis Ababa'}`.trim();
+          locationName = `${address.road || ''} ${address.suburb || address.neighbourhood || ''}, ${address.city || 'Tando Allahyar'}`.trim();
           
           // Clean up the name
           if (locationName.startsWith(',')) {
@@ -304,7 +304,7 @@ const CheckoutScreenComplete = ({ navigation, route }) => {
         let locationName = 'Current Location';
         if (reverseGeocode.length > 0) {
           const address = reverseGeocode[0];
-          locationName = `${address.street || ''} ${address.district || ''}, ${address.city || 'Addis Ababa'}`.trim();
+          locationName = `${address.street || ''} ${address.district || ''}, ${address.city || 'Tando Allahyar'}`.trim();
         }
 
         setLatitude(lat);
@@ -585,7 +585,7 @@ const CheckoutScreenComplete = ({ navigation, route }) => {
   }
   
   return (
-    <SafeAreaView style={s.container} edges={['top']}>
+    <SafeAreaView style={s.container} edges={['left', 'right', 'bottom']}>
     <ScrollView style={s.container}>
       {/* Restaurant Information */}
       <View style={s.section}>
@@ -818,7 +818,7 @@ const CheckoutScreenComplete = ({ navigation, route }) => {
             <View style={s.searchContainer}>
               <TextInput
                 style={s.searchInput}
-                placeholder="Search for a location in Addis Ababa..."
+                placeholder="Search for a location in Tando Allahyar..."
                 value={locationSearchText}
                 onChangeText={handleLocationSearch}
               />

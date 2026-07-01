@@ -70,6 +70,8 @@ const RegisterScreen = ({ navigation }) => {
               phone,
               profileImage: picture,
               isActive,
+              role: 'customer',
+              roles: ['customer'],
             },
             token,
           })

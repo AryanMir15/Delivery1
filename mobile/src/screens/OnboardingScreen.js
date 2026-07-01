@@ -18,8 +18,8 @@ const onboardingData = [
   {
     id: '1',
     icon: 'hand-wave',
-    title: 'Welcome to Aksum Delivery',
-    description: 'Your trusted delivery partner in Ethiopia',
+    title: 'Welcome to shOk',
+    description: 'Your trusted delivery partner in Tando Allahyar',
     buttonText: 'Next',
   },
   {
@@ -38,7 +38,7 @@ const onboardingData = [
   },
 ];
 
-const OnboardingScreen = ({ navigation }) => {
+const OnboardingScreen = ({ navigation, onComplete }) => {
   const { colors, typography } = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef(null);
@@ -49,16 +49,14 @@ const OnboardingScreen = ({ navigation }) => {
       flatListRef.current?.scrollToIndex({ index: nextIndex });
       setCurrentIndex(nextIndex);
     } else {
-      // Mark onboarding as complete and trigger re-render
       await AsyncStorage.setItem('onboardingComplete', 'true');
-      // Pass a callback to parent to re-check onboarding status
-      navigation.setParams({ onboardingComplete: true });
+      onComplete?.();
     }
   };
 
   const handleSkip = async () => {
     await AsyncStorage.setItem('onboardingComplete', 'true');
-    navigation.setParams({ onboardingComplete: true });
+    onComplete?.();
   };
 
   const s = styles(colors, typography);
@@ -66,7 +64,7 @@ const OnboardingScreen = ({ navigation }) => {
   const renderItem = ({ item }) => (
     <View style={s.slide}>
       <View style={s.iconContainer}>
-        <Icon name={item.icon} size={100} color={colors.accent} />
+        <Icon name={item.icon} size={100} color="#E85D3A" />
       </View>
       <Text style={s.title}>{String(item.title)}</Text>
       <Text style={s.description}>{String(item.description)}</Text>
@@ -124,7 +122,7 @@ const OnboardingScreen = ({ navigation }) => {
 const styles = (colors, typography) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.surface,
+    backgroundColor: '#000',
   },
   skipButton: {
     position: 'absolute',
@@ -135,7 +133,7 @@ const styles = (colors, typography) => StyleSheet.create({
   },
   skipText: {
     fontSize: 16,
-    color: colors.textSecondary,
+    color: '#8E8E93',
     fontWeight: '600',
   },
   slide: {
@@ -150,14 +148,14 @@ const styles = (colors, typography) => StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: colors.textPrimary,
+    fontWeight: '900',
+    color: '#C0C0C0',
     textAlign: 'center',
     marginBottom: 16,
   },
   description: {
     fontSize: 16,
-    color: colors.textSecondary,
+    color: '#8E8E93',
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -171,30 +169,30 @@ const styles = (colors, typography) => StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: colors.divider,
+    backgroundColor: '#2C2C2E',
     marginHorizontal: 5,
   },
   activeDot: {
-    backgroundColor: colors.accent,
+    backgroundColor: '#E85D3A',
     width: 30,
   },
   button: {
-    backgroundColor: colors.accent,
+    backgroundColor: '#E85D3A',
     marginHorizontal: 40,
     marginBottom: 40,
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
-    shadowColor: colors.accent,
+    shadowColor: '#E85D3A',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 5,
   },
   buttonText: {
-    color: colors.textInverse,
+    color: '#fff',
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '900',
   },
 });
 

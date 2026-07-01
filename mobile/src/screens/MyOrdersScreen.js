@@ -295,7 +295,7 @@ const MyOrdersScreen = ({ navigation }) => {
   );
 
   return (
-    <SafeAreaView style={s.container} edges={['top']}>
+    <SafeAreaView style={s.container} edges={['left', 'right', 'bottom']}>
       {/* Header */}
       <View style={s.header}>
         <Text style={s.headerTitle}>My Orders</Text>

@@ -14,25 +14,26 @@ import AnalyticsScreen from '../screens/vendor/AnalyticsScreen';
 import VendorProfileScreen from '../screens/vendor/VendorProfileScreen';
 import ShopProfileScreen from '../screens/vendor/ShopProfileScreen';
 import { useTheme } from '../theme';
+import SharedTopBar from '../components/SharedTopBar';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
 const DashboardStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
+  <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#000' } }}>
     <Stack.Screen name="DashboardMain" component={VendorDashboardScreen} />
   </Stack.Navigator>
 );
 
 const OrdersStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
+  <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#000' } }}>
     <Stack.Screen name="OrdersList" component={VendorOrdersScreen} />
     <Stack.Screen name="OrderDetail" component={VendorOrderDetailScreen} />
   </Stack.Navigator>
 );
 
 const ProductsStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
+  <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#000' } }}>
     <Stack.Screen name="ProductsList" component={ProductsScreen} />
     <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
     <Stack.Screen name="ProductForm" component={ProductFormScreen} />
@@ -40,7 +41,7 @@ const ProductsStack = () => (
 );
 
 const ProfileStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
+  <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#000' } }}>
     <Stack.Screen name="ProfileMain" component={VendorProfileScreen} />
     <Stack.Screen name="ShopProfile" component={ShopProfileScreen} />
   </Stack.Navigator>
@@ -52,7 +53,7 @@ const VendorNavigator = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        headerShown: false,
+        header: () => <SharedTopBar />,
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
           switch (route.name) {
@@ -81,14 +82,15 @@ const VendorNavigator = () => {
           backgroundColor: colors.tabBackground,
           borderTopWidth: 1,
           borderTopColor: colors.tabBorder,
-          paddingBottom: 5,
+          paddingBottom: 12,
           paddingTop: 5,
-          height: 60,
+          height: 68,
         },
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '500',
         },
+        contentStyle: { backgroundColor: '#000' },
       })}
     >
       <Tab.Screen name="Dashboard" component={DashboardStack} />

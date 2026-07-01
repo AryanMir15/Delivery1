@@ -8,6 +8,7 @@ const typeDefs = gql`
     email: String!
     phone: String
     role: String!
+    roles: [String]
     profileImage: String
     isActive: Boolean!
     addresses: [Address]
@@ -420,6 +421,7 @@ const typeDefs = gql`
     isNewUser: Boolean
     userTypeId: String
     isActive: Boolean
+    roles: [String]
   }
 
   type RestaurantBasic {
@@ -712,6 +714,19 @@ const typeDefs = gql`
       licenseNumber: String
       vehicleNumber: String
     ): AuthPayload!
+
+    registerAsRider(
+      vehicleType: String!
+      licenseNumber: String!
+      vehicleNumber: String!
+    ): User!
+
+    registerAsVendor(
+      shopName: String!
+      shopType: String!
+      address: String!
+      phone: String
+    ): Restaurant!
 
     login(
       email: String!
@@ -1082,6 +1097,7 @@ const typeDefs = gql`
     isOfferNotification: Boolean
     favourite: [String]
     available: Boolean
+    roles: [String]
   }
 
   input LocationInput {

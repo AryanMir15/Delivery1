@@ -61,6 +61,7 @@ export const LOGIN_USER = gql`
       isNewUser
       userTypeId
       isActive
+      roles
     }
   }
 `;
@@ -534,6 +535,53 @@ export const VENDOR_UPLOAD_IMAGE = gql`
   mutation VendorUploadImage($image: String!) {
     uploadImageToS3(image: $image) {
       imageUrl
+    }
+  }
+`;
+
+export const REGISTER_AS_RIDER = gql`
+  mutation RegisterAsRider(
+    $vehicleType: String!
+    $licenseNumber: String!
+    $vehicleNumber: String!
+  ) {
+    registerAsRider(
+      vehicleType: $vehicleType
+      licenseNumber: $licenseNumber
+      vehicleNumber: $vehicleNumber
+    ) {
+      id
+      _id
+      name
+      role
+      roles
+      vehicleType
+      licenseNumber
+      vehicleNumber
+      available
+    }
+  }
+`;
+
+export const REGISTER_AS_VENDOR = gql`
+  mutation RegisterAsVendor(
+    $shopName: String!
+    $shopType: String!
+    $address: String!
+    $phone: String
+  ) {
+    registerAsVendor(
+      shopName: $shopName
+      shopType: $shopType
+      address: $address
+      phone: $phone
+    ) {
+      id
+      _id
+      name
+      shopType
+      address
+      isAvailable
     }
   }
 `;

@@ -12,6 +12,7 @@ import SearchScreen from '../screens/SearchScreen';
 import OrdersScreen from '../screens/OrdersScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import RestaurantScreen from '../screens/RestaurantScreen';
+import RestaurantSheet from '../screens/RestaurantSheet';
 import FoodDetailScreen from '../screens/FoodDetailScreenSimple';
 import CartScreen from '../screens/CartScreen';
 import CheckoutScreen from '../screens/CheckoutScreen';
@@ -22,15 +23,24 @@ import NotificationsScreen from '../screens/NotificationsScreen';
 import FavoritesScreen from '../screens/FavoritesScreen';
 import RecentlyViewedScreen from '../screens/RecentlyViewedScreen';
 import { useTheme } from '../theme';
+import SharedTopBar from '../components/SharedTopBar';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
 const HomeStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
+  <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#000' } }}>
     <Stack.Screen name="HomeMain" component={HomeScreen} />
     <Stack.Screen name="CategoryHome" component={CategoryHomeScreen} />
     <Stack.Screen name="Restaurant" component={RestaurantScreen} />
+    <Stack.Screen
+      name="RestaurantSheet"
+      component={RestaurantSheet}
+      options={{
+        presentation: 'transparentModal',
+        cardStyleInterpolator: () => ({ cardStyle: { backgroundColor: 'transparent' } }),
+      }}
+    />
     <Stack.Screen name="FoodDetail" component={FoodDetailScreen} />
     <Stack.Screen name="Search" component={SearchScreen} />
     <Stack.Screen name="Notifications" component={NotificationsScreen} />
@@ -40,14 +50,14 @@ const HomeStack = () => (
 );
 
 const OrdersStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
+  <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#000' } }}>
     <Stack.Screen name="OrdersMain" component={OrdersScreen} />
     <Stack.Screen name="OrderTracking" component={OrderTrackingScreen} />
   </Stack.Navigator>
 );
 
 const ProfileStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
+  <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#000' } }}>
     <Stack.Screen name="ProfileMain" component={ProfileScreen} />
     <Stack.Screen name="EditProfile" component={EditProfileScreen} />
   </Stack.Navigator>
@@ -68,12 +78,12 @@ const MainNavigator = () => {
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#000' } }}>
       <Stack.Screen name="TabNavigator">
         {() => (
           <Tab.Navigator
             screenOptions={({ route }) => ({
-              headerShown: false,
+              header: () => <SharedTopBar />,
               tabBarIcon: ({ focused, color, size }) => {
                 let iconName;
                 switch (route.name) {
@@ -107,14 +117,15 @@ const MainNavigator = () => {
                 backgroundColor: colors.tabBackground,
                 borderTopWidth: 1,
                 borderTopColor: colors.tabBorder,
-                paddingBottom: 5,
+                paddingBottom: 12,
                 paddingTop: 5,
-                height: 60,
+                height: 68,
               },
               tabBarLabelStyle: {
                 fontSize: 12,
                 fontWeight: '500',
               },
+              contentStyle: { backgroundColor: '#000' },
             })}
           >
             <Tab.Screen name="Home" component={HomeStack} />

@@ -151,7 +151,7 @@ export default function OrdersScreen() {
   );
 
   return (
-    <SafeAreaView style={s.container} edges={['top']}>
+    <SafeAreaView style={s.container} edges={['left', 'right', 'bottom']}>
     <View style={s.container}>
       {/* Tabs */}
       <View style={s.tabsContainer}>

@@ -11,6 +11,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { store, persistor } from './src/store';
 import { client } from './src/api/apolloClient';
 import RootNavigator from './src/navigation/RootNavigator';
+import RoleSwitchOverlay from './src/components/RoleSwitchOverlay';
 import SessionService from './src/services/SessionService';
 import { ThemeProvider, useTheme } from './src/theme';
 
@@ -95,6 +96,7 @@ const AppContent = () => {
           />
           <RootNavigator />
         </NavigationContainer>
+        <RoleSwitchOverlay />
       </SafeAreaProvider>
     </PaperProvider>
   );

@@ -9,6 +9,8 @@ const initialState = {
   error: null,
   deliveryAddress: null,
   isAvailable: false,
+  activeRole: null,
+  isTransitioning: false,
 };
 
 // Async thunk for storing token
@@ -42,6 +44,7 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
       state.user = action.payload.user;
       state.token = action.payload.token;
+      state.activeRole = action.payload.user?.role || 'customer';
       state.error = null;
     },
     loginFailure: (state, action) => {
@@ -71,6 +74,13 @@ const authSlice = createSlice({
         state.user.available = action.payload;
       }
     },
+    switchRole: (state, action) => {
+      state.activeRole = action.payload;
+      state.isTransitioning = true;
+    },
+    finishRoleTransition: (state) => {
+      state.isTransitioning = false;
+    },
     clearError: (state) => {
       state.error = null;
     },
@@ -96,6 +106,8 @@ export const {
   updateUser,
   setDeliveryAddress,
   setAvailability,
+  switchRole,
+  finishRoleTransition,
   clearError,
 } = authSlice.actions;
 

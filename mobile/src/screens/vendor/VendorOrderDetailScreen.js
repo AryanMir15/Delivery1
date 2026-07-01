@@ -133,7 +133,7 @@ export default function OrderDetailScreen({ route, navigation }) {
   const nextStatus = getNextStatus();
 
   return (
-    <SafeAreaView style={s.container} edges={['top']}>
+    <SafeAreaView style={s.container} edges={['left', 'right', 'bottom']}>
     <ScrollView style={s.container} contentContainerStyle={s.scrollInner}>
       {/* Order Header */}
       <View style={s.header}>

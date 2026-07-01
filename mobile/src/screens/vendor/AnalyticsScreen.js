@@ -212,7 +212,7 @@ export default function AnalyticsScreen() {
   };
 
   return (
-    <SafeAreaView style={s.container} edges={['top']}>
+    <SafeAreaView style={s.container} edges={['left', 'right', 'bottom']}>
       <ScrollView style={s.scrollContent} contentContainerStyle={s.scrollInner}>
         {/* Period Selector */}
         <View style={s.periodSelector}>

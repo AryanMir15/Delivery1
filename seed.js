@@ -28,6 +28,28 @@ async function seed() {
     console.error('Missing test users! Create them first.');
     process.exit(1);
   }
+
+  // Ensure all test users have 'customer' AND their primary role in roles array
+  const fixRoles = async (user) => {
+    const roles = user.roles || [];
+    let changed = false;
+    if (!roles.includes('customer')) {
+      roles.unshift('customer');
+      changed = true;
+    }
+    if (user.role && !roles.includes(user.role)) {
+      roles.push(user.role);
+      changed = true;
+    }
+    if (changed) {
+      await User.findByIdAndUpdate(user._id, { roles });
+      console.log(`Fixed ${user.email} roles → [${roles.join(', ')}]`);
+    }
+  };
+  await fixRoles(customer);
+  await fixRoles(rider);
+  await fixRoles(vendor);
+
   console.log(`Customer: ${customer._id}`);
   console.log(`Rider: ${rider._id}`);
   console.log(`Vendor: ${vendor._id}`);
@@ -96,6 +118,7 @@ async function seed() {
 
   const shahBiryani = await Restaurant.create({
     name: 'Shah Biryani House',
+    image: 'shah-biryani-house-banner.png',
     address: 'Main Bazaar, Tando Allahyar',
     phone: '+923001234567',
     email: 'shahbiryani@test.com',
@@ -141,23 +164,23 @@ async function seed() {
   // --- Foods ---
   const foodsData = [
     // Shah Biryani House
-    { title: 'Chicken Biryani', description: 'Classic hyderabadi chicken biryani', restaurant: shahBiryani._id, category: catMap['Biryani'], isOutOfStock: false },
-    { title: 'Mutton Biryani', description: 'Tender mutton pieces with fragrant rice', restaurant: shahBiryani._id, category: catMap['Biryani'], isOutOfStock: false },
-    { title: 'Seekh Kebab Platter', description: '6 pcs seekh kebab with naan', restaurant: shahBiryani._id, category: catMap['BBQ & Grills'], isOutOfStock: false },
-    { title: 'Chicken Karahi', description: 'Spicy chicken karahi with naan', restaurant: shahBiryani._id, category: catMap['BBQ & Grills'], isOutOfStock: true },
+    { title: 'Chicken Biryani', description: 'Classic hyderabadi chicken biryani', image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&h=300&fit=crop', restaurant: shahBiryani._id, category: catMap['Biryani'], isOutOfStock: false },
+    { title: 'Mutton Biryani', description: 'Tender mutton pieces with fragrant rice', image: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=400&h=300&fit=crop', restaurant: shahBiryani._id, category: catMap['Biryani'], isOutOfStock: false },
+    { title: 'Seekh Kebab Platter', description: '6 pcs seekh kebab with naan', image: 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&h=300&fit=crop', restaurant: shahBiryani._id, category: catMap['BBQ & Grills'], isOutOfStock: false },
+    { title: 'Chicken Karahi', description: 'Spicy chicken karahi with naan', image: 'https://images.unsplash.com/photo-1631515242808-497c3b3616a2?w=400&h=300&fit=crop', restaurant: shahBiryani._id, category: catMap['BBQ & Grills'], isOutOfStock: true },
 
     // Khan BBQ Corner
-    { title: 'Tikka Platter', description: 'Mix tikka platter with raita', restaurant: khanBBQ._id, category: catMap['BBQ & Grills'], isOutOfStock: false },
-    { title: 'Reshmi Kebab', description: 'Creamy grilled chicken kebab', restaurant: khanBBQ._id, category: catMap['BBQ & Grills'], isOutOfStock: false },
-    { title: 'BBQ Paratha Roll', description: 'Chicken tikka in paratha', restaurant: khanBBQ._id, category: catMap['Paratha Roll'], isOutOfStock: false },
-    { title: 'Platter Special', description: 'Family size BBQ platter for 4', restaurant: khanBBQ._id, category: catMap['BBQ & Grills'], isOutOfStock: false },
+    { title: 'Tikka Platter', description: 'Mix tikka platter with raita', image: 'https://images.unsplash.com/photo-1529006557810-274b9b3fc259?w=400&h=300&fit=crop', restaurant: khanBBQ._id, category: catMap['BBQ & Grills'], isOutOfStock: false },
+    { title: 'Reshmi Kebab', description: 'Creamy grilled chicken kebab', image: 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&h=300&fit=crop', restaurant: khanBBQ._id, category: catMap['BBQ & Grills'], isOutOfStock: false },
+    { title: 'BBQ Paratha Roll', description: 'Chicken tikka in paratha', image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=400&h=300&fit=crop', restaurant: khanBBQ._id, category: catMap['Paratha Roll'], isOutOfStock: false },
+    { title: 'Platter Special', description: 'Family size BBQ platter for 4', image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=300&fit=crop', restaurant: khanBBQ._id, category: catMap['BBQ & Grills'], isOutOfStock: false },
 
     // Green Valley Fast Food
-    { title: 'Zinger Burger', description: 'Crispy chicken zinger burger', restaurant: greenValley._id, category: catMap['Burgers'], isOutOfStock: false },
-    { title: 'Cheese Burger', description: 'Double patty cheese burger', restaurant: greenValley._id, category: catMap['Burgers'], isOutOfStock: false },
-    { title: 'Chicken Pizza', description: '12 inch chicken supreme pizza', restaurant: greenValley._id, category: catMap['Pizza'], isOutOfStock: false },
-    { title: 'Fries Large', description: 'Crispy golden fries with ketchup', restaurant: greenValley._id, category: catMap['Snacks'], isOutOfStock: false },
-    { title: 'Cold Drink 1.5L', description: 'Pepsi or Coke', restaurant: greenValley._id, category: catMap['Cold Drinks'], isOutOfStock: false },
+    { title: 'Zinger Burger', description: 'Crispy chicken zinger burger', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=300&fit=crop', restaurant: greenValley._id, category: catMap['Burgers'], isOutOfStock: false },
+    { title: 'Cheese Burger', description: 'Double patty cheese burger', image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&h=300&fit=crop', restaurant: greenValley._id, category: catMap['Burgers'], isOutOfStock: false },
+    { title: 'Chicken Pizza', description: '12 inch chicken supreme pizza', image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop', restaurant: greenValley._id, category: catMap['Pizza'], isOutOfStock: false },
+    { title: 'Fries Large', description: 'Crispy golden fries with ketchup', image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&h=300&fit=crop', restaurant: greenValley._id, category: catMap['Snacks'], isOutOfStock: false },
+    { title: 'Cold Drink 1.5L', description: 'Pepsi or Coke', image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&h=300&fit=crop', restaurant: greenValley._id, category: catMap['Cold Drinks'], isOutOfStock: false },
   ];
 
   const foods = await Food.insertMany(foodsData);

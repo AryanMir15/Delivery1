@@ -10,13 +10,15 @@ import RiderNavigator from './RiderNavigator';
 import VendorNavigator from './VendorNavigator';
 import SplashScreen from '../screens/SplashScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
+import RiderRegistrationScreen from '../screens/RiderRegistrationScreen';
+import VendorRegistrationScreen from '../screens/VendorRegistrationScreen';
 import { useTheme } from '../theme';
 
 const Stack = createStackNavigator();
 
 const RootNavigator = () => {
   const { colors } = useTheme();
-  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const { isAuthenticated, user, activeRole } = useSelector((state) => state.auth);
   const [isLoading, setIsLoading] = React.useState(true);
   const [showOnboarding, setShowOnboarding] = React.useState(false);
 
@@ -34,7 +36,7 @@ const RootNavigator = () => {
   }
 
   const getMainNavigator = () => {
-    const role = user?.role;
+    const role = activeRole || user?.role;
     switch (role) {
       case 'rider':
         return RiderNavigator;
@@ -50,11 +52,17 @@ const RootNavigator = () => {
   try {
     const MainNav = getMainNavigator();
     return (
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#000' }, animation: 'fade' }}>
         {showOnboarding ? (
-          <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+          <Stack.Screen name="Onboarding">
+            {(props) => <OnboardingScreen {...props} onComplete={() => setShowOnboarding(false)} />}
+          </Stack.Screen>
         ) : isAuthenticated ? (
-          <Stack.Screen name="Main" component={MainNav} />
+          <>
+            <Stack.Screen name="Main" component={MainNav} />
+            <Stack.Screen name="RiderRegistration" component={RiderRegistrationScreen} />
+            <Stack.Screen name="VendorRegistration" component={VendorRegistrationScreen} />
+          </>
         ) : (
           <Stack.Screen name="Auth" component={AuthNavigator} />
         )}

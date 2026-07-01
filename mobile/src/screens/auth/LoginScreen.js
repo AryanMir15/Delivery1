@@ -37,7 +37,7 @@ const LoginScreen = ({ navigation }) => {
       setIsLoggingIn(false);
 
       if (data.login) {
-        const { token, userId, name, email, phone, picture, isActive, userTypeId } = data.login;
+        const { token, userId, name, email, phone, picture, isActive, userTypeId, roles } = data.login;
 
         try {
           await AsyncStorage.setItem('authToken', token);
@@ -53,6 +53,7 @@ const LoginScreen = ({ navigation }) => {
                 profileImage: picture,
                 isActive,
                 role: userTypeId,
+                roles: roles || [userTypeId],
               },
               token,
             })

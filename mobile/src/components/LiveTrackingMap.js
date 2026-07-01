@@ -85,10 +85,10 @@ const LiveTrackingMap = ({ orderId, driverId, deliveryLocation, restaurantLocati
       };
     }
 
-    // Default to Addis Ababa
+    // Default to Tando Allahyar
     return {
-      latitude: 9.0320,
-      longitude: 38.7469,
+      latitude: 25.78,
+      longitude: 68.66,
       latitudeDelta: 0.1,
       longitudeDelta: 0.1,
     };

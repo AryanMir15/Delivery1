@@ -795,6 +795,7 @@ const resolvers = {
         phone,
         password,
         role: userRole,
+        roles: [userRole],
       };
 
       // Add rider-specific fields if role is rider
@@ -826,6 +827,7 @@ const resolvers = {
         isNewUser: true,
         userTypeId: user.role,
         isActive: user.isActive,
+        roles: user.roles || [user.role],
       };
     },
 
@@ -859,6 +861,7 @@ const resolvers = {
         isNewUser: false, // Existing user logging in
         userTypeId: user.role,
         isActive: user.isActive,
+        roles: user.roles || [user.role],
       };
     },
 
@@ -1074,6 +1077,7 @@ const resolvers = {
         if (userInput.isOfferNotification !== undefined) updateData.isOfferNotification = userInput.isOfferNotification;
         if (userInput.favourite !== undefined) updateData.favourite = userInput.favourite;
         if (userInput.available !== undefined) updateData.available = userInput.available;
+        if (userInput.roles !== undefined) updateData.roles = userInput.roles;
 
         const updatedUser = await User.findByIdAndUpdate(id, updateData, { new: true });
 
@@ -1101,6 +1105,65 @@ const resolvers = {
       });
 
       return await category.save();
+    },
+
+    registerAsRider: async (parent, { vehicleType, licenseNumber, vehicleNumber }, context) => {
+      if (!context.user) {
+        throw new Error('Not authenticated');
+      }
+
+      const user = await User.findById(context.user._id);
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      const roles = user.roles || [user.role];
+      if (roles.includes('rider')) {
+        throw new Error('Already registered as rider');
+      }
+
+      roles.push('rider');
+      user.roles = roles;
+      user.vehicleType = vehicleType;
+      user.licenseNumber = licenseNumber;
+      user.vehicleNumber = vehicleNumber;
+      user.available = false;
+
+      await user.save();
+      return user;
+    },
+
+    registerAsVendor: async (parent, { shopName, shopType, address, phone }, context) => {
+      if (!context.user) {
+        throw new Error('Not authenticated');
+      }
+
+      const user = await User.findById(context.user._id);
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      const roles = user.roles || [user.role];
+      if (roles.includes('vendor')) {
+        throw new Error('Already registered as vendor');
+      }
+
+      roles.push('vendor');
+      user.roles = roles;
+      await user.save();
+
+      const restaurant = new Restaurant({
+        name: shopName,
+        shopType: shopType || 'restaurant',
+        address,
+        phone: phone || user.phone,
+        owner: user._id,
+        isActive: true,
+        isAvailable: false,
+      });
+
+      await restaurant.save();
+      return restaurant;
     },
 
     updateCategory: async (parent, { id, title, description, image, isActive }, context) => {

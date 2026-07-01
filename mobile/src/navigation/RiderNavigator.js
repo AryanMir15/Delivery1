@@ -14,12 +14,13 @@ import DeliveryScreen from '../screens/rider/DeliveryScreen';
 import RiderOrderDetailScreen from '../screens/rider/RiderOrderDetailScreen';
 import WalletScreen from '../screens/rider/WalletScreen';
 import { useTheme } from '../theme';
+import SharedTopBar from '../components/SharedTopBar';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
 const HomeStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
+  <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#000' } }}>
     <Stack.Screen name="HomeMain" component={RiderHomeScreen} />
     <Stack.Screen name="OrderDetail" component={RiderOrderDetailScreen} />
     <Stack.Screen name="Delivery" component={DeliveryScreen} />
@@ -27,14 +28,14 @@ const HomeStack = () => (
 );
 
 const OrdersStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
+  <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#000' } }}>
     <Stack.Screen name="OrdersMain" component={RiderOrdersScreen} />
     <Stack.Screen name="OrderDetail" component={RiderOrderDetailScreen} />
   </Stack.Navigator>
 );
 
 const ProfileStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
+  <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#000' } }}>
     <Stack.Screen name="ProfileMain" component={RiderProfileScreen} />
     <Stack.Screen name="Wallet" component={WalletScreen} />
   </Stack.Navigator>
@@ -55,8 +56,8 @@ const RiderNavigator = () => {
 
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
-        headerShown: false,
+        screenOptions={({ route }) => ({
+          header: () => <SharedTopBar />,
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
           switch (route.name) {
@@ -87,14 +88,15 @@ const RiderNavigator = () => {
           backgroundColor: colors.tabBackground,
           borderTopWidth: 1,
           borderTopColor: colors.tabBorder,
-          paddingBottom: 5,
+          paddingBottom: 12,
           paddingTop: 5,
-          height: 60,
+          height: 68,
         },
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '500',
         },
+        contentStyle: { backgroundColor: '#000' },
       })}
     >
       <Tab.Screen name="Home" component={HomeStack} />

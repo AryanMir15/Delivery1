@@ -168,7 +168,7 @@ export default function DashboardScreen() {
   };
 
   return (
-    <SafeAreaView style={s.container} edges={['top']}>
+    <SafeAreaView style={s.container} edges={['left', 'right', 'bottom']}>
       <ScrollView
         style={s.scrollContent}
         contentContainerStyle={s.scrollInner}

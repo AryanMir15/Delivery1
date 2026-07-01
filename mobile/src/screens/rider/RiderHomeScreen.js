@@ -295,7 +295,7 @@ const HomeScreen = ({ navigation }) => {
 
   if (loading && !refreshing && !data) {
     return (
-      <SafeAreaView style={s.container}>
+      <SafeAreaView style={s.container} edges={['left', 'right', 'bottom']}>
         <View style={s.loadingContainer}>
           <ShokLogo size={60} />
         </View>
@@ -304,7 +304,7 @@ const HomeScreen = ({ navigation }) => {
   }
 
   return (
-    <SafeAreaView style={s.container}>
+    <SafeAreaView style={s.container} edges={['left', 'right', 'bottom']}>
       <FlatList
         data={availableOrders}
         keyExtractor={(item) => item.id || item._id}

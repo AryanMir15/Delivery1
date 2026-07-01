@@ -253,7 +253,7 @@ const OrderTrackingScreenSmooth = ({ route }) => {
   const s = styles(colors, typography, scale);
 
   return (
-    <SafeAreaView style={s.container} edges={['top']}>
+    <SafeAreaView style={s.container} edges={['left', 'right', 'bottom']}>
     <View style={s.container}>
       {/* Map View - Full Screen */}
       {(shopCoords || customerCoords || riderCoords) && (
