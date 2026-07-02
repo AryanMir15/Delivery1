@@ -745,25 +745,25 @@ const styles = (scale = 1) => StyleSheet.create({
 
   // Sort Tags
   sortTagRow: {
-    marginBottom: 14,
+    marginTop: 16,
+    marginBottom: 8,
   },
   sortTagList: {
     paddingHorizontal: 16,
-    gap: 10,
-    alignItems: 'center',
+    gap: 8,
   },
   sortTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 5,
     borderWidth: 1,
     borderColor: '#2A2A2A',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
   },
   sortTagText: {
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: '600',
     color: palette.gray400,
   },
