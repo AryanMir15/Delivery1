@@ -96,12 +96,11 @@ function AnimatedSection({ children, delay = 0 }) {
 }
 
 const SORT_TAGS = [
-  { id: 'relevance', label: 'Relevance', icon: null },
-  { id: 'rating', label: 'Top Rated', icon: 'star-outline' },
-  { id: 'delivery', label: 'Fast Delivery', icon: 'clock-fast' },
-  { id: 'price', label: 'Price: Low', icon: 'tag-outline' },
-  { id: 'distance', label: 'Nearby', icon: 'map-marker-distance' },
   { id: 'filter', label: null, icon: 'tune-variant' },
+  { id: 'distance', label: 'Nearby', icon: 'map-marker-distance' },
+  { id: 'delivery', label: 'Fast Delivery', icon: 'clock-fast' },
+  { id: 'rating', label: 'Top Rated', icon: 'star-outline' },
+  { id: 'price', label: 'Price: Low', icon: 'tag-outline' },
 ];
 
 const CATEGORY_ICONS = {
@@ -750,20 +749,21 @@ const styles = (scale = 1) => StyleSheet.create({
   },
   sortTagList: {
     paddingHorizontal: 16,
-    gap: 8,
+    gap: 10,
+    alignItems: 'center',
   },
   sortTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 6,
     borderWidth: 1,
     borderColor: '#2A2A2A',
     borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
   },
   sortTagText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
     color: palette.gray400,
   },
