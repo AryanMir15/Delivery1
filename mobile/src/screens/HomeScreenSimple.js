@@ -95,6 +95,15 @@ function AnimatedSection({ children, delay = 0 }) {
   );
 }
 
+const SORT_TAGS = [
+  { id: 'relevance', label: 'Relevance', icon: null },
+  { id: 'rating', label: 'Top Rated', icon: 'star-outline' },
+  { id: 'delivery', label: 'Fast Delivery', icon: 'clock-fast' },
+  { id: 'price', label: 'Price: Low', icon: 'tag-outline' },
+  { id: 'distance', label: 'Nearby', icon: 'map-marker-distance' },
+  { id: 'filter', label: null, icon: 'tune-variant' },
+];
+
 const CATEGORY_ICONS = {
   'Burgers':        { icon: 'hamburger',       bg: '#111', tint: '#C0C0C0', image: require('../../assets/Icons/Burger-icon.jpg') },
   'Pizza':          { icon: 'pizza',           bg: '#111', tint: '#C0C0C0', image: require('../../assets/Icons/Pizza-icon.jpg') },
@@ -306,6 +315,27 @@ const HomeScreenSimple = ({ navigation }) => {
           )}
         </AnimatedSection>
 
+        {/* Sort Tags */}
+        <AnimatedSection delay={260}>
+          <View style={s.sortTagRow}>
+            <FlatList
+              data={SORT_TAGS}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={s.sortTagList}
+              renderItem={({ item: tag }) => (
+                <TouchableOpacity style={s.sortTag} activeOpacity={0.7}>
+                  {tag.icon ? (
+                    <Icon name={tag.icon} size={14} color={palette.gray400} />
+                  ) : null}
+                  {tag.label ? <Text style={s.sortTagText}>{tag.label}</Text> : null}
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </AnimatedSection>
+
         {/* Top Shops */}
         <AnimatedSection delay={320}>
           {restaurants.length > 0 && (
@@ -325,6 +355,7 @@ const HomeScreenSimple = ({ navigation }) => {
                 renderItem={({ item }) => {
                   const shopImage = RESTAURANT_IMAGES[item.name] || (item.image ? { uri: item.image } : null);
                   const open = item.isAvailable !== false && isOpenNow(item.openingTimes);
+                  const dist = Math.round((item.deliveryTime || 30) / 3);
                   return (
                     <TouchableOpacity
                       style={[s.shopCard, !open && s.shopCardClosed]}
@@ -358,6 +389,10 @@ const HomeScreenSimple = ({ navigation }) => {
                             <Icon name="clock-outline" size={11} color={palette.gray400} />
                             <Text style={s.shopTime}>{item.deliveryTime || 30}-{(item.deliveryTime || 30) + 5} min</Text>
                           </View>
+                        </View>
+                        <View style={s.shopDistance}>
+                          <Icon name="map-marker-distance" size={12} color={palette.gray500} />
+                          <Text style={s.shopDistanceText}>{dist} km</Text>
                         </View>
                       </View>
                     </View>
@@ -584,17 +619,15 @@ const styles = (scale = 1) => StyleSheet.create({
   shopCard: {
     width: Math.max(width * 0.77, 265),
     minWidth: 265,
-    borderRadius: 14,
     overflow: 'hidden',
-    backgroundColor: '#0D0D0D',
-    borderWidth: 1,
-    borderColor: '#1C1C1E',
   },
   shopCardClosed: {
     opacity: 0.7,
   },
   shopImageWrap: {
     position: 'relative',
+    borderRadius: 14,
+    overflow: 'hidden',
   },
   shopImage: {
     width: '100%',
@@ -645,8 +678,8 @@ const styles = (scale = 1) => StyleSheet.create({
     letterSpacing: 0.3,
   },
   shopInfo: {
-    padding: 12,
     paddingTop: 28,
+    paddingHorizontal: 2,
   },
   shopInfoRow: {
     flexDirection: 'row',
@@ -694,6 +727,44 @@ const styles = (scale = 1) => StyleSheet.create({
   },
   shopTime: {
     fontSize: 12,
+    color: palette.gray400,
+  },
+  shopDistance: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  shopDistanceText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: palette.gray400,
+  },
+
+  // Sort Tags
+  sortTagRow: {
+    marginBottom: 14,
+  },
+  sortTagList: {
+    paddingHorizontal: 16,
+    gap: 8,
+  },
+  sortTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    borderWidth: 1,
+    borderColor: '#2A2A2A',
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  sortTagText: {
+    fontSize: 12,
+    fontWeight: '600',
     color: palette.gray400,
   },
 
