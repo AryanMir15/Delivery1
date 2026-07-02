@@ -355,6 +355,7 @@ const HomeScreenSimple = ({ navigation }) => {
                   const shopImage = RESTAURANT_IMAGES[item.name] || (item.image ? { uri: item.image } : null);
                   const open = item.isAvailable !== false && isOpenNow(item.openingTimes);
                   const dist = Math.round((item.deliveryTime || 30) / 3);
+                  const distLow = Math.max(dist - 2, 1);
                   return (
                     <TouchableOpacity
                       style={[s.shopCard, !open && s.shopCardClosed]}
@@ -378,21 +379,19 @@ const HomeScreenSimple = ({ navigation }) => {
                         </View>
                       </View>
                     <View style={s.shopInfo}>
-                      <View style={s.shopInfoRow}>
-                        <View style={s.shopInfoLeft}>
-                          <Text style={s.shopName} numberOfLines={1}>{item.name}</Text>
-                          <View style={s.shopMeta}>
-                            <Icon name="star" size={12} color="#E5A100" />
-                            <Text style={s.shopRating}>{item.rating?.toFixed(1) || '0.0'}</Text>
-                            <Text style={s.shopDot}>·</Text>
-                            <Icon name="clock-outline" size={11} color={palette.gray400} />
-                            <Text style={s.shopTime}>{item.deliveryTime || 30}-{(item.deliveryTime || 30) + 5} min</Text>
-                          </View>
+                      <View style={s.shopInfoLeft}>
+                        <Text style={s.shopName} numberOfLines={1}>{item.name}</Text>
+                        <View style={s.shopMeta}>
+                          <Icon name="star" size={12} color="#E5A100" />
+                          <Text style={s.shopRating}>{item.rating?.toFixed(1) || '0.0'}</Text>
+                          <Text style={s.shopDot}>·</Text>
+                          <Icon name="clock-outline" size={11} color={palette.gray400} />
+                          <Text style={s.shopTime}>{item.deliveryTime || 30}-{(item.deliveryTime || 30) + 5} min</Text>
                         </View>
-                        <View style={s.shopDistance}>
-                          <Icon name="map-marker-distance" size={12} color={palette.gray500} />
-                          <Text style={s.shopDistanceText}>{dist} km</Text>
-                        </View>
+                      </View>
+                      <View style={s.shopDistance}>
+                        <Icon name="map-marker-distance" size={12} color={palette.gray500} />
+                        <Text style={s.shopDistanceText}>{distLow}-{dist} km</Text>
                       </View>
                     </View>
                     </TouchableOpacity>
@@ -677,17 +676,14 @@ const styles = (scale = 1) => StyleSheet.create({
     letterSpacing: 0.3,
   },
   shopInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
     paddingTop: 28,
     paddingHorizontal: 2,
   },
-  shopInfoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
   shopInfoLeft: {
     flex: 1,
-    marginRight: 10,
   },
   shopName: {
     fontSize: 14,
@@ -731,11 +727,8 @@ const styles = (scale = 1) => StyleSheet.create({
   shopDistance: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 3,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
+    gap: 2,
+    alignSelf: 'flex-end',
   },
   shopDistanceText: {
     fontSize: 11,
